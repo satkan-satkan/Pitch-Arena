@@ -51,176 +51,17 @@ import {
 } from "lucide-react";
 import "./styles.css";
 
-const arenas = [
-  {
-    id: "family",
-    title: ["Свои люди", "Friends & family"],
-    subtitle: [
-      "Большие истории начинаются дома",
-      "Every big story starts at home",
-    ],
-    level: 1,
-    difficulty: ["Разминка", "Warm-up"],
-    time: 5,
-    region: "all",
-    kind: "family",
-    tag: ["ПЕРВЫЙ ШАГ", "THE FIRST STEP"],
-    description: [
-      "Расскажи о своей идее тем, кто в тебя верит. Простые вопросы помогут найти главное и говорить о сложном понятно.",
-      "Share your idea with people who believe in you. Friendly questions help you find your focus and make complex ideas simple.",
-    ],
-    panel: ["Алексей", "Анна", "Марк"],
-  },
-  {
-    id: "sharks",
-    title: ["Shark Tank", "Shark Tank"],
-    subtitle: [
-      "Убеди тех, кого сложно удивить",
-      "Convince the hard to impress",
-    ],
-    level: 3,
-    difficulty: ["Сложный", "Advanced"],
-    time: 10,
-    region: "us",
-    kind: "sharks",
-    tag: ["ВЫСОКИЕ СТАВКИ", "HIGH STAKES"],
-    description: [
-      "Симуляция строгой инвестиционной панели: юнит-экономика, рынок и неудобные вопросы. Здесь важна каждая цифра.",
-      "A demanding investor panel simulation: unit economics, market size, and tough questions. Every number counts.",
-    ],
-    panel: ["Майкл", "София", "Дэвид"],
-  },
-  {
-    id: "yc",
-    title: ["Y Combinator", "Y Combinator"],
-    subtitle: [
-      "10 минут, которые меняют всё",
-      "10 minutes that change everything",
-    ],
-    level: 4,
-    difficulty: ["Эксперт", "Expert"],
-    time: 10,
-    region: "us",
-    kind: "yc",
-    tag: ["МЫСЛИ МАСШТАБНЕЕ", "THINK BIGGER"],
-    description: [
-      "Быстрые вопросы о росте, пользователях и продукте. Тренировка в стиле интервью в акселератор: коротко, конкретно, по существу.",
-      "Rapid-fire questions on growth, users, and product. An accelerator-style interview: concise, specific, and to the point.",
-    ],
-    panel: ["Джеймс", "Эмма", "Дэниел"],
-  },
-  {
-    id: "arena",
-    title: ["Arena Startups", "Arena Startups"],
-    subtitle: [
-      "Сильные идеи. Прямые вопросы.",
-      "Bold ideas. Direct questions.",
-    ],
-    level: 2,
-    difficulty: ["Средний", "Intermediate"],
-    time: 7,
-    region: "cis",
-    kind: "arena",
-    tag: ["ВЫХОД В СВЕТ", "STEP INTO THE LIGHT"],
-    description: [
-      "Потренируй выступление перед панелью предпринимателей. Покажи, какую проблему решаешь и почему твоя команда справится.",
-      "Practice with an entrepreneur panel. Show which problem you solve and why your team can do it.",
-    ],
-    panel: ["Артём", "Елена", "Марк"],
-  },
-  {
-    id: "a16z",
-    title: ["a16z", "a16z"],
-    subtitle: [
-      "Построй то, во что верит будущее",
-      "Build what the future believes in",
-    ],
-    level: 5,
-    difficulty: ["Легендарный", "Legendary"],
-    time: 15,
-    region: "us",
-    kind: "a16z",
-    tag: ["НОВЫЙ ГОРИЗОНТ", "THE NEXT HORIZON"],
-    description: [
-      "Глубокая тренировка: технологическое преимущество, защита от конкурентов и венчурный масштаб.",
-      "A deep-dive session on technical advantage, defensibility, and venture-scale opportunities.",
-    ],
-    panel: ["Дэвид", "Майкл", "София"],
-  },
-  {
-    id: "dubai",
-    title: ["Dubai Angels", "Dubai Angels"],
-    subtitle: [
-      "Твой выход на глобальный рынок",
-      "Your gateway to a global market",
-    ],
-    level: 2,
-    difficulty: ["Средний", "Intermediate"],
-    time: 7,
-    region: "uae",
-    kind: "dubai",
-    tag: ["БЕЗ ГРАНИЦ", "BEYOND BORDERS"],
-    description: [
-      "Представь продукт бизнес-ангелам региона MENA. Потренируй вопросы о выходе на рынок и международном росте.",
-      "Pitch to a simulated MENA angel panel. Practice questions about go-to-market and international growth.",
-    ],
-    panel: ["Омар", "Лейла", "Адам"],
-  },
-  {
-    id: "europe",
-    title: ["European Angels", "European Angels"],
-    subtitle: ["Идеи с долгосрочным влиянием", "Ideas with a lasting impact"],
-    level: 2,
-    difficulty: ["Средний", "Intermediate"],
-    time: 7,
-    region: "eu",
-    kind: "europe",
-    tag: ["ОТ ИДЕИ К ВЛИЯНИЮ", "IDEAS TO IMPACT"],
-    description: [
-      "Расскажи о продукте, устойчивом росте и стратегии выхода на европейский рынок.",
-      "Talk about your product, sustainable growth, and European market strategy.",
-    ],
-    panel: ["Эмма", "Лукас", "София"],
-  },
-];
-const investors = [
-  {
-    name: ["Майкл Чен", "Michael Chen"],
-    role: "SaaS · AI · B2B",
-    initial: "MC",
-    color: "lavender",
-    photo: "photo-1500648767791-00dcc994a43e",
-    level: 3,
-    region: "us",
-  },
-  {
-    name: ["София Мартин", "Sofia Martin"],
-    role: "Consumer · FinTech",
-    initial: "SM",
-    color: "peach",
-    photo: "photo-1580489944761-15a19d654956",
-    level: 2,
-    region: "eu",
-  },
-  {
-    name: ["Дэвид Миллер", "David Miller"],
-    role: "DeepTech · Web3",
-    initial: "DM",
-    color: "blue",
-    photo: "photo-1560250097-0b93528c311a",
-    level: 4,
-    region: "us",
-  },
-  {
-    name: ["Лейла Рашид", "Leila Rashid"],
-    role: "Impact · E-commerce",
-    initial: "LR",
-    color: "green",
-    photo: "photo-1534528741775-53994a69daeb",
-    level: 2,
-    region: "uae",
-  },
-];
+import {
+  arenas,
+  investors,
+  photo,
+  panelFor,
+  totalXP,
+  nextArena,
+  medalsFor,
+} from "./game-data";
+import { JourneyMap, QuestStrip, TrophyShelf } from "./JourneyMap";
+import PitchRoom from "./PitchRoom";
 const seedRanking = [
   {
     name: "Lumio",
@@ -270,8 +111,6 @@ const read = (key, fallback) => {
     return fallback;
   }
 };
-const photo = (id, w = 100) =>
-  `https://images.unsplash.com/${id}?auto=format&fit=crop&w=${w}&q=85`;
 function Brand({ small = false }) {
   return (
     <div className={`brand ${small ? "small" : ""}`}>
@@ -628,12 +467,18 @@ function Scene({ kind }) {
   if (kind === "sharks") return <SharkArt />;
   return (
     <div className={`scene-logo ${kind}`}>
-      {kind === "yc" ? (
+      {kind === "nfactorial" ? (
+        <>
+          <span>n!</span>
+          <small>BUILD SOMETHING REAL</small>
+        </>
+      ) : kind === "yc" ? (
         <span>Y</span>
       ) : kind === "arena" ? (
         <>
-          <span className="arena-a">A</span>
-          <small>ARENA STARTUPS</small>
+          <img className="arena-oskar" src="/portraits/oskar.jpg" alt="" />
+          <span className="arena-a">✦</span>
+          <small>UNICORN ARENA</small>
         </>
       ) : kind === "a16z" ? (
         <span>a16z</span>
@@ -712,7 +557,13 @@ function App() {
     window.scrollTo(0, 0);
   };
   const complete = (data) => {
+    const prior = medalsFor(history)
+      .filter((m) => m.earned)
+      .map((m) => m.id);
     const record = { ...data, id: Date.now(), date: new Date().toISOString() };
+    record.newMedals = medalsFor([record, ...history]).filter(
+      (m) => m.earned && !prior.includes(m.id),
+    );
     setHistory((h) => [record, ...h]);
     setSession(null);
     setResult(record);
@@ -722,8 +573,8 @@ function App() {
     ? Math.round(history.reduce((s, h) => s + h.score, 0) / history.length)
     : 0;
   const nav = [
-    { id: "home", icon: LayoutDashboard, label: t("Обзор", "Overview") },
-    { id: "arenas", icon: Mic, label: t("Арены для питча", "Pitch arenas") },
+    { id: "home", icon: Globe2, label: t("Моё приключение", "My adventure") },
+    { id: "arenas", icon: Mic, label: t("Карта и арены", "Map & arenas") },
     { id: "investors", icon: Users, label: t("Инвесторы", "Investors") },
     {
       id: "history",
@@ -764,12 +615,19 @@ function App() {
             <Rocket size={18} />
           </div>
           <div>
-            <strong>{t("Мой воркспейс", "My workspace")}</strong>
-            <span>{t("Аккаунт основателя", "Founder account")}</span>
+            <strong>{t("Путь основателя", "Founder journey")}</strong>
+            <span>
+              {t(
+                "Сезон 01 · От идеи к единорогу",
+                "Season 01 · Becoming a unicorn",
+              )}
+            </span>
           </div>
           <ChevronDown size={14} />
         </div>
-        <div className="nav-label">{t("ПЛАТФОРМА", "WORKSPACE")}</div>
+        <div className="nav-label">
+          {t("ТВОЁ ПРИКЛЮЧЕНИЕ", "YOUR ADVENTURE")}
+        </div>
         <nav>
           {nav.map((n) => (
             <button
@@ -779,7 +637,9 @@ function App() {
             >
               <n.icon size={19} />
               <span>{n.label}</span>
-              {n.id === "arenas" && <span className="nav-count">7</span>}
+              {n.id === "arenas" && (
+                <span className="nav-count">{arenas.length}</span>
+              )}
               {n.id === "leaderboard" && <span className="live-dot" />}
             </button>
           ))}
@@ -840,7 +700,7 @@ function App() {
           <div className="topbar-actions">
             <span className="status-dot" />
             <span className="practice-mode">
-              {t("Режим тренировки", "Practice mode")}
+              {`${totalXP(history)} XP · ${t("Уровень", "Level")} ${Math.floor(totalXP(history) / 500) + 1}`}
             </span>
             <span className="topbar-divider" />
             <button
@@ -902,17 +762,20 @@ function App() {
               <div className="page-heading">
                 <div>
                   <div className="eyebrow">
-                    {t("МЕСТО, ГДЕ РАСТУТ ОСНОВАТЕЛИ", "WHERE FOUNDERS GROW")}
+                    {t(
+                      "СЕЗОН 01 · ПРИКЛЮЧЕНИЕ ОСНОВАТЕЛЯ",
+                      "SEASON 01 · A FOUNDER’S ADVENTURE",
+                    )}
                     <span className="tiny-spark">✧</span>
                   </div>
                   <h1>
-                    {t("Твоя идея. Твой выход.", "Your idea. Your moment.")}{" "}
+                    {t("От идеи до единорога.", "From idea to unicorn.")}{" "}
                     <span className="wave">✺</span>
                   </h1>
                   <p>
                     {t(
-                      "Тренируй питч, убеждай инвесторов и становись увереннее.",
-                      "Practice your pitch, win over investors, and build your confidence.",
+                      "Открывай мир, проходи арены и превращай смелость в опыт.",
+                      "Explore the world, take on arenas, and turn courage into experience.",
                     )}
                   </p>
                 </div>
@@ -929,12 +792,12 @@ function App() {
                   <div className="hero-content">
                     <div className="hero-pill">
                       <span />{" "}
-                      {t("ТВОЙ СЛЕДУЮЩИЙ БОЛЬШОЙ ШАГ", "YOUR NEXT BIG STEP")}
+                      {t("СЛЕДУЮЩАЯ МИССИЯ ЖДЁТ", "YOUR NEXT MISSION AWAITS")}
                     </div>
                     <h2>
-                      {t("Большие идеи.", "Big ideas.")}
+                      {t("Большая идея.", "One big idea.")}
                       <br />
-                      {t("Уверенный питч.", "Confident pitches.")}
+                      {t("Большое приключение.", "A bigger adventure.")}
                     </h2>
                     <p>
                       {t(
@@ -944,9 +807,11 @@ function App() {
                     </p>
                     <button
                       className="button dark"
-                      onClick={() => setSelected(arenas[0])}
+                      onClick={() => setSelected(nextArena(history))}
                     >
-                      {t("Начать питч", "Start a pitch")}
+                      {history.length
+                        ? t("Продолжить путь", "Continue journey")
+                        : t("Начать приключение", "Start my adventure")}
                       <ArrowUpRight size={18} />
                     </button>
                     <div className="hero-footnote">
@@ -975,14 +840,14 @@ function App() {
                     <div
                       className="progress-ring"
                       style={{
-                        "--progress": `${Math.min(history.length / 5, 1) * 100}%`,
+                        "--progress": `${(totalXP(history) % 500) / 5}%`,
                       }}
                     >
                       <div>
                         <Rocket size={25} />
                       </div>
                       <span className="level-orbit">
-                        {Math.floor(history.length / 5) + 1}
+                        {Math.floor(totalXP(history) / 500) + 1}
                       </span>
                     </div>
                     <h3>
@@ -999,12 +864,16 @@ function App() {
                   </div>
                   <div className="xp-row">
                     <span>
-                      {history.length * 100} <span>XP</span>
+                      {totalXP(history)} <span>XP</span>
                     </span>
-                    <span>{(Math.floor(history.length / 5) + 1) * 500} XP</span>
+                    <span>
+                      {(Math.floor(totalXP(history) / 500) + 1) * 500} XP
+                    </span>
                   </div>
                   <div className="xp-track">
-                    <span style={{ width: `${(history.length % 5) * 20}%` }} />
+                    <span
+                      style={{ width: `${(totalXP(history) % 500) / 5}%` }}
+                    />
                   </div>
                   <div className="progress-divider" />
                   <div className="progress-stat">
@@ -1032,60 +901,29 @@ function App() {
                   </button>
                 </div>
               </section>
+              <QuestStrip
+                history={history}
+                t={t}
+                pick={pick}
+                onSelect={setSelected}
+              />
               <div className="section-heading">
                 <div className="section-title">
-                  <h2>{t("Выбери свою арену", "Choose your arena")}</h2>
-                  <span className="count-badge">07</span>
+                  <h2>{t("Карта твоего приключения", "Your adventure map")}</h2>
+                  <span className="count-badge">{arenas.length}</span>
                 </div>
                 <button className="text-button" onClick={() => go("arenas")}>
                   {t("Все арены", "All arenas")}
                   <ArrowRight size={16} />
                 </button>
               </div>
-              <div className="filter-bar">
-                <div className="region-tabs">
-                  {[
-                    ["all", "Весь мир", "Worldwide"],
-                    ["cis", "СНГ", "CIS"],
-                    ["eu", "Европа", "Europe"],
-                    ["us", "Америка", "Americas"],
-                    ["uae", "Эмираты", "UAE"],
-                  ].map(([id, ru, en]) => (
-                    <button
-                      className={region === id ? "selected" : ""}
-                      onClick={() => setRegion(id)}
-                      key={id}
-                    >
-                      {id === "all" && <Globe2 size={14} />} {t(ru, en)}
-                    </button>
-                  ))}
-                </div>
-                <label className="difficulty-select">
-                  <Settings2 size={14} />
-                  <select
-                    aria-label={t("Сложность", "Difficulty")}
-                    value={difficulty}
-                    onChange={(e) => setDifficulty(e.target.value)}
-                  >
-                    <option value="all">{t("Все уровни", "All levels")}</option>
-                    <option value="easy">
-                      {t("Для начинающих", "Beginner friendly")}
-                    </option>
-                    <option value="hard">{t("Продвинутые", "Advanced")}</option>
-                  </select>
-                  <ChevronDown size={12} />
-                </label>
-              </div>
-              <div className="arena-grid">
-                {filtered.slice(0, 3).map((a) => (
-                  <ArenaCard
-                    key={a.id}
-                    arena={a}
-                    {...{ t, pick }}
-                    onClick={() => setSelected(a)}
-                  />
-                ))}
-              </div>
+              <JourneyMap
+                history={history}
+                t={t}
+                pick={pick}
+                onSelect={setSelected}
+              />
+              <TrophyShelf history={history} t={t} pick={pick} />
               <div className="bottom-grid">
                 <section className="investor-section">
                   <div className="section-heading">
@@ -1113,7 +951,8 @@ function App() {
                         key={i}
                         onClick={() =>
                           setSelected({
-                            ...arenas[i === 1 ? 3 : 1],
+                            ...arenas.find((a) => a.id === v.arenaId),
+                            personaIds: [v.id],
                             title: v.name,
                             panel: [pick(v.name)],
                             level: v.level,
@@ -1208,12 +1047,29 @@ function App() {
             <>
               <PageTitle
                 eyebrow={t("ВЫБЕРИ СВОЙ ВЫЗОВ", "CHOOSE YOUR CHALLENGE")}
-                title={t("Одна идея. Семь арен.", "One idea. Seven arenas.")}
+                title={t(
+                  "Выбери точку на карте.",
+                  "Choose your next destination.",
+                )}
                 subtitle={t(
                   "Начни с простого разговора. Дойди до самых сложных вопросов.",
                   "Start with a friendly conversation. Work your way up to the toughest questions.",
                 )}
               />
+              <JourneyMap
+                history={history}
+                t={t}
+                pick={pick}
+                onSelect={setSelected}
+              />
+              <div className="section-heading">
+                <div className="section-title">
+                  <h2>{t("Все миссии", "All missions")}</h2>
+                </div>
+                <span className="text-muted">
+                  {t("Свободный выбор арены", "Free choice of arena")}
+                </span>
+              </div>
               <div className="browse-tools">
                 <div className="search-input">
                   <Search size={17} />
@@ -1297,8 +1153,8 @@ function App() {
                 )}
                 title={t("По ту сторону стола", "Across the table")}
                 subtitle={t(
-                  "Тренировочные персонажи с разной специализацией и уровнем сложности.",
-                  "Practice personas with different specializations and levels of difficulty.",
+                  "Реальные прототипы, игровые диалоги. Выбери, перед кем репетировать следующий питч.",
+                  "Real-world references, fictional dialogue. Choose who to rehearse your next pitch with.",
                 )}
               />
               <div className="investor-full-grid">
@@ -1306,7 +1162,10 @@ function App() {
                   <div className="investor-full" key={i}>
                     <div className={`investor-banner ${v.color}`}>
                       <span className="tag">
-                        {t("БИЗНЕС-АНГЕЛ", "ANGEL INVESTOR")}
+                        {t(
+                          "РЕАЛЬНЫЙ ПРОТОТИП · СИМУЛЯЦИЯ",
+                          "REAL-WORLD REFERENCE · SIMULATION",
+                        )}
                       </span>
                       <img src={photo(v.photo, 300)} alt={pick(v.name)} />
                     </div>
@@ -1320,7 +1179,9 @@ function App() {
                             ? t("США", "United States")
                             : v.region === "eu"
                               ? t("Европа", "Europe")
-                              : t("ОАЭ", "UAE")}
+                              : v.id === "arman"
+                                ? t("Алматы", "Almaty")
+                                : t("Москва", "Moscow")}
                         </span>
                         <span>
                           <Zap size={15} />
@@ -1328,31 +1189,31 @@ function App() {
                         </span>
                       </div>
                       <p className="investor-description">
-                        {i === 0
-                          ? t(
-                              "Проверит, насколько глубоко ты понимаешь продукт и своего клиента.",
-                              "Tests how deeply you understand your product and customer.",
-                            )
-                          : i === 1
-                            ? t(
-                                "Спросит о поведении пользователей, удержании и бизнес-модели.",
-                                "Asks about user behavior, retention, and your business model.",
-                              )
-                            : i === 2
-                              ? t(
-                                  "Разберётся в технологии, рынке и твоём конкурентном преимуществе.",
-                                  "Digs into your technology, market, and competitive edge.",
-                                )
-                              : t(
-                                  "Оценит стратегию роста и готовность выйти на новые рынки.",
-                                  "Explores your growth strategy and readiness for new markets.",
-                                )}
+                        {t("Фокус игрового сценария: ", "Practice focus: ")}
+                        {pick(v.focus)}.{" "}
+                        {t(
+                          "Реплики не являются цитатами реального человека.",
+                          "Dialogue is not a quotation from the real person.",
+                        )}
                       </p>
+                      <a
+                        className="persona-source"
+                        href={v.source}
+                        target="_blank"
+                        rel="noreferrer"
+                      >
+                        {t(
+                          "О прототипе · официальный источник",
+                          "About this person · official source",
+                        )}
+                        <ArrowUpRight size={12} />
+                      </a>
                       <button
                         className="button white"
                         onClick={() =>
                           setSelected({
-                            ...arenas[v.level > 2 ? 1 : 3],
+                            ...arenas.find((a) => a.id === v.arenaId),
+                            personaIds: [v.id],
                             title: v.name,
                             panel: [pick(v.name)],
                             level: v.level,
@@ -1368,8 +1229,8 @@ function App() {
               </div>
               <p className="simulation-note">
                 {t(
-                  "Персонажи вымышленные. Фотографии используются как иллюстрации.",
-                  "These are fictional personas. Photos are illustrative.",
+                  "Имена и портреты — с официальных страниц. Реплики вымышлены; проект не связан с этими людьми и организациями. Голоса — нейтральные синтетические.",
+                  "Names and portraits come from official pages. Dialogue is fictional; we are not affiliated with these people or organizations. Voices are neutral and synthetic.",
                 )}
               </p>
             </>
@@ -1403,7 +1264,7 @@ function App() {
                     <Stat
                       icon={Zap}
                       label={t("Заработано опыта", "Experience earned")}
-                      value={`${history.length * 100} XP`}
+                      value={`${totalXP(history)} XP`}
                     />
                   </div>
                   <div className="history-list">
@@ -1539,7 +1400,7 @@ function App() {
                     <span>{t("Локальный прогресс", "Local progress")}</span>
                   </div>
                   <strong className="rank-score">
-                    {history.length * 100}
+                    {totalXP(history)}
                     <span>XP</span>
                   </strong>
                   <Rocket size={19} />
@@ -1558,6 +1419,7 @@ function App() {
                 )}
               />
               <ProfileForm
+                level={Math.floor(totalXP(history) / 500) + 1}
                 {...{ profile, setProfile, t }}
                 onSave={() => setToast(t("Профиль сохранён", "Profile saved"))}
               />
@@ -1579,7 +1441,7 @@ function App() {
       {session && (
         <PitchRoom
           data={session}
-          {...{ t, pick, lang }}
+          {...{ t, pick, lang, Brand, Modal, CameraPreview }}
           onClose={() => setSession(null)}
           onComplete={complete}
         />
@@ -1589,6 +1451,10 @@ function App() {
           result={result}
           {...{ t }}
           onClose={() => setResult(null)}
+          onMap={() => {
+            setResult(null);
+            go("home");
+          }}
           onRetry={() => {
             setResult(null);
             setSelected(
@@ -1626,8 +1492,8 @@ function App() {
                 Mic,
                 t("Дай идее голос", "Give your idea a voice"),
                 t(
-                  "Расскажи о продукте в микрофон или введи текст. Перелистывай слайды во время выступления.",
-                  "Pitch using your microphone or enter text. Flip through slides as you speak.",
+                  "Выбери длительность и расскажи о продукте без перебиваний. После таймера проверь транскрипт; затем начнутся вопросы.",
+                  "Choose a duration and pitch without interruptions. After the timer, check your transcript; then the questions begin.",
                 ),
               ],
               [
@@ -1742,14 +1608,14 @@ function ArenaCard({ arena: a, t, pick, onClick }) {
         <div className="arena-meta">
           <span>
             <Users size={13} />
-            {t("3 инвестора", "3 investors")}
+            {panelFor(a).length} {t("в панели", "on the panel")}
           </span>
           <span>
             <Clock3 size={13} />
-            {a.time} {t("мин", "min")}
+            {a.pitchSeconds / 60} {t("мин питч", "min pitch")}
           </span>
           <span className="arena-level">
-            {t("Уровень", "Level")} {a.level}
+            +{a.xp} XP
             <ChevronRight size={13} />
           </span>
         </div>
@@ -1816,7 +1682,7 @@ function Modal({ children, onClose, label, wide = false }) {
     </div>
   );
 }
-function ProfileForm({ profile, setProfile, t, onSave }) {
+function ProfileForm({ profile, setProfile, t, onSave, level }) {
   const [draft, setDraft] = useState(profile);
   return (
     <form
@@ -1831,7 +1697,9 @@ function ProfileForm({ profile, setProfile, t, onSave }) {
         <div className="user-avatar large">{draft.name.slice(0, 1) || "?"}</div>
         <div>
           <h2>{draft.name}</h2>
-          <span>{t("Основатель · Уровень 1", "Founder · Level 1")}</span>
+          <span>
+            {t(`Основатель · Уровень ${level}`, `Founder · Level ${level}`)}
+          </span>
         </div>
         <span className="profile-local">
           <ShieldCheck size={14} />
@@ -1908,6 +1776,8 @@ function ProfileForm({ profile, setProfile, t, onSave }) {
 function Setup({ arena, t, pick, profile, onClose, onStart }) {
   const [startup, setStartup] = useState(profile.startup);
   const [ask, setAsk] = useState("100000");
+  const [pitchSeconds, setPitchSeconds] = useState(arena.pitchSeconds || 120);
+  const [spokenQuestions, setSpokenQuestions] = useState(true);
   const [files, setFiles] = useState([]);
   const [error, setError] = useState("");
   const [dragging, setDragging] = useState(false);
@@ -1982,19 +1852,87 @@ function Setup({ arena, t, pick, profile, onClose, onStart }) {
         </span>
         <span>
           <Clock3 size={14} />
-          {arena.time} {t("мин", "min")}
+          {Number(pitchSeconds) / 60} {t("мин питч", "min pitch")}
         </span>
         <span>
           <Users size={14} />
           {arena.panel.length} {t("собеседника", "panelists")}
         </span>
       </div>
+      <div className="setup-cast">
+        {panelFor(arena).map((v, i) => (
+          <div key={i}>
+            {v.photo ? (
+              <img src={photo(v.photo, 80)} alt="" />
+            ) : (
+              <span className="cast-initial">{v.initial}</span>
+            )}
+            <span>{pick(v.name)}</span>
+          </div>
+        ))}
+      </div>
       <form
         onSubmit={(e) => {
           e.preventDefault();
-          onStart({ arena, startup, ask: Number(ask), files });
+          onStart({
+            arena,
+            startup,
+            ask: Number(ask),
+            files,
+            pitchSeconds: Number(pitchSeconds),
+            spokenQuestions,
+          });
         }}
       >
+        <div className="pitch-settings">
+          <div className="pitch-setting-heading">
+            <span>
+              <Clock3 size={15} />
+              {t("Время на питч", "Pitch duration")}
+            </span>
+            <span>{t("Игровой лимит", "Game time limit")}</span>
+          </div>
+          <div className="duration-options">
+            {[60, 120, 180, 300].map((n) => (
+              <button
+                type="button"
+                key={n}
+                className={Number(pitchSeconds) === n ? "selected" : ""}
+                onClick={() => setPitchSeconds(n)}
+              >
+                {n / 60} {t("мин", "min")}
+              </button>
+            ))}
+            <label className="custom-duration">
+              <input
+                aria-label={t(
+                  "Своя длительность в секундах",
+                  "Custom duration in seconds",
+                )}
+                type="number"
+                min="30"
+                max="600"
+                required
+                value={pitchSeconds}
+                onChange={(e) => setPitchSeconds(e.target.value)}
+              />
+              <span>{t("сек", "sec")}</span>
+            </label>
+          </div>
+          <label className="voice-preference">
+            <input
+              type="checkbox"
+              checked={spokenQuestions}
+              onChange={(e) => setSpokenQuestions(e.target.checked)}
+            />
+            <span>
+              {t(
+                "Озвучивать вопросы нейтральным голосом",
+                "Read questions with a neutral voice",
+              )}
+            </span>
+          </label>
+        </div>
         <div className="form-grid">
           <label>
             {t("Название стартапа", "Startup name")}
@@ -2103,7 +2041,7 @@ function Setup({ arena, t, pick, profile, onClose, onStart }) {
           </p>
         </div>
         <button className="button dark full" type="submit">
-          {t("Я готов. Начать питч", "I’m ready. Let’s pitch")}
+          {t("Войти на арену", "Enter the arena")}
           <ArrowUpRight size={18} />
         </button>
         <p className="setup-privacy">
@@ -2117,38 +2055,6 @@ function Setup({ arena, t, pick, profile, onClose, onStart }) {
     </Modal>
   );
 }
-const makeQuestions = (level, t, startup, ask) => [
-  t(
-    `Расскажи о ${startup}: какую проблему вы решаете и для кого?`,
-    `Tell us about ${startup}: what problem are you solving, and for whom?`,
-  ),
-  t(
-    "Почему клиент выберет ваш продукт вместо существующих альтернатив?",
-    "Why would a customer choose your product over existing alternatives?",
-  ),
-  level <= 2
-    ? t(
-        "Как вы будете зарабатывать? Кто ваш первый платящий клиент?",
-        "How will you make money? Who is your first paying customer?",
-      )
-    : t(
-        "Какие у вас CAC, LTV и срок окупаемости привлечения клиента? На каких данных основаны расчёты?",
-        "What are your CAC, LTV, and payback period? What data supports these numbers?",
-      ),
-  t(
-    `Вы привлекаете $${ask.toLocaleString()}. На что пойдут деньги и каких результатов вы достигнете?`,
-    `You’re raising $${ask.toLocaleString()}. How will you use it, and what milestones will you reach?`,
-  ),
-  level <= 2
-    ? t(
-        "Почему именно ваша команда сможет это сделать? Какой следующий шаг?",
-        "Why is your team the right one to build this? What is the next step?",
-      )
-    : t(
-        "Что помешает крупному конкуренту повторить ваш продукт? Как вы защитите преимущество?",
-        "What stops a larger competitor from copying your product? How will you defend your advantage?",
-      ),
-];
 function CameraPreview({ t }) {
   const [enabled, setEnabled] = useState(false);
   const [pending, setPending] = useState(false);
@@ -2156,13 +2062,13 @@ function CameraPreview({ t }) {
   const video = useRef(null),
     stream = useRef(null),
     mounted = useRef(true);
-  useEffect(
-    () => () => {
+  useEffect(() => {
+    mounted.current = true;
+    return () => {
       mounted.current = false;
       stream.current?.getTracks().forEach((track) => track.stop());
-    },
-    [],
-  );
+    };
+  }, []);
   useEffect(() => {
     if (enabled && video.current) video.current.srcObject = stream.current;
   }, [enabled]);
@@ -2219,600 +2125,19 @@ function CameraPreview({ t }) {
     </div>
   );
 }
-function PitchRoom({ data, t, pick, lang, onClose, onComplete }) {
-  const { arena, startup, ask, files } = data;
-  const englishNames = {
-    Анна: "Anna",
-    Алексей: "Alex",
-    Маша: "Maria",
-    Майкл: "Michael",
-    София: "Sofia",
-    Дэвид: "David",
-    Джеймс: "James",
-    Эмма: "Emma",
-    Дэниел: "Daniel",
-    Артём: "Artem",
-    Елена: "Elena",
-    Марк: "Mark",
-    Омар: "Omar",
-    Лейла: "Leila",
-    Адам: "Adam",
-    Лукас: "Lucas",
-  };
-  const panel = arena.panel.map((name) =>
-    lang === "en" ? englishNames[name] || name : name,
-  );
-  const questions = useRef(makeQuestions(arena.level, t, startup, ask)).current;
-  const [step, setStep] = useState(0);
-  const [answer, setAnswer] = useState("");
-  const [answers, setAnswers] = useState([]);
-  const [slide, setSlide] = useState(0);
-  const [seconds, setSeconds] = useState(0);
-  const [listening, setListening] = useState(false);
-  const [micPending, setMicPending] = useState(false);
-  const mounted = useRef(true);
-  const [micError, setMicError] = useState("");
-  const [recordingUrl, setRecordingUrl] = useState(null);
-  const [confirmExit, setConfirmExit] = useState(false);
-  const [finishing, setFinishing] = useState(false);
-  const [urls] = useState(() =>
-    files.map((f) => ({
-      url: URL.createObjectURL(f),
-      type: f.type,
-      name: f.name,
-    })),
-  );
-  const recognition = useRef(null),
-    recorder = useRef(null),
-    stream = useRef(null),
-    chunks = useRef([]),
-    audioUrl = useRef(null),
-    timer = useRef(null),
-    manualStop = useRef(false);
-  const answerRef = useRef(answer);
-  answerRef.current = answer;
-  useEffect(() => {
-    const previousOverflow = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-    timer.current = setInterval(() => setSeconds((s) => s + 1), 1000);
-    return () => {
-      document.body.style.overflow = previousOverflow;
-      mounted.current = false;
-      clearInterval(timer.current);
-      manualStop.current = true;
-      recognition.current?.abort();
-      if (recorder.current?.state === "recording") {
-        recorder.current.onstop = null;
-        recorder.current.stop();
-      }
-      stream.current?.getTracks().forEach((x) => x.stop());
-      urls.forEach((f) => URL.revokeObjectURL(f.url));
-      if (audioUrl.current) URL.revokeObjectURL(audioUrl.current);
-      window.speechSynthesis?.cancel();
-    };
-  }, []);
-  const stopMic = async () => {
-    manualStop.current = true;
-    const current = recognition.current;
-    if (current && listening) {
-      await new Promise((resolve) => {
-        const timeout = setTimeout(resolve, 1200);
-        current.addEventListener(
-          "end",
-          () => {
-            clearTimeout(timeout);
-            resolve();
-          },
-          { once: true },
-        );
-        current.stop();
-      });
-      current.onresult = null;
-      recognition.current = null;
-    }
-    setListening(false);
-    if (recorder.current?.state === "recording") {
-      await new Promise((resolve) => {
-        recorder.current.addEventListener("stop", resolve, { once: true });
-        recorder.current.stop();
-      });
-    }
-    stream.current?.getTracks().forEach((x) => x.stop());
-  };
-  const startMic = async () => {
-    setMicError("");
-    if (!navigator.mediaDevices?.getUserMedia) {
-      setMicError(
-        t(
-          "Микрофон недоступен. Введи ответ текстом.",
-          "Microphone unavailable. Please type your answer.",
-        ),
-      );
-      return;
-    }
-    setMicPending(true);
-    try {
-      const media = await navigator.mediaDevices.getUserMedia({ audio: true });
-      if (!mounted.current) {
-        media.getTracks().forEach((track) => track.stop());
-        return;
-      }
-      stream.current = media;
-      chunks.current = [];
-      const rec = new MediaRecorder(media);
-      recorder.current = rec;
-      rec.ondataavailable = (e) => {
-        if (e.data.size) chunks.current.push(e.data);
-      };
-      rec.onstop = () => {
-        const blob = new Blob(chunks.current, { type: rec.mimeType });
-        if (audioUrl.current) URL.revokeObjectURL(audioUrl.current);
-        audioUrl.current = URL.createObjectURL(blob);
-        setRecordingUrl(audioUrl.current);
-      };
-      rec.start();
-      setListening(true);
-      manualStop.current = false;
-      const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-      if (SR) {
-        const r = new SR();
-        r.lang = lang === "ru" ? "ru-RU" : "en-US";
-        r.continuous = true;
-        r.interimResults = false;
-        r.onresult = (e) => {
-          let text = "";
-          for (let i = e.resultIndex; i < e.results.length; i++) {
-            if (e.results[i].isFinal) text += e.results[i][0].transcript + " ";
-          }
-          answerRef.current = (answerRef.current + " " + text).trim();
-          setAnswer(answerRef.current);
-        };
-        r.onerror = (e) => {
-          if (e.error !== "aborted")
-            setMicError(
-              t(
-                "Распознавание недоступно. Запись продолжается — введи текст ответа перед отправкой.",
-                "Transcription unavailable. Recording continues — type your answer before submitting.",
-              ),
-            );
-        };
-        r.onend = () => {
-          recognition.current = null;
-        };
-        recognition.current = r;
-        r.start();
-      } else {
-        setMicError(
-          t(
-            "Браузер записывает аудио, но не поддерживает транскрипцию. Введи текст ответа для оценки.",
-            "Your browser can record audio but doesn’t support transcription. Type your answer for scoring.",
-          ),
-        );
-      }
-    } catch {
-      setListening(false);
-      stream.current?.getTracks().forEach((x) => x.stop());
-      setMicError(
-        t(
-          "Не удалось включить микрофон. Разреши доступ в браузере или введи ответ текстом.",
-          "Could not start the microphone. Allow access in your browser or type your answer.",
-        ),
-      );
-    } finally {
-      if (mounted.current) setMicPending(false);
-    }
-  };
-  const finish = (arr) => {
-    const text = arr.join(" "),
-      words = text.split(/\s+/).filter(Boolean).length;
-    const coverage = arr.filter(
-      (a) => a.trim().split(/\s+/).length >= 15,
-    ).length;
-    const evidence = arr.filter((a) => /\d/.test(a)).length;
-    const score = Math.min(
-      100,
-      Math.round(coverage * 10 + Math.min(words / 5, 25) + evidence * 5),
-    );
-    onComplete({
-      startup,
-      arena: pick(arena.title),
-      arenaId: arena.id,
-      duration: seconds,
-      score,
-      answers: arr,
-      questions,
-      ask,
-      words,
-      coverage,
-      evidence,
-    });
-  };
-  const send = async () => {
-    if (!answer.trim() || finishing) return;
-    setFinishing(true);
-    await stopMic();
-    const arr = [...answers, answerRef.current.trim()];
-    if (step === questions.length - 1) {
-      finish(arr);
-      return;
-    }
-    setAnswers(arr);
-    setStep((s) => s + 1);
-    setAnswer("");
-    setRecordingUrl(null);
-    setFinishing(false);
-  };
-  const speak = () => {
-    if (!("speechSynthesis" in window)) return;
-    window.speechSynthesis.cancel();
-    const u = new SpeechSynthesisUtterance(questions[step]);
-    u.lang = lang === "ru" ? "ru-RU" : "en-US";
-    window.speechSynthesis.speak(u);
-  };
-  return (
-    <div className="pitch-room">
-      <header className="room-header">
-        <Brand small />
-        <div className="room-title">
-          <span className="status-dot" />
-          {pick(arena.title)}
-          <span className="room-demo">
-            {t("Тренировочная симуляция", "Practice simulation")}
-          </span>
-        </div>
-        <div className="room-time">
-          <Clock3 size={15} />
-          {String(Math.floor(seconds / 60)).padStart(2, "0")}:
-          {String(seconds % 60).padStart(2, "0")}
-        </div>
-        <button
-          className="icon-button"
-          onClick={() => setConfirmExit(true)}
-          aria-label={t("Выйти", "Exit")}
-        >
-          <X size={21} />
-        </button>
-      </header>
-      <div className="room-content">
-        <section className="room-stage">
-          <div className="stage-top">
-            <div>
-              <span className="eyebrow">
-                {t("СЕЙЧАС НА СЦЕНЕ", "ON STAGE NOW")}
-              </span>
-              <h2>{startup}</h2>
-            </div>
-            <span className="funding-ask">
-              ${ask.toLocaleString()}
-              <small>{t("раунд инвестиций", "investment round")}</small>
-            </span>
-          </div>
-          <div className="presentation">
-            <CameraPreview t={t} />
-            {urls.length ? (
-              urls[slide].type === "application/pdf" ? (
-                <iframe
-                  title={t("Презентация", "Pitch deck")}
-                  src={urls[slide].url}
-                />
-              ) : (
-                <img
-                  src={urls[slide].url}
-                  alt={`${t("Слайд", "Slide")} ${slide + 1}`}
-                />
-              )
-            ) : (
-              <div className="demo-slide">
-                <div className="demo-slide-label">
-                  {String(slide + 1).padStart(2, "0")} / 05{" "}
-                  <span>YOUR NEXT BIG THING</span>
-                </div>
-                <div className="slide-spark">✳</div>
-                <h1>
-                  {
-                    [
-                      startup,
-                      t(
-                        "Проблема.\nИ твоё решение.",
-                        "The problem.\nYour solution.",
-                      ),
-                      t("Рынок ждёт.", "The market is waiting."),
-                      t(
-                        "От идеи\nк первым клиентам.",
-                        "From an idea\nto your first customers.",
-                      ),
-                      t(
-                        "Создадим будущее.\nВместе.",
-                        "Let’s build the future.\nTogether.",
-                      ),
-                    ][slide]
-                  }
-                </h1>
-                <p>
-                  {
-                    [
-                      t(
-                        "Большая история начинается с простого «а что, если?»",
-                        "Every great story begins with a simple “what if?”",
-                      ),
-                      t(
-                        "Кому ты помогаешь и что меняешь?",
-                        "Who do you help, and what do you change?",
-                      ),
-                      t(
-                        "Кто твой клиент? Почему сейчас?",
-                        "Who is your customer? Why now?",
-                      ),
-                      t(
-                        "Расскажи о бизнес-модели и росте.",
-                        "Tell us about your business model and growth.",
-                      ),
-                      t(
-                        `Раунд: $${ask.toLocaleString()} · Твой следующий большой шаг`,
-                        `Raising $${ask.toLocaleString()} · Your next big step`,
-                      ),
-                    ][slide]
-                  }
-                </p>
-                <div className="demo-slide-bottom">
-                  {startup}
-                  <ArrowUpRight size={25} />
-                </div>
-              </div>
-            )}
-          </div>
-          <div className="slide-controls">
-            <span>
-              <FileText size={14} />
-              {urls.length
-                ? urls[slide].name
-                : t("Тренировочные слайды", "Practice slides")}
-            </span>
-            {urls[slide]?.type === "application/pdf" ? (
-              <small>
-                {t(
-                  "Листай страницы внутри PDF",
-                  "Scroll within the PDF to change pages",
-                )}
-              </small>
-            ) : (
-              <div>
-                <button
-                  className="icon-button"
-                  disabled={slide === 0}
-                  onClick={() => setSlide((s) => s - 1)}
-                  aria-label={t("Предыдущий слайд", "Previous slide")}
-                >
-                  <ChevronLeft size={18} />
-                </button>
-                <span>
-                  {slide + 1} / {urls.length || 5}
-                </span>
-                <button
-                  className="icon-button"
-                  disabled={slide === (urls.length || 5) - 1}
-                  onClick={() => setSlide((s) => s + 1)}
-                  aria-label={t("Следующий слайд", "Next slide")}
-                >
-                  <ChevronRight size={18} />
-                </button>
-              </div>
-            )}
-          </div>
-          <div className="panel-label">
-            <Users size={15} />
-            {t("Твоя инвестиционная панель", "Your investor panel")}
-            <span>{t("Условные персонажи", "Fictional personas")}</span>
-          </div>
-          <div className="room-investors">
-            {panel.map((name, i) => (
-              <div
-                className={`room-investor ${step % arena.panel.length === i ? "speaking" : ""}`}
-                key={name}
-              >
-                <div className="room-investor-top">
-                  <img src={photo(investors[i % 4].photo, 100)} alt="" />
-                  <div>
-                    <strong>{name}</strong>
-                    <span>
-                      {step % arena.panel.length === i
-                        ? t("Задаёт вопрос", "Asking a question")
-                        : t("Слушает тебя", "Listening to you")}
-                    </span>
-                  </div>
-                  {step % arena.panel.length === i && <Volume2 size={16} />}
-                </div>
-                <div className="interest-label">
-                  <span>{t("Интерес к питчу", "Pitch interest")}</span>
-                  <strong>
-                    {Math.min(
-                      95,
-                      15 +
-                        answers.filter((a) => a.length > 60).length * 16 +
-                        i * 4,
-                    )}
-                    %
-                  </strong>
-                </div>
-                <div className="interest-track">
-                  <span
-                    style={{
-                      width: `${Math.min(95, 15 + answers.filter((a) => a.length > 60).length * 16 + i * 4)}%`,
-                    }}
-                  />
-                </div>
-              </div>
-            ))}
-          </div>
-          <p className="room-disclaimer">
-            {t(
-              "Интерес — игровой показатель, не решение об инвестициях. Вопросы и оценка основаны на правилах.",
-              "Interest is a game indicator, not an investment decision. Questions and scoring are rule-based.",
-            )}
-          </p>
-        </section>
-        <aside className="room-conversation">
-          <div className="conversation-heading">
-            <h3>{t("Время диалога", "Let’s talk")}</h3>
-            <span>
-              {step + 1} / {questions.length}
-            </span>
-          </div>
-          <div className="question-progress">
-            {questions.map((_, i) => (
-              <span key={i} className={i <= step ? "done" : ""} />
-            ))}
-          </div>
-          <div className="question-author">
-            <div className="question-avatar">
-              <img
-                src={photo(
-                  investors[(step % arena.panel.length) % 4].photo,
-                  80,
-                )}
-                alt=""
-              />
-            </div>
-            <div>
-              <strong>{panel[step % panel.length]}</strong>
-              <span>
-                {step === 0
-                  ? t("Твой первый вопрос", "Your first question")
-                  : t("Хочет узнать больше", "Wants to know more")}
-              </span>
-            </div>
-            <button
-              className="icon-button"
-              onClick={speak}
-              aria-label={t("Озвучить вопрос", "Read question aloud")}
-            >
-              <Volume2 size={18} />
-            </button>
-          </div>
-          <div className="question-bubble">{questions[step]}</div>
-          <div className="answer-header">
-            <label htmlFor="pitch-answer">
-              {t("Твой ответ", "Your answer")}
-            </label>
-            <span className={listening ? "recording-label" : ""}>
-              {listening ? (
-                <>
-                  <i />
-                  {t("Запись", "Recording")}
-                </>
-              ) : (
-                t("Голосом или текстом", "Speak or type")
-              )}
-            </span>
-          </div>
-          <textarea
-            id="pitch-answer"
-            maxLength={12000}
-            value={answer}
-            onChange={(e) => setAnswer(e.target.value)}
-            placeholder={t(
-              "Нажми на микрофон и говори — или напиши ответ здесь…",
-              "Tap the microphone and speak — or type your answer here…",
-            )}
-          />
-          {micError && (
-            <p className="mic-error" role="status">
-              {micError}
-            </p>
-          )}
-          {recordingUrl && (
-            <div className="audio-playback">
-              <audio controls src={recordingUrl} />
-              <a
-                href={recordingUrl}
-                download={`pitch-${step + 1}.webm`}
-                aria-label={t("Скачать запись", "Download recording")}
-              >
-                <Download size={17} />
-              </a>
-            </div>
-          )}
-          <div className="answer-actions">
-            <button
-              className={`mic-button ${listening ? "recording" : ""}`}
-              onClick={listening ? stopMic : startMic}
-              disabled={micPending || finishing}
-              aria-label={
-                listening
-                  ? t("Остановить запись", "Stop recording")
-                  : t("Включить микрофон", "Start microphone")
-              }
-            >
-              {listening ? <StopCircle size={22} /> : <Mic size={22} />}
-            </button>
-            <button
-              className="button dark"
-              onClick={send}
-              disabled={!answer.trim() || finishing}
-            >
-              {step === questions.length - 1
-                ? t("Завершить питч", "Finish pitch")
-                : t("Ответить", "Send answer")}
-              <ArrowRight size={17} />
-            </button>
-          </div>
-          <div className="coach-tip">
-            <Lightbulb size={18} />
-            <p>
-              {t(
-                "Конкретика убеждает. Добавь пример, цифру или короткую историю клиента.",
-                "Specifics persuade. Add an example, a number, or a short customer story.",
-              )}
-            </p>
-          </div>
-          <div className="room-privacy">
-            <ShieldCheck size={13} />
-            {t(
-              "Аудио не отправляется на сервер приложения. Распознавание — сервис браузера.",
-              "Audio stays off our server. Transcription uses your browser’s service.",
-            )}
-          </div>
-        </aside>
-      </div>
-      {confirmExit && (
-        <Modal
-          onClose={() => setConfirmExit(false)}
-          label={t("Выйти из питча", "Leave pitch")}
-        >
-          <div className="modal-eyebrow">
-            <Mic size={17} />
-            {t("ПАУЗА — ЭТО НОРМАЛЬНО", "IT’S OKAY TO TAKE A BREAK")}
-          </div>
-          <h2>{t("Закончить на сегодня?", "Call it a day?")}</h2>
-          <p className="modal-subtitle">
-            {t(
-              "Незавершённый питч не попадёт в историю. Ты всегда можешь начать заново.",
-              "An unfinished pitch won’t be saved to your history. You can always start again.",
-            )}
-          </p>
-          <div className="modal-actions">
-            <button
-              className="button white"
-              onClick={() => setConfirmExit(false)}
-            >
-              {t("Продолжить питч", "Keep practicing")}
-            </button>
-            <button className="button dark" onClick={onClose}>
-              {t("Выйти", "Leave pitch")}
-              <ArrowRight size={16} />
-            </button>
-          </div>
-        </Modal>
-      )}
-    </div>
-  );
-}
-function Results({ result: r, t, onClose, onRetry }) {
+function Results({ result: r, t, onClose, onRetry, onMap }) {
   const download = () => {
     const content = [
       r.startup,
       r.arena,
       `${r.score}/100`,
+      ...(r.pitchTranscript
+        ? [
+            t("ИСХОДНЫЙ ПИТЧ", "ORIGINAL PITCH"),
+            r.pitchTranscript,
+            t("ВОПРОСЫ И ОТВЕТЫ", "QUESTIONS AND ANSWERS"),
+          ]
+        : []),
       ...r.questions.flatMap((q, i) => [q, r.answers[i] || ""]),
     ].join("\n\n");
     const blob = new Blob([content], { type: "text/plain;charset=utf-8" });
@@ -2832,7 +2157,16 @@ function Results({ result: r, t, onClose, onRetry }) {
         <div className="eyebrow">
           {t("ЕЩЁ НА ОДИН ШАГ УВЕРЕННЕЕ", "ONE STEP MORE CONFIDENT")}
         </div>
-        <h2>{t("Ты сделал это.", "You did it.")}</h2>
+        <h2>{t("Миссия пройдена!", "Mission complete!")}</h2>
+        <div className="result-stars">
+          {[1, 2, 3].map((n) => (
+            <Star
+              key={n}
+              size={25}
+              className={n <= (r.stars || 1) ? "earned" : ""}
+            />
+          ))}
+        </div>
         <p>
           {r.startup} · {r.arena}
         </p>
@@ -2847,7 +2181,8 @@ function Results({ result: r, t, onClose, onRetry }) {
         </div>
         <div>
           <strong>
-            +100<small>XP</small>
+            +{r.xp ?? 100}
+            <small>XP</small>
           </strong>
           <span>
             {t("За смелость и практику", "For showing up and practicing")}
@@ -2861,6 +2196,27 @@ function Results({ result: r, t, onClose, onRetry }) {
           <span>{t("Время выступления", "Pitch duration")}</span>
         </div>
       </div>
+      {r.newMedals?.length > 0 && (
+        <div className="new-medals">
+          <span>{t("НОВЫЕ ДОСТИЖЕНИЯ", "NEW ACHIEVEMENTS")}</span>
+          {r.newMedals.map((m) => (
+            <div key={m.id}>
+              <strong>{m.icon}</strong>
+              <span>{t(...m.name)}</span>
+              <CheckCircle2 size={15} />
+            </div>
+          ))}
+        </div>
+      )}
+      {r.pitchTranscript && (
+        <details className="result-transcript">
+          <summary>
+            {t("Твой исходный питч", "Your original pitch")} · {r.pitchDuration}{" "}
+            {t("сек", "sec")}
+          </summary>
+          <p>{r.pitchTranscript}</p>
+        </details>
+      )}
       <div className="result-feedback">
         <h3>{t("Фокус для следующего питча", "Focus for your next pitch")}</h3>
         {[
@@ -2901,11 +2257,20 @@ function Results({ result: r, t, onClose, onRetry }) {
         ))}
       </div>
       <p className="info-note">
-        {t(
-          "Оценка по формуле: развёрнутые ответы — до 50 баллов, объём текста — до 25, наличие цифр — до 25. Это не ИИ-анализ качества бизнеса.",
-          "Scoring formula: detailed answers up to 50 points, text length up to 25, use of numbers up to 25. This is not an AI evaluation of your business.",
-        )}
+        {r.scoringVersion === 2
+          ? t(
+              "Учебный балл: темы питча — до 25, развёрнутые ответы — до 40, цифры — до 25, объём питча — до 10. XP: награда арены + 5 за каждые 10 баллов. Это локальные правила, не ИИ-оценка бизнеса.",
+              "Practice score: pitch topics up to 25, detailed answers up to 40, numbers up to 25, pitch length up to 10. XP: arena reward + 5 per 10 points. These are local rules, not an AI business evaluation.",
+            )
+          : t(
+              "Оценка по формуле: развёрнутые ответы — до 50 баллов, объём текста — до 25, наличие цифр — до 25. Это не ИИ-анализ качества бизнеса.",
+              "Scoring formula: detailed answers up to 50 points, text length up to 25, use of numbers up to 25. This is not an AI evaluation of your business.",
+            )}
       </p>
+      <button className="button dark full result-map-button" onClick={onMap}>
+        {t("Вернуться на карту", "Back to the world map")}
+        <Globe2 size={17} />
+      </button>
       <div className="modal-actions">
         <button className="button white" onClick={download}>
           <Download size={16} />
