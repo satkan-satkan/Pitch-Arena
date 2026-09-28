@@ -1,9 +1,13 @@
 {
-  "passed": 23,
+  "passed": 28,
   "checks": [
+    "Pending sign-in never displays a fake account",
+    "Existing local profile is clearly marked as a guest",
+    "Guest profile data is preserved",
     "Music starts off without autoplay",
     "Prepared MP3 decodes and plays after user action",
     "Account registration updates UI",
+    "Signed-in user sees account controls and their own identity",
     "Saved project is selected",
     "AI remains disabled without a configured API key",
     "Music pauses before recording or pitch starts",
@@ -20,6 +24,7 @@
     "Second browser sees server history",
     "Account and music controls fit a mobile viewport",
     "Sign out restores separate guest data",
+    "Sign out removes the account identity",
     "Guest can resume a local draft",
     "Discard removes local draft",
     "Music volume setting survives reload",

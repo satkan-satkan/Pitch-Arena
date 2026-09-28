@@ -39,6 +39,7 @@ import {
   Trophy,
   UploadCloud,
   Users,
+  UserRound,
   Video,
   X,
   Zap,
@@ -519,7 +520,7 @@ function App() {
   const [guestDraft, setGuestDraft] = useState(() => read("pa-draft", null));
   const [guestProfile, setGuestProfile] = useState(() =>
     read("pa-profile", {
-      name: "Александр",
+      name: "",
       startup: "Мой стартап",
       industry: "SaaS & AI",
       bio: "",
@@ -842,12 +843,32 @@ function App() {
             <span>{t("Как это работает", "How it works")}</span>
             <ArrowUpRight size={15} />
           </button>
-          <button className="profile-button" onClick={() => go("profile")}>
-            <div className="user-avatar">{profile.name.slice(0, 1)}</div>
+          <button
+            className="profile-button"
+            disabled={workspace.checking}
+            onClick={() =>
+              workspace.account ? go("profile") : setAccountOpen(true)
+            }
+          >
+            <div className="user-avatar">
+              {workspace.account ? (
+                profile.name.slice(0, 1)
+              ) : (
+                <UserRound size={18} />
+              )}
+            </div>
             <div>
-              <strong>{profile.name}</strong>
+              <strong>
+                {workspace.checking
+                  ? t("Проверяем вход…", "Checking sign-in…")
+                  : workspace.account
+                    ? profile.name
+                    : t("Гостевой режим", "Guest mode")}
+              </strong>
               <span>
-                {t("Будущий единорог", "Future unicorn")} <span>✦</span>
+                {workspace.account
+                  ? t("Будущий единорог", "Future unicorn")
+                  : t("Прогресс в этом браузере", "Progress in this browser")}
               </span>
             </div>
             <MoreHorizontal size={18} />
@@ -877,11 +898,14 @@ function App() {
             <BackgroundMusic blocked={Boolean(session)} t={t} />
             <button
               className="account-entry"
+              disabled={workspace.checking}
               onClick={() => setAccountOpen(true)}
             >
-              {workspace.account
-                ? t("Аккаунт", "Account")
-                : t("Войти", "Sign in")}
+              {workspace.checking
+                ? t("Проверяем вход…", "Checking sign-in…")
+                : workspace.account
+                  ? t("Аккаунт", "Account")
+                  : t("Войти", "Sign in")}
             </button>
             <span className="status-dot" />
             <span className="practice-mode">
@@ -932,13 +956,15 @@ function App() {
                 </div>
               )}
             </div>
-            <button
-              className="user-avatar top-avatar"
-              onClick={() => go("profile")}
-              aria-label={t("Мой профиль", "My profile")}
-            >
-              {profile.name.slice(0, 1)}
-            </button>
+            {workspace.account && (
+              <button
+                className="user-avatar top-avatar"
+                onClick={() => go("profile")}
+                aria-label={t("Мой профиль", "My profile")}
+              >
+                {profile.name.slice(0, 1)}
+              </button>
+            )}
           </div>
         </header>
         <main>

@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { api } from "../services/api";
 export default function useWorkspace() {
   const [account, setAccount] = useState(null),
@@ -7,15 +7,29 @@ export default function useWorkspace() {
     [draft, setDraft] = useState(null),
     [aiReady, setAiReady] = useState(false),
     [online, setOnline] = useState(false),
+    [checking, setChecking] = useState(true),
     [activeProjectId, setActiveProjectId] = useState("");
+  const latestRequest = useRef(0);
   const refresh = async () => {
-    const r = await api("/bootstrap");
+    const request = ++latestRequest.current;
+    let r;
+    try {
+      r = await api("/bootstrap");
+    } catch (error) {
+      if (request === latestRequest.current) {
+        setOnline(false);
+        setChecking(false);
+      }
+      throw error;
+    }
+    if (request !== latestRequest.current) return r;
     setAccount(r.user);
     setProjects(r.projects);
     setHistory(r.history);
     setDraft(r.draft);
     setAiReady(r.aiReady);
     setOnline(true);
+    setChecking(false);
     setActiveProjectId((current) =>
       r.projects.some((p) => p.id === current)
         ? current
@@ -24,7 +38,7 @@ export default function useWorkspace() {
     return r;
   };
   useEffect(() => {
-    refresh().catch(() => setOnline(false));
+    refresh().catch(() => {});
   }, []);
   return {
     account,
@@ -36,6 +50,7 @@ export default function useWorkspace() {
     setDraft,
     aiReady,
     online,
+    checking,
     activeProjectId,
     setActiveProjectId,
     refresh,

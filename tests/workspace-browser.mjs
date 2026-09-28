@@ -63,8 +63,49 @@ async function signIn(p) {
   await p.getByRole("heading", { name: "Мои проекты", exact: true }).waitFor();
 }
 try {
+  await page.addInitScript(() => {
+    if (!localStorage.getItem("pa-profile"))
+      localStorage.setItem(
+        "pa-profile",
+        JSON.stringify({
+          name: "Александр",
+          startup: "Мой стартап",
+          industry: "SaaS & AI",
+          bio: "",
+        }),
+      );
+  });
+  let releaseBootstrap;
+  const bootstrapGate = new Promise((resolve) => {
+    releaseBootstrap = resolve;
+  });
+  await page.route("**/api/bootstrap", async (route) => {
+    await bootstrapGate;
+    await route.continue();
+  });
   await page.goto(origin);
   await page.locator(".map-pin").first().waitFor();
+  check(
+    "Pending sign-in never displays a fake account",
+    (await page.locator(".account-entry").isDisabled()) &&
+      (await page.locator(".top-avatar").count()) === 0 &&
+      (await page.locator(".account-entry").textContent()).includes(
+        "Проверяем вход",
+      ),
+  );
+  releaseBootstrap();
+  await page.getByRole("button", { name: "Войти", exact: true }).waitFor();
+  check(
+    "Existing local profile is clearly marked as a guest",
+    (await page.locator(".profile-button strong").textContent()) ===
+      "Гостевой режим" && (await page.locator(".top-avatar").count()) === 0,
+  );
+  check(
+    "Guest profile data is preserved",
+    await page.evaluate(
+      () => JSON.parse(localStorage.getItem("pa-profile")).name === "Александр",
+    ),
+  );
   check(
     "Music starts off without autoplay",
     await page.getByTestId("background-music").evaluate((a) => a.paused),
@@ -101,6 +142,13 @@ try {
     .getByRole("heading", { name: "Мои проекты", exact: true })
     .waitFor();
   check("Account registration updates UI", (await boot()).user.email === email);
+  check(
+    "Signed-in user sees account controls and their own identity",
+    (await page.locator(".account-entry").textContent()) === "Аккаунт" &&
+      (await page.locator(".profile-button strong").textContent()) ===
+        "Тестовый основатель" &&
+      (await page.locator(".top-avatar").count()) === 1,
+  );
   await page.getByLabel("Новый проект", { exact: true }).fill("Clinic Cloud");
   await page
     .getByRole("button", { name: "Создать проект", exact: true })
@@ -291,6 +339,11 @@ try {
     .click();
   await page.getByRole("button", { name: "Войти", exact: true }).waitFor();
   check("Sign out restores separate guest data", (await boot()).user === null);
+  check(
+    "Sign out removes the account identity",
+    (await page.locator(".profile-button strong").textContent()) ===
+      "Гостевой режим" && (await page.locator(".top-avatar").count()) === 0,
+  );
   await openArena();
   await page.getByLabel("Озвучивать вопросы нейтральным голосом").uncheck();
   await page
