@@ -16,7 +16,7 @@
 }
 .community-heading p,
 .community-caption {
-  color: var(--muted, #827b91);
+  color: var(--muted, #666e5e);
   line-height: 1.6;
 }
 .community-heading .button {
@@ -38,11 +38,11 @@
 .community-form select,
 .team-invite input,
 .team-invite select {
-  border: 1px solid #e3deed;
+  border: 1px solid #dfded5;
   background: white;
   border-radius: 10px;
   padding: 12px;
-  color: #302d3d;
+  color: #252b25;
   width: 100%;
   font: inherit;
   box-sizing: border-box;
@@ -51,18 +51,18 @@
   width: auto;
 }
 .community-empty {
-  border: 1px dashed #d9ccec;
+  border: 1px dashed #dfded5;
   border-radius: 24px;
   text-align: center;
   padding: 58px 24px;
-  background: linear-gradient(125deg, #f8f4ff, #fff);
-  color: #80718f;
+  background: linear-gradient(125deg, #faf9f5, #fff);
+  color: #666e5e;
 }
 .community-empty > svg {
-  color: #9673df;
+  color: #888e80;
 }
 .community-empty h2 {
-  color: #302c3e;
+  color: #252b25;
   font-size: 24px;
   letter-spacing: -0.6px;
 }
@@ -86,7 +86,7 @@
 .team-card,
 .startup-detail {
   background: white;
-  border: 1px solid #e8e1f1;
+  border: 1px solid #f1f0e9;
   border-radius: 22px;
   padding: 26px;
   min-width: 0;
@@ -101,7 +101,7 @@
   margin: 0;
 }
 .startup-card p {
-  color: #7c758b;
+  color: #666e5e;
   line-height: 1.6;
 }
 .startup-card h2 a {
@@ -113,7 +113,7 @@
   gap: 12px;
 }
 .startup-card h2 a:hover {
-  color: #8760d1;
+  color: #666e5e;
 }
 .startup-card-top {
   display: flex;
@@ -123,8 +123,8 @@
 .startup-monogram {
   width: 48px;
   height: 48px;
-  background: #f1eaff;
-  color: #8865cb;
+  background: #f1f0e9;
+  color: #666e5e;
   font-size: 24px;
   font-weight: 700;
   display: grid;
@@ -136,8 +136,8 @@
   display: inline-flex;
   padding: 6px 9px;
   border-radius: 7px;
-  background: #f4f1f9;
-  color: #786391;
+  background: #faf9f5;
+  color: #666e5e;
   font-size: 11px;
   line-height: 1.4;
 }
@@ -155,19 +155,19 @@
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  color: #7752bd;
+  color: #666e5e;
   text-decoration: none;
   font-size: 12px;
   padding: 6px 8px;
-  border: 1px solid #eae3f5;
+  border: 1px solid #f1f0e9;
   border-radius: 6px;
 }
 .social-links a:hover {
-  background: #f0e8fc;
+  background: #f1f0e9;
 }
 .startup-revenue {
   padding: 16px 0;
-  border-top: 1px solid #eee8f5;
+  border-top: 1px solid #f1f0e9;
   display: flex;
   flex-direction: column;
   gap: 6px;
@@ -178,7 +178,7 @@
 .startup-revenue span,
 .startup-card small {
   font-size: 11px;
-  color: #8b8199;
+  color: #666e5e;
 }
 .startup-detail {
   max-width: 850px;
@@ -192,18 +192,18 @@
 .startup-tagline {
   font-size: 20px;
   line-height: 1.6;
-  color: #6c637e;
+  color: #454d40;
 }
 .startup-description {
   white-space: pre-wrap;
   overflow-wrap: anywhere;
   line-height: 1.8;
-  color: #5c536a;
+  color: #454d40;
   margin: 24px 0;
 }
 .startup-detail > small {
   display: block;
-  color: #918899;
+  color: #666e5e;
   line-height: 1.6;
   margin-top: 30px;
 }
@@ -218,7 +218,7 @@
   flex-direction: column;
   gap: 8px;
   font-size: 12px;
-  color: #71657e;
+  color: #454d40;
 }
 .community-form-grid {
   display: grid;
@@ -226,7 +226,7 @@
   gap: 16px;
 }
 .community-links {
-  border: 1px solid #e9e1f2;
+  border: 1px solid #f1f0e9;
   border-radius: 13px;
   padding: 20px;
   margin: 0;
@@ -238,7 +238,7 @@
 }
 .community-links p {
   font-size: 12px;
-  color: #8c8099;
+  color: #666e5e;
   margin: 0 0 20px;
   line-height: 1.6;
 }
@@ -254,7 +254,7 @@
   margin: 0;
 }
 .community-section-title p {
-  color: #8a8195;
+  color: #666e5e;
   font-size: 13px;
 }
 .community-actions {
@@ -278,31 +278,31 @@
   margin: 0 0 16px;
 }
 .team-card > p {
-  color: #8a8195;
+  color: #666e5e;
   line-height: 1.6;
 }
 .team-members {
   list-style: none;
   padding: 0;
   margin: 20px 0;
-  border-top: 1px solid #ece6f3;
+  border-top: 1px solid #f1f0e9;
 }
 .team-members li {
   display: flex;
   justify-content: space-between;
   gap: 10px;
   padding: 13px 0;
-  border-bottom: 1px solid #ece6f3;
+  border-bottom: 1px solid #f1f0e9;
   font-size: 13px;
 }
 .team-members small {
-  color: #94889f;
+  color: #666e5e;
 }
 .team-members button,
 .pending-invite button {
   border: 0;
   background: none;
-  color: #9373b6;
+  color: #666e5e;
   font: inherit;
   cursor: pointer;
   font-size: 12px;
@@ -316,7 +316,7 @@
 .team-invite small {
   grid-column: 1/-1;
   line-height: 1.6;
-  color: #91829e;
+  color: #666e5e;
   font-size: 11px;
 }
 .team-invite .button {
@@ -332,7 +332,7 @@
 }
 .team-inbox {
   padding: 24px;
-  background: #eee6ff;
+  background: #f1f0e9;
   border-radius: 20px;
   margin: 24px 0;
 }
@@ -347,7 +347,7 @@
   margin-right: auto;
 }
 .moderation-note {
-  background: #f7f1ff;
+  background: #faf9f5;
   padding: 12px;
   border-radius: 10px;
   font-size: 12px;

@@ -60,31 +60,14 @@ try {
   ]) {
     await button(label).click();
     check(
-      `Emotion preview uses ${id} asset`,
-      (await page.locator(".bento-guide img").getAttribute("src")).includes(id),
+      `Guide signal reflects ${id} context`,
+      (await page
+        .locator(".bento-guide .guide-signal")
+        .getAttribute("data-emotion")) === id,
     );
   }
-  const transparent = await page.evaluate(async () => {
-    const moods = ["welcome", "thinking", "listening", "support", "celebrate"];
-    const flags = [];
-    for (const mood of moods) {
-      const image = new Image();
-      image.src = `/guide/iskra-${mood}.png`;
-      await image.decode();
-      const c = document.createElement("canvas");
-      c.width = c.height = 1;
-      const ctx = c.getContext("2d");
-      ctx.drawImage(image, 0, 0);
-      flags.push(ctx.getImageData(0, 0, 1, 1).data[3] === 0);
-    }
-    return flags.every(Boolean);
-  });
-  check(
-    "All five generated sprites have genuine transparent corners",
-    transparent,
-  );
   mkdirSync("artifacts", { recursive: true });
-  await page.screenshot({ path: "artifacts/v7-landing.png", fullPage: true });
+  await page.screenshot({ path: "artifacts/v8-landing.png", fullPage: true });
   await button("Познакомиться с Искрой").click();
   await page.getByRole("dialog", { name: "Знакомство с Искрой" }).waitFor();
   check(
@@ -92,7 +75,7 @@ try {
     (await state()).status === "learning" &&
       (await page.evaluate(() => window.micRequests)) === 0,
   );
-  await page.screenshot({ path: "artifacts/v7-guide-intro.png" });
+  await page.screenshot({ path: "artifacts/v8-guide-intro.png" });
   await button("Дальше").click();
   await button("Дальше").click();
   check(
@@ -151,7 +134,7 @@ try {
     await page.locator(".answer-review .button.dark").click();
   }
   await page
-    .getByRole("heading", { name: "Миссия пройдена!", exact: true })
+    .getByRole("heading", { name: "Раунд завершён", exact: true })
     .waitFor();
   check(
     "Only a finished practice completes the introduction",
@@ -167,11 +150,11 @@ try {
     "Guide never requests microphone access in text mode",
     await page.evaluate(() => window.micRequests === 0),
   );
-  await page.screenshot({ path: "artifacts/v7-guide-result.png" });
+  await page.screenshot({ path: "artifacts/v8-guide-result.png" });
   await button("Close").click();
   await page
     .locator(".nav-item")
-    .filter({ hasText: "Моё приключение" })
+    .filter({ hasText: "Комната основателя" })
     .click();
   await button("Скрыть подсказки Искры").click();
   await page.reload();
@@ -213,7 +196,7 @@ try {
   await page.locator(".guide-home").waitFor();
   await page.setViewportSize({ width: 390, height: 844 });
   await page.screenshot({
-    path: "artifacts/v7-guide-mobile.png",
+    path: "artifacts/v8-guide-mobile.png",
     fullPage: true,
   });
   check(
@@ -241,7 +224,7 @@ try {
   );
   check("No browser runtime errors", errors.length === 0);
   writeFileSync(
-    "artifacts/v7-verification.json",
+    "artifacts/v8-verification.json",
     JSON.stringify(
       { passed: checks.length, checks, errors, liveAI: false },
       null,

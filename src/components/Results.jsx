@@ -67,9 +67,9 @@ export default function Results({
           <Trophy size={30} />
         </span>
         <div className="eyebrow">
-          {t("ЕЩЁ НА ОДИН ШАГ УВЕРЕННЕЕ", "ONE STEP MORE CONFIDENT")}
+          {t("РАЗБОР ПОСЛЕ ВСТРЕЧИ", "POST-MEETING REVIEW")}
         </div>
-        <h2>{t("Миссия пройдена!", "Mission complete!")}</h2>
+        <h2>{t("Раунд завершён", "Round complete")}</h2>
         <div className="result-stars">
           {[1, 2, 3].map((n) => (
             <Star
@@ -100,7 +100,7 @@ export default function Results({
             <small>XP</small>
           </strong>
           <span>
-            {t("За смелость и практику", "For showing up and practicing")}
+            {t("За завершённую тренировку", "For completing the practice")}
           </span>
         </div>
         <div>

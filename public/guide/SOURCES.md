@@ -1,5 +1,7 @@
 # Iskra / Искра: original guide assets
 
+**Archived visual direction.** Following owner feedback that the presentation felt too childish, the live UI now uses a compact SVG signal mark in `src/guide/Guide.jsx`. These original images and prompts are retained for design history.
+
 Created for Pitch Arena on 2026-09-29 with the **built-in image generation tool**, not the CLI. Original generated character; no reference to an existing mascot. Transparent PNGs are stored beside this file. No external image provider or API key is needed at runtime.
 
 | Asset | Expression |

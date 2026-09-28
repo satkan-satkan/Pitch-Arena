@@ -85,7 +85,7 @@ async function answerRound(text, screenshot) {
         .click();
     count++;
   }
-  await page.getByRole("heading", { name: "Миссия пройдена!" }).waitFor();
+  await page.getByRole("heading", { name: "Раунд завершён" }).waitFor();
   return count;
 }
 try {
@@ -383,7 +383,7 @@ try {
   check(
     "Legacy results remain readable",
     (await legacy
-      .getByRole("heading", { name: "Mission complete!" })
+      .getByRole("heading", { name: "Round complete" })
       .isVisible()) &&
       (await legacy.locator(".practice-feedback").count()) === 0,
   );

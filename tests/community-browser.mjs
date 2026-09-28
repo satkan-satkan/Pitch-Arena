@@ -49,7 +49,10 @@ try {
     (await page.locator(".sidebar").count()) === 0,
   );
   mkdirSync("artifacts", { recursive: true });
-  await page.screenshot({ path: "artifacts/v6-landing.png", fullPage: true });
+  await page.screenshot({
+    path: "artifacts/v8-community-landing.png",
+    fullPage: true,
+  });
   await button("Попробовать без регистрации").click();
   check(
     "Guest game has a separate URL",
@@ -57,7 +60,7 @@ try {
   );
   await page.goBack();
   await page.locator(".landing-hero").waitFor();
-  await button("Начать свой путь").click();
+  await button("Занять сцену").click();
   await page
     .getByRole("heading", { name: "Создать аккаунт", exact: true })
     .waitFor();
@@ -162,7 +165,7 @@ try {
       .isVisible(),
   );
   await visitor.screenshot({
-    path: "artifacts/v6-directory.png",
+    path: "artifacts/v8-community-directory.png",
     fullPage: true,
   });
   await visitor
@@ -201,7 +204,10 @@ try {
     "Owner can withdraw the public listing",
     (await f.request("/startups")).data.total === 0,
   );
-  await page.screenshot({ path: "artifacts/v6-workspace.png", fullPage: true });
+  await page.screenshot({
+    path: "artifacts/v8-community-workspace.png",
+    fullPage: true,
+  });
   await visitor.goto(f.origin);
   await visitor.setViewportSize({ width: 390, height: 844 });
   await visitor.locator(".landing-hero").waitFor();
@@ -212,7 +218,7 @@ try {
     ),
   );
   await visitor.screenshot({
-    path: "artifacts/v6-landing-mobile.png",
+    path: "artifacts/v8-community-landing-mobile.png",
     fullPage: true,
   });
   await button("Switch to English", visitor).click();
@@ -220,8 +226,7 @@ try {
     "Landing supports English",
     await visitor
       .getByRole("heading", {
-        name: "Big ideas start with your voice.",
-        exact: true,
+        name: /You have an idea\.\s*They have\s*questions\./,
       })
       .isVisible(),
   );
@@ -237,7 +242,7 @@ try {
   );
   check("No browser runtime errors", errors.length === 0);
   writeFileSync(
-    "artifacts/v6-verification.json",
+    "artifacts/v8-community-verification.json",
     JSON.stringify(
       { passed: checks.length, checks, errors, liveAI: false },
       null,

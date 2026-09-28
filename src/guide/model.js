@@ -72,7 +72,7 @@ export function guideCue({
   if (phase === "pitch")
     return {
       emotion: "listening",
-      title: ["Я слушаю", "I’m listening"],
+      title: ["Микрофон твой", "The floor is yours"],
       text: [
         "Сейчас твоя сцена. Вопросы будут после питча.",
         "The stage is yours. Questions come after your pitch.",
@@ -135,11 +135,11 @@ export function guideCue({
       emotion: Number.isFinite(score) && score < 50 ? "support" : "celebrate",
       title:
         Number.isFinite(score) && score < 50
-          ? ["Первая опора уже есть", "You have a starting point"]
-          : ["Ты дошёл до результата!", "You made it to the finish!"],
+          ? ["Есть над чем поработать", "There’s work to do"]
+          : ["Раунд завершён.", "Round complete."],
       text: [
-        "Завершённая попытка — уже шаг вперёд. Выбери одну задачу из разбора и попробуй ещё раз.",
-        "A completed attempt is a step forward. Pick one goal from the review and try again.",
+        "Посмотри, какие ответы подкреплены фактами. Выбери один пробел для следующей попытки.",
+        "Check which answers have evidence behind them. Pick one gap to address next time.",
       ],
     };
   return {

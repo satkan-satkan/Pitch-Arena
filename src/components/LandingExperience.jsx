@@ -33,18 +33,18 @@ export default function LandingExperience({ t, onGuide }) {
     <section className="landing-experience" id="experience">
       <div className="landing-section-heading">
         <span className="landing-eyebrow">
-          {t("ПОПРОБУЙ ПРЕДСТАВИТЬ СВОЙ МОМЕНТ", "PICTURE YOUR FIRST MOMENT")}
+          {t("ВНУТРИ СИМУЛЯТОРА", "INSIDE THE SIMULATOR")}
         </span>
         <h2>
           {t(
-            "Не просто рассказать. Быть понятым.",
-            "More than a pitch. A connection.",
+            "«Это платформа на базе ИИ». И что?",
+            "“It’s an AI platform.” And?",
           )}
         </h2>
         <p>
           {t(
-            "От первой фразы до следующей попытки — у каждого шага есть смысл.",
-            "From your first sentence to your next attempt, every step has a purpose.",
+            "Хорошее начало. Теперь объясни, чью проблему ты решаешь.",
+            "A start. Now explain whose problem you solve.",
           )}
         </p>
       </div>
@@ -189,12 +189,12 @@ export default function LandingExperience({ t, onGuide }) {
               emotion={["listening", "thinking", "support"][step]}
             />
             <div>
-              <span>{t("ИСКРА РЯДОМ", "ISKRA IS HERE")}</span>
+              <span>{t("ИСКРА / ЗАМЕТКА", "ISKRA / NOTE")}</span>
               <p>
                 {step === 0
                   ? t(
-                      "Я слушаю. Сейчас главное — твоя история.",
-                      "I’m listening. This moment belongs to your story.",
+                      "Таймер идёт. Начни с проблемы клиента.",
+                      "Clock’s running. Start with the customer’s problem.",
                     )
                   : step === 1
                     ? t(
@@ -202,8 +202,8 @@ export default function LandingExperience({ t, onGuide }) {
                         "You do not have to fix everything. Let’s find one thing to improve.",
                       )
                     : t(
-                        "Неидеальная попытка тоже двигает тебя вперёд.",
-                        "An imperfect attempt still moves you forward.",
+                        "Один конкретный пример убедительнее пяти эпитетов.",
+                        "One concrete example beats five adjectives.",
                       )}
               </p>
             </div>
@@ -214,17 +214,17 @@ export default function LandingExperience({ t, onGuide }) {
         <article className="bento-guide">
           <div>
             <span className="landing-eyebrow">
-              {t("ПРИЯТНО ПОЗНАКОМИТЬСЯ", "NICE TO MEET YOU")}
+              {t("НА СВЯЗИ / ИСКРА", "ON COMMS / ISKRA")}
             </span>
             <h3>
-              {t("Маленькая Искра.", "A little Iskra.")}
+              {t("Твой редактор.", "Your editor.")}
               <br />
-              {t("Большая поддержка.", "A lot of encouragement.")}
+              {t("Без аплодисментов авансом.", "No applause in advance.")}
             </h3>
             <p>
               {t(
-                "Подскажет, когда нужно. Помолчит, когда говоришь ты. И порадуется твоему следующему шагу.",
-                "A tip when you need it. Quiet when you speak. And a little joy for every step forward.",
+                "Следит за этапом, напоминает про факты и помогает разобрать попытку. Во время питча не перебивает.",
+                "Tracks the stage, asks for evidence and helps review your attempt. Stays quiet while you pitch.",
               )}
             </p>
             <div
@@ -253,7 +253,12 @@ export default function LandingExperience({ t, onGuide }) {
           <strong>
             RU <span>/</span> EN
           </strong>
-          <h3>{t("Твой язык. Твой темп.", "Your language. Your pace.")}</h3>
+          <h3>
+            {t(
+              "Суть должна работать на обоих.",
+              "The substance needs to work in both.",
+            )}
+          </h3>
           <p>
             {t(
               "Говори или печатай. Начни без слайдов. Включай подсказки, когда они нужны.",
@@ -264,9 +269,9 @@ export default function LandingExperience({ t, onGuide }) {
         <article className="bento-path">
           <Route size={27} />
           <h3>
-            {t("Сегодня — перед своими.", "Today, friends & family.")}
+            {t("Сначала — перед своими.", "First, friends & family.")}
             <br />
-            {t("Завтра — перед миром.", "Tomorrow, the world.")}
+            {t("Потом вопросы сложнее.", "Then the questions get harder.")}
           </h3>
           <p>
             {t(

@@ -76,6 +76,8 @@ import { api, hydrateSession, sessionClient, errorText } from "./services/api";
 
 import { summarizeScores } from "./practice/engine";
 import { PracticeGoal } from "./components/PracticeFeedback";
+import "./direction.css";
+
 const seedRanking = [
   {
     name: "Lumio",
@@ -823,7 +825,11 @@ function App() {
   };
   const { average } = summarizeScores(history);
   const nav = [
-    { id: "home", icon: Globe2, label: t("Моё приключение", "My adventure") },
+    {
+      id: "home",
+      icon: Globe2,
+      label: t("Комната основателя", "Founder room"),
+    },
     { id: "arenas", icon: Mic, label: t("Карта и арены", "Map & arenas") },
     { id: "investors", icon: Users, label: t("Инвесторы", "Investors") },
     {
@@ -955,8 +961,8 @@ function App() {
             <strong>{t("Путь основателя", "Founder journey")}</strong>
             <span>
               {t(
-                "Сезон 01 · От идеи к единорогу",
-                "Season 01 · Becoming a unicorn",
+                "Сезон 01 · До первого чека",
+                "Season 01 · Before the first check",
               )}
             </span>
           </div>
@@ -1031,7 +1037,7 @@ function App() {
               </strong>
               <span>
                 {workspace.account
-                  ? t("Будущий единорог", "Future unicorn")
+                  ? t("Основатель", "Founder")
                   : t("Прогресс в этом браузере", "Progress in this browser")}
               </span>
             </div>
@@ -1182,19 +1188,19 @@ function App() {
                 <div>
                   <div className="eyebrow">
                     {t(
-                      "СЕЗОН 01 · ПРИКЛЮЧЕНИЕ ОСНОВАТЕЛЯ",
-                      "SEASON 01 · A FOUNDER’S ADVENTURE",
+                      "СЕЗОН 01 · ДО ПЕРВОГО ЧЕКА",
+                      "SEASON 01 · BEFORE THE FIRST CHECK",
                     )}
                     <span className="tiny-spark">✧</span>
                   </div>
                   <h1>
-                    {t("От идеи до единорога.", "From idea to unicorn.")}{" "}
+                    {t("Твой следующий раунд.", "Your next round.")}{" "}
                     <span className="wave">✺</span>
                   </h1>
                   <p>
                     {t(
-                      "Открывай мир, проходи арены и превращай смелость в опыт.",
-                      "Explore the world, take on arenas, and turn courage into experience.",
+                      "Проверь аргументы здесь. На настоящей встрече будет меньше дублей.",
+                      "Test your case here. The real meeting comes with fewer retakes.",
                     )}
                   </p>
                 </div>
@@ -1219,17 +1225,20 @@ function App() {
                   <div className="hero-content">
                     <div className="hero-pill">
                       <span />{" "}
-                      {t("СЛЕДУЮЩАЯ МИССИЯ ЖДЁТ", "YOUR NEXT MISSION AWAITS")}
+                      {t(
+                        "ПОВЕСТКА: ТВОЙ СТАРТАП",
+                        "ON THE AGENDA: YOUR STARTUP",
+                      )}
                     </div>
                     <h2>
-                      {t("Большая идея.", "One big idea.")}
+                      {t("Хороший слайд.", "Nice slide.")}
                       <br />
-                      {t("Большое приключение.", "A bigger adventure.")}
+                      {t("А бизнес где?", "Where’s the business?")}
                     </h2>
                     <p>
                       {t(
-                        "От разговора на кухне до сделки с инвестором.\nРепетируй здесь. Удивляй в реальности.",
-                        "From a kitchen conversation to your first investment.\nPractice here. Make an impression out there.",
+                        "Рынок, спрос, модель заработка.\nОтрепетируй ответы, прежде чем они понадобятся.",
+                        "Market, demand, business model.\nRehearse the answers before you need them.",
                       )}
                     </p>
                     <button
@@ -1237,8 +1246,8 @@ function App() {
                       onClick={() => setSelected(nextArena(history, arenas))}
                     >
                       {history.length
-                        ? t("Продолжить путь", "Continue journey")
-                        : t("Начать приключение", "Start my adventure")}
+                        ? t("Продолжить тренировку", "Continue practice")
+                        : t("Начать раунд", "Start a round")}
                       <ArrowUpRight size={18} />
                     </button>
                     <div className="hero-footnote">
@@ -1249,14 +1258,22 @@ function App() {
                       </span>
                       <span>
                         {t(
-                          "Без риска. С настоящим прогрессом.",
-                          "Zero pressure. Real progress.",
+                          "Симуляция встречи. Настоящая подготовка.",
+                          "Simulated meeting. Real preparation.",
                         )}
                       </span>
                     </div>
                   </div>
-                  <ArenaArt />
-                  <div className="hero-corner">PRACTICE MAKES PROGRESS ↗</div>
+                  <div className="round-poster" aria-hidden="true">
+                    <span>PITCH / REPEAT</span>
+                    <strong>?</strong>
+                    <small>
+                      THE DECK IS NOT
+                      <br />
+                      THE BUSINESS.
+                    </small>
+                  </div>
+                  <div className="hero-corner">DEMO DAY STARTS HERE ↗</div>
                 </div>
                 <div className="progress-card">
                   <div className="card-topline">
@@ -1279,7 +1296,7 @@ function App() {
                     </div>
                     <h3>
                       {history.length >= 5
-                        ? t("На пути к звёздам", "Rising star")
+                        ? t("Есть опыт выступлений", "Stage experience")
                         : t("Начинающий основатель", "Aspiring founder")}
                     </h3>
                     <p>
@@ -1337,7 +1354,9 @@ function App() {
               />
               <div className="section-heading">
                 <div className="section-title">
-                  <h2>{t("Карта твоего приключения", "Your adventure map")}</h2>
+                  <h2>
+                    {t("Выбери следующую комнату", "Choose your next room")}
+                  </h2>
                   <span className="count-badge">{arenas.length}</span>
                 </div>
                 <button className="text-button" onClick={() => go("arenas")}>
@@ -1414,7 +1433,7 @@ function App() {
                   <div className="section-heading">
                     <div className="section-title">
                       <Trophy size={17} />
-                      <h2>{t("На пути к единорогу", "The next unicorns")}</h2>
+                      <h2>{t("На радаре", "On the radar")}</h2>
                     </div>
                     <span className="week-badge">{t("Демо", "Demo")}</span>
                   </div>

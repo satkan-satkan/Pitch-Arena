@@ -5,10 +5,10 @@
 }
 .experience-window {
   margin-top: 40px;
-  border: 1px solid #dfd3ed;
+  border: 1px solid #dfded5;
   border-radius: 22px;
   background: #fff;
-  box-shadow: 0 20px 75px #7257950c;
+  box-shadow: 0 20px 75px #454d400c;
   overflow: hidden;
   position: relative;
 }
@@ -17,9 +17,9 @@
   align-items: center;
   gap: 16px;
   padding: 17px 23px;
-  border-bottom: 1px solid #eee7f5;
-  background: #fdfbff;
-  color: #ac9bb8;
+  border-bottom: 1px solid #f1f0e9;
+  background: #faf9f5;
+  color: #888e80;
   font-size: 10px;
 }
 .experience-toolbar > div {
@@ -30,7 +30,7 @@
   width: 6px;
   height: 6px;
   border-radius: 50%;
-  background: #e1d4ed;
+  background: #dfded5;
 }
 .experience-toolbar > small {
   margin-left: auto;
@@ -41,13 +41,13 @@
   display: flex;
   gap: 5px;
   padding: 18px 22px 0;
-  border-bottom: 1px solid #eee7f5;
+  border-bottom: 1px solid #f1f0e9;
 }
 .experience-tabs button {
   border: 0;
   border-bottom: 2px solid transparent;
   background: transparent;
-  color: #a28eaf;
+  color: #888e80;
   padding: 12px 18px 16px;
   cursor: pointer;
   font: inherit;
@@ -59,11 +59,11 @@
 .experience-tabs button > span {
   font-size: 9px;
   letter-spacing: 1px;
-  color: #c3b1d0;
+  color: #b6b7aa;
 }
 .experience-tabs button[aria-selected="true"] {
-  color: #8655b9;
-  border-color: #a47bd0;
+  color: #666e5e;
+  border-color: #888e80;
 }
 .experience-content {
   display: grid;
@@ -79,7 +79,7 @@
   display: block;
   letter-spacing: 1.6px;
   font-size: 8px;
-  color: #b7a4c3;
+  color: #888e80;
   margin-bottom: 20px;
 }
 .experience-demo h3 {
@@ -92,29 +92,29 @@
 .experience-demo blockquote {
   font-size: 18px;
   line-height: 1.8;
-  color: #8c719e;
+  color: #666e5e;
   margin: 0;
 }
 .experience-clock {
   display: flex;
   align-items: center;
   gap: 10px;
-  color: #a899b1;
+  color: #888e80;
   font-size: 10px;
 }
 .experience-clock > span {
   font-size: 18px;
-  color: #776084;
+  color: #454d40;
   font-variant-numeric: tabular-nums;
 }
 .experience-clock > svg {
-  color: #ae92ce;
+  color: #888e80;
 }
 .experience-clock > i {
   width: 4px;
   height: 4px;
   border-radius: 50%;
-  background: #baa2cf;
+  background: #b6b7aa;
 }
 .experience-wave {
   display: flex;
@@ -126,7 +126,7 @@
 .experience-wave i {
   width: 4px;
   border-radius: 10px;
-  background: linear-gradient(#b798d9, #e7dbf3);
+  background: linear-gradient(#b6b7aa, #dfded5);
 }
 .experience-coach {
   display: flex;
@@ -134,8 +134,8 @@
   justify-content: center;
   flex-direction: column;
   padding: 30px;
-  background: radial-gradient(ellipse at 50% 25%, #eee4f8, transparent 75%);
-  border-left: 1px solid #f1e9f6;
+  background: radial-gradient(ellipse at 50% 25%, #f1f0e9, transparent 75%);
+  border-left: 1px solid #f1f0e9;
 }
 .experience-coach .guide-portrait {
   width: 205px;
@@ -148,11 +148,11 @@
 .experience-coach span {
   font-size: 8px;
   letter-spacing: 1.7px;
-  color: #aa8fbe;
+  color: #888e80;
 }
 .experience-coach p {
   font-size: 12px;
-  color: #9b83ab;
+  color: #666e5e;
   line-height: 1.8;
   margin: 12px 0 0;
 }
@@ -177,21 +177,21 @@
   line-height: 1.6;
 }
 .experience-evidence.missing {
-  border-color: #ece2f4;
-  background: #fcfaff;
+  border-color: #f1f0e9;
+  background: #faf9f5;
 }
 .experience-evidence.missing span,
 .experience-evidence.missing p {
-  color: #a185b7;
+  color: #888e80;
 }
 .experience-demo > small {
   font-size: 9px;
-  color: #b8a8c4;
+  color: #888e80;
   display: block;
   margin-top: 17px;
 }
 .experience-demo > p {
-  color: #93809f;
+  color: #666e5e;
   font-size: 14px;
   line-height: 1.8;
   max-width: 430px;
@@ -200,8 +200,8 @@
 .next-step-badge {
   font-size: 8px;
   letter-spacing: 1.3px;
-  color: #a385b8;
-  border: 1px solid #eadef4;
+  color: #888e80;
+  border: 1px solid #f1f0e9;
   border-radius: 5px;
   padding: 7px 9px;
   display: inline-flex;
@@ -215,14 +215,14 @@
 .experience-bento article {
   border-radius: 22px;
   padding: 32px;
-  border: 1px solid #e7dcef;
+  border: 1px solid #dfded5;
   min-width: 0;
 }
 .bento-guide {
   grid-row: span 2;
   display: flex;
   flex-direction: column;
-  background: linear-gradient(145deg, #f8f2fe, #eee3f9);
+  background: linear-gradient(145deg, #faf9f5, #f1f0e9);
   position: relative;
   overflow: hidden;
   min-height: 505px;
@@ -240,7 +240,7 @@
 }
 .bento-guide p {
   font-size: 13px;
-  color: #9982aa;
+  color: #666e5e;
   line-height: 1.8;
 }
 .bento-guide > .guide-portrait {
@@ -260,45 +260,45 @@
 }
 .emotion-picker button {
   padding: 6px 9px;
-  border: 1px solid #ddcce9;
+  border: 1px solid #dfded5;
   border-radius: 7px;
   background: #ffffff66;
-  color: #a58bb7;
+  color: #888e80;
   cursor: pointer;
   font: inherit;
   font-size: 9px;
 }
 .emotion-picker button[aria-pressed="true"] {
-  background: #9974bd;
-  border-color: #9974bd;
+  background: #666e5e;
+  border-color: #666e5e;
   color: white;
 }
 .bento-guide .ready-text-button {
   display: flex;
   align-items: center;
   gap: 8px;
-  color: #8c66ab;
+  color: #666e5e;
   font-size: 11px;
 }
 .bento-language {
-  background: #fffeff;
+  background: #faf9f5;
   display: flex;
   flex-direction: column;
   align-items: flex-start;
   justify-content: center;
 }
 .bento-language > svg {
-  color: #a989c5;
+  color: #888e80;
 }
 .bento-language > strong {
   font-size: 34px;
   letter-spacing: -1px;
   margin: 18px 0 6px;
-  color: #786282;
+  color: #454d40;
   font-weight: 500;
 }
 .bento-language > strong span {
-  color: #e0d1eb;
+  color: #dfded5;
 }
 .bento-language h3 {
   font-size: 20px;
@@ -308,17 +308,17 @@
 .bento-language p,
 .bento-path p {
   font-size: 12px;
-  color: #a18daa;
+  color: #888e80;
   line-height: 1.8;
   margin: 8px 0 0;
 }
 .bento-path {
-  background: #3e304d;
-  color: #e8daef !important;
-  border-color: #3e304d !important;
+  background: #252b25;
+  color: #dfded5 !important;
+  border-color: #252b25 !important;
 }
 .bento-path > svg {
-  color: #bda1d2;
+  color: #b6b7aa;
 }
 .bento-path h3 {
   font-size: 22px;
@@ -331,16 +331,16 @@
   align-items: center;
   gap: 15px;
   font-size: 12px;
-  color: #bda0d2;
+  color: #b6b7aa;
   margin-top: 27px;
 }
 .bento-path i {
   width: 40px;
-  border-top: 1px dashed #755c87;
+  border-top: 1px dashed #454d40;
 }
 .experience-tabs button:focus-visible,
 .emotion-picker button:focus-visible {
-  outline: 2px solid #a781ca;
+  outline: 2px solid #888e80;
   outline-offset: 3px;
 }
 @media (max-width: 700px) {
@@ -383,7 +383,7 @@
   }
   .experience-coach {
     border-left: 0;
-    border-top: 1px solid #f0e7f6;
+    border-top: 1px solid #f1f0e9;
     flex-direction: row;
     padding: 10px 22px;
     gap: 10px;

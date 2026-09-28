@@ -279,7 +279,7 @@ try {
         .click();
   }
   await page
-    .getByRole("heading", { name: "Миссия пройдена!", exact: true })
+    .getByRole("heading", { name: "Раунд завершён", exact: true })
     .waitFor();
   const completed = await boot();
   check(

@@ -11,15 +11,52 @@ const emotions = {
 };
 export function GuidePortrait({ emotion = "welcome", t, className = "" }) {
   const mood = emotions[emotion] ? emotion : "welcome";
+  const levels = {
+    welcome: [18, 30, 46, 30, 18],
+    thinking: [38, 18, 30, 46, 24],
+    listening: [14, 24, 54, 24, 14],
+    support: [24, 24, 24, 24, 24],
+    celebrate: [18, 28, 38, 48, 58],
+  }[mood];
   return (
-    <img
-      className={`guide-portrait ${className}`}
-      src={`/guide/iskra-${mood}.png`}
-      alt={`${t("Искра", "Iskra")} — ${t(...emotions[mood])}`}
-      width="180"
-      height="180"
-      decoding="async"
-    />
+    <svg
+      className={`guide-portrait guide-signal ${className}`}
+      data-emotion={mood}
+      role="img"
+      aria-label={`${t("Искра", "Iskra")} — ${t(...emotions[mood])}`}
+      viewBox="0 0 120 120"
+      width="120"
+      height="120"
+    >
+      <rect x="1" y="1" width="118" height="118" rx="6" fill="currentColor" />
+      <path
+        d="M12 20v-8h8M100 12h8v8M108 100v8h-8M20 108h-8v-8"
+        fill="none"
+        stroke="#747a70"
+      />
+      {levels.map((height, i) => (
+        <rect
+          key={i}
+          x={30 + i * 13}
+          y={60 - height / 2}
+          width="7"
+          height={height}
+          rx="1"
+          fill="#ed784b"
+        />
+      ))}
+      <text
+        x="60"
+        y="99"
+        textAnchor="middle"
+        fill="#d5d8cd"
+        fontFamily="monospace"
+        fontSize="8"
+        letterSpacing="3"
+      >
+        ISKRA
+      </text>
+    </svg>
   );
 }
 export function GuideMessage({
@@ -42,7 +79,7 @@ export function GuideMessage({
       <GuidePortrait emotion={emotion || cue.emotion} t={t} />
       <div className="guide-bubble">
         <span className="guide-name">
-          {t("ИСКРА · ТВОЙ ГИД", "ISKRA · YOUR GUIDE")}
+          {t("ИСКРА / РЕДАКТОР ПИТЧА", "ISKRA / PITCH EDITOR")}
         </span>
         <strong>{title || t(...cue.title)}</strong>
         <p>{text || t(...cue.text)}</p>
@@ -62,14 +99,14 @@ export function GuideHome({ guide, t, onOpen, hasDraft, onResume }) {
         title={
           completed
             ? t(
-                "Первый шаг сделан. Продолжим?",
-                "First step done. What’s next?",
+                "Раунд закрыт. Что улучшаем?",
+                "Round complete. What needs work?",
               )
             : hasDraft
               ? t("Твоя история ждёт продолжения", "Your story is waiting")
               : t(
-                  "Большая сцена начинается с маленького шага",
-                  "A big stage starts with a small step",
+                  "Давай проверим твой питч.",
+                  "Let’s put your pitch to the test.",
                 )
         }
         text={
@@ -84,8 +121,8 @@ export function GuideHome({ guide, t, onOpen, hasDraft, onResume }) {
                   "Resume your saved practice first. We can start a new pitch when you finish this one.",
                 )
               : t(
-                  "Я Искра. Проведу тебя через первый питч: короткая подготовка, минута на сцене и вопросы после выступления.",
-                  "I’m Iskra. I’ll guide your first pitch: a short introduction, one minute on stage and questions afterwards.",
+                  "Я Искра, редактор твоего питча. Начнём с минуты перед «Своими людьми». Затем разберём, где аргумент, а где пока предположение.",
+                  "I’m Iskra, your pitch editor. Start with a minute in front of Friends & family. Then we’ll separate evidence from assumptions.",
                 )
         }
       >
@@ -124,8 +161,8 @@ const intro = [
     emotion: "welcome",
     title: ["Давай познакомимся", "Let’s meet"],
     text: [
-      "Я Искра. Здесь можно репетировать, ошибаться и пробовать снова. Вместе пройдём одну настоящую тренировку перед «Своими людьми».",
-      "I’m Iskra. This is a place to rehearse, make mistakes and try again. We’ll complete a real practice with Friends & family.",
+      "Я Искра. Помогу собрать питч, который выдержит уточняющий вопрос. Начнём с тренировки перед «Своими людьми».",
+      "I’m Iskra. Let’s build a pitch that survives a follow-up question. We’ll start with Friends & family.",
     ],
     task: [
       "Твоя цель — понятно объяснить идею, а не впечатлить сложными словами.",
@@ -178,12 +215,7 @@ export function GuideIntro({
         <div className="guide-intro-art">
           <span>✦</span>
           <GuidePortrait emotion={card.emotion} t={t} />
-          <small>
-            {t(
-              "ТВОЙ СПУТНИК НА ПУТИ ОСНОВАТЕЛЯ",
-              "YOUR COMPANION ON THE FOUNDER JOURNEY",
-            )}
-          </small>
+          <small>{t("РЕДАКТОР / НА СВЯЗИ", "EDITOR / ON COMMS")}</small>
         </div>
         <div className="guide-intro-copy">
           <span className="eyebrow">
