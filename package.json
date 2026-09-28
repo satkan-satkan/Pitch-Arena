@@ -8,7 +8,12 @@
     "build": "vite build",
     "preview": "vite preview --host 0.0.0.0",
     "test": "node --test tests/*.test.js",
-    "test:browser": "node tests/browser-smoke.mjs"
+    "test:browser": "node tests/browser-smoke.mjs",
+    "dev:all": "node scripts/dev.mjs",
+    "dev:server": "node --env-file-if-exists=.env server/index.js",
+    "start": "node --env-file-if-exists=.env server/index.js",
+    "audio:prepare": "node scripts/prepare-audio.mjs",
+    "test:workspace": "node tests/workspace-browser.mjs"
   },
   "dependencies": {
     "d3-geo": "^3.1.1",
@@ -16,12 +21,17 @@
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
     "topojson-client": "^3.1.0",
-    "world-atlas": "^2.0.2"
+    "world-atlas": "^2.0.2",
+    "zod": "^4.6.5"
   },
   "devDependencies": {
     "@vitejs/plugin-react": "^4.4.0",
+    "ffmpeg-static": "^5.3.0",
     "playwright": "^1.63.0",
     "prettier": "^3.9.9",
     "vite": "^6.3.0"
+  },
+  "engines": {
+    "node": ">=24"
   }
 }

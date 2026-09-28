@@ -185,7 +185,9 @@ try {
   await page.clock.resume();
   check(
     "Timer stops recording and exposes the audio clip",
-    (await page.locator("audio").getAttribute("src")).startsWith("blob:"),
+    (
+      await page.locator(".audio-playback audio").getAttribute("src")
+    ).startsWith("blob:"),
   );
   check(
     "Microphone tracks released",

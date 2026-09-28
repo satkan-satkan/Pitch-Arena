@@ -63,6 +63,11 @@ import {
 import { JourneyMap, QuestStrip, TrophyShelf } from "./JourneyMap";
 import PitchRoom from "./PitchRoom";
 import Results from "./components/Results";
+import BackgroundMusic from "./components/BackgroundMusic";
+import AccountPanel from "./components/AccountPanel";
+import useWorkspace from "./hooks/useWorkspace";
+import { api, hydrateSession, sessionClient, errorText } from "./services/api";
+
 import { summarizeScores } from "./practice/engine";
 import { PracticeGoal } from "./components/PracticeFeedback";
 const seedRanking = [
@@ -508,7 +513,11 @@ function App() {
   const [region, setRegion] = useState("all");
   const [difficulty, setDifficulty] = useState("all");
   const [search, setSearch] = useState("");
-  const [profile, setProfile] = useState(() =>
+  const workspace = useWorkspace();
+  const [accountOpen, setAccountOpen] = useState(false);
+  const [launchBusy, setLaunchBusy] = useState(false);
+  const [guestDraft, setGuestDraft] = useState(() => read("pa-draft", null));
+  const [guestProfile, setGuestProfile] = useState(() =>
     read("pa-profile", {
       name: "Александр",
       startup: "Мой стартап",
@@ -516,7 +525,29 @@ function App() {
       bio: "",
     }),
   );
-  const [history, setHistory] = useState(() => read("pa-history", []));
+  const [guestHistory, setGuestHistory] = useState(() =>
+    read("pa-history", []),
+  );
+  const profile = workspace.account?.profile || guestProfile;
+  const history = workspace.account ? workspace.history : guestHistory;
+  const activeProject = workspace.projects.find(
+    (p) => p.id === workspace.activeProjectId,
+  );
+  const savedDraft = workspace.account ? workspace.draft : guestDraft;
+  const setProfile = async (next) => {
+    if (!workspace.account) {
+      setGuestProfile(next);
+      return true;
+    }
+    try {
+      await api("/profile", { method: "PUT", data: next });
+      workspace.setAccount((user) => ({ ...user, profile: next }));
+      return true;
+    } catch (error) {
+      setToast(errorText(error, t));
+      return false;
+    }
+  };
   const [selected, setSelected] = useState(null);
   const [retry, setRetry] = useState(null);
   const [session, setSession] = useState(null);
@@ -529,12 +560,12 @@ function App() {
     document.documentElement.lang = lang;
   }, [lang]);
   useEffect(
-    () => localStorage.setItem("pa-profile", JSON.stringify(profile)),
-    [profile],
+    () => localStorage.setItem("pa-profile", JSON.stringify(guestProfile)),
+    [guestProfile],
   );
   useEffect(
-    () => localStorage.setItem("pa-history", JSON.stringify(history)),
-    [history],
+    () => localStorage.setItem("pa-history", JSON.stringify(guestHistory)),
+    [guestHistory],
   );
   useEffect(() => {
     if (toast) {
@@ -565,14 +596,156 @@ function App() {
     const prior = medalsFor(history)
       .filter((m) => m.earned)
       .map((m) => m.id);
-    const record = { ...data, id: Date.now(), date: new Date().toISOString() };
-    record.newMedals = medalsFor([record, ...history]).filter(
-      (m) => m.earned && !prior.includes(m.id),
-    );
-    setHistory((h) => [record, ...h]);
+    const record = data.serverVerified
+      ? data
+      : {
+          ...data,
+          id: data.id || crypto.randomUUID(),
+          date: new Date().toISOString(),
+        };
+    if (!data.serverVerified)
+      record.newMedals = medalsFor([record, ...history]).filter(
+        (m) => m.earned && !prior.includes(m.id),
+      );
+    if (workspace.account) {
+      workspace.setHistory((h) => [
+        record,
+        ...h.filter((r) => r.id !== record.id),
+      ]);
+      workspace.setDraft(null);
+      localStorage.removeItem(`pa-draft:${workspace.account.id}`);
+    } else {
+      setGuestHistory((h) => [record, ...h.filter((r) => r.id !== record.id)]);
+      setGuestDraft(null);
+      localStorage.removeItem("pa-draft");
+    }
     setSession(null);
     setResult(record);
     setPage("history");
+  };
+  const draftKey = workspace.account
+    ? `pa-draft:${workspace.account.id}`
+    : "pa-draft";
+  const launch = async (data) => {
+    setLaunchBusy(true);
+    try {
+      if (savedDraft) throw new Error("DRAFT_EXISTS");
+      if (workspace.account) {
+        let projectId = data.projectId;
+        if (!projectId) {
+          const p = await api("/projects", {
+            method: "POST",
+            data: { name: data.startup, industry: profile.industry },
+          });
+          projectId = p.id;
+        }
+        const snap = await api("/sessions", {
+          method: "POST",
+          data: {
+            projectId,
+            arenaId: data.arena.id,
+            ask: data.ask,
+            pitchSeconds: data.pitchSeconds,
+            language: lang,
+            spokenQuestions: data.spokenQuestions,
+            useAI: data.useAI,
+            practiceGoal: data.practiceGoal || null,
+          },
+        });
+        const cloud = sessionClient(snap);
+        try {
+          for (const file of data.files)
+            await cloud.call("assets", file, "POST", {
+              raw: true,
+              headers: {
+                "If-Match": String(cloud.snapshot.revision),
+                "Content-Type": file.type,
+                "X-File-Name": encodeURIComponent(file.name),
+              },
+            });
+        } catch (error) {
+          workspace.setDraft(cloud.snapshot);
+          throw error;
+        }
+        workspace.setDraft(cloud.snapshot);
+        setSession({
+          ...data,
+          id: snap.id,
+          projectId,
+          cloud,
+          draftKey,
+          restored: cloud.snapshot.state,
+        });
+      } else setSession({ ...data, id: crypto.randomUUID(), draftKey });
+      setSelected(null);
+      setRetry(null);
+    } finally {
+      setLaunchBusy(false);
+    }
+  };
+  const resumeDraft = async () => {
+    setLaunchBusy(true);
+    try {
+      if (workspace.account) {
+        const snap = await api(`/sessions/${savedDraft.id}`);
+        const data = await hydrateSession(snap);
+        const local = read(draftKey, null);
+        if (local?.id === snap.id && local.revision === snap.revision) {
+          data.restored = {
+            ...data.restored,
+            pitch: local.state.pitch,
+            answer: local.state.answer,
+            slide: local.state.slide,
+          };
+        }
+        setLang(snap.config.language);
+        setSession({
+          ...data,
+          arena: arenas.find((a) => a.id === data.arenaId),
+          draftKey,
+          resuming: true,
+        });
+      } else {
+        setLang(savedDraft.config.language || lang);
+        setSession({
+          ...savedDraft.config,
+          id: savedDraft.id,
+          arena: arenas.find((a) => a.id === savedDraft.config.arenaId),
+          files: [],
+          restored: savedDraft.state,
+          startedAt: savedDraft.startedAt,
+          deadline: savedDraft.deadline,
+          draftKey,
+          resuming: true,
+        });
+      }
+    } catch (error) {
+      setToast(errorText(error, t));
+    } finally {
+      setLaunchBusy(false);
+    }
+  };
+  const discardDraft = async () => {
+    try {
+      if (workspace.account) {
+        const snap = await api(`/sessions/${savedDraft.id}`);
+        await sessionClient(snap).call("", {}, "DELETE");
+        workspace.setDraft(null);
+      } else setGuestDraft(null);
+      localStorage.removeItem(draftKey);
+    } catch (error) {
+      setToast(errorText(error, t));
+    }
+  };
+  const leaveSession = async () => {
+    setSession(null);
+    if (workspace.account) {
+      try {
+        await workspace.refresh();
+      } catch (error) {
+        setToast(errorText(error, t));
+      }
+    } else setGuestDraft(read("pa-draft", null));
   };
   const { average } = summarizeScores(history);
   const nav = [
@@ -701,6 +874,15 @@ function App() {
             </strong>
           </div>
           <div className="topbar-actions">
+            <BackgroundMusic blocked={Boolean(session)} t={t} />
+            <button
+              className="account-entry"
+              onClick={() => setAccountOpen(true)}
+            >
+              {workspace.account
+                ? t("Аккаунт", "Account")
+                : t("Войти", "Sign in")}
+            </button>
             <span className="status-dot" />
             <span className="practice-mode">
               {`${totalXP(history)} XP · ${t("Уровень", "Level")} ${Math.floor(totalXP(history) / 500) + 1}`}
@@ -760,6 +942,33 @@ function App() {
           </div>
         </header>
         <main>
+          {savedDraft && !session && (
+            <section className="resume-banner">
+              <div>
+                <strong>
+                  {t("Продолжим тренировку?", "Continue your practice?")}
+                </strong>
+                <p>
+                  {savedDraft.config?.startup} ·{" "}
+                  {t(
+                    "Текст и этап сохранены. Таймер идёт по реальному времени.",
+                    "Your text and stage are saved. The timer follows real time.",
+                  )}
+                </p>
+              </div>
+              <button
+                className="button dark"
+                disabled={launchBusy}
+                onClick={resumeDraft}
+              >
+                {t("Продолжить питч", "Resume pitch")}
+              </button>
+              <button className="button white" onClick={discardDraft}>
+                {t("Удалить черновик", "Discard draft")}
+              </button>
+            </section>
+          )}
+
           {page === "home" && (
             <>
               <div className="page-heading">
@@ -1332,8 +1541,8 @@ function App() {
                 )}
                 title={t("Большие идеи наверху", "Big ideas rise to the top")}
                 subtitle={t(
-                  "Пример будущего рейтинга сообщества. Твой прогресс пока сохраняется только на этом устройстве.",
-                  "A preview of the community leaderboard. Your progress is currently saved on this device only.",
+                  "Пример будущего рейтинга сообщества. Личные результаты находятся в разделе «Мои выступления».",
+                  "A preview of the community leaderboard. Your personal results are in My pitches.",
                 )}
               />
               <div className="leaderboard-banner">
@@ -1422,6 +1631,8 @@ function App() {
                 )}
               />
               <ProfileForm
+                key={workspace.account?.id || "guest"}
+                cloud={!!workspace.account}
                 level={Math.floor(totalXP(history) / 500) + 1}
                 {...{ profile, setProfile, t }}
                 onSave={() => setToast(t("Профиль сохранён", "Profile saved"))}
@@ -1433,23 +1644,27 @@ function App() {
       {selected && (
         <Setup
           arena={selected}
-          {...{ t, pick, profile, retry }}
+          {...{ t, pick, retry, launchBusy }}
+          profile={{
+            ...profile,
+            startup: retry?.startup || activeProject?.name || profile.startup,
+          }}
+          account={workspace.account}
+          projects={workspace.projects}
+          activeProjectId={retry?.projectId || workspace.activeProjectId}
+          aiReady={workspace.aiReady}
           onClose={() => {
             setSelected(null);
             setRetry(null);
           }}
-          onStart={(data) => {
-            setSession(data);
-            setSelected(null);
-            setRetry(null);
-          }}
+          onStart={launch}
         />
       )}
       {session && (
         <PitchRoom
           data={session}
           {...{ t, pick, lang, Brand, Modal, CameraPreview }}
-          onClose={() => setSession(null)}
+          onClose={leaveSession}
           onComplete={complete}
         />
       )}
@@ -1469,6 +1684,17 @@ function App() {
               arenas.find((a) => a.id === result.arenaId) || arenas[0],
             );
           }}
+        />
+      )}
+      {accountOpen && (
+        <AccountPanel
+          account={workspace.account}
+          projects={workspace.projects}
+          localHistory={guestHistory}
+          {...{ t, Modal }}
+          onClose={() => setAccountOpen(false)}
+          onRefresh={workspace.refresh}
+          onProject={(project) => workspace.setActiveProjectId(project.id)}
         />
       )}
       {help && (
@@ -1526,8 +1752,8 @@ function App() {
           </div>
           <p className="info-note">
             {t(
-              "Это локальный прототип: вопросы и оценка работают по правилам, без подключения ИИ. Аудио не отправляется на наш сервер; распознавание речи может обрабатываться сервисом браузера.",
-              "This is a local prototype: questions and scoring use rules, without an AI connection. Audio is not sent to our server; speech recognition may be processed by your browser’s service.",
+              "Баллы считаются по открытым правилам. В аккаунте можно включить ИИ-разбор: текст и слайды будут отправлены провайдеру ИИ. Аудио не отправляется на наш сервер; распознавание речи может обрабатываться сервисом браузера.",
+              "Scores use transparent rules. Account users can enable AI feedback, which sends text and slides to the AI provider. Audio is not sent to our server; speech recognition may be processed by your browser’s service.",
             )}
           </p>
           <button
@@ -1690,15 +1916,17 @@ function Modal({ children, onClose, label, wide = false }) {
     </div>
   );
 }
-function ProfileForm({ profile, setProfile, t, onSave, level }) {
+function ProfileForm({ profile, setProfile, t, onSave, level, cloud }) {
   const [draft, setDraft] = useState(profile);
+  const [saving, setSaving] = useState(false);
   return (
     <form
       className="profile-form"
-      onSubmit={(e) => {
+      onSubmit={async (e) => {
         e.preventDefault();
-        setProfile(draft);
-        onSave();
+        setSaving(true);
+        if (await setProfile(draft)) onSave();
+        setSaving(false);
       }}
     >
       <div className="profile-form-top">
@@ -1711,7 +1939,9 @@ function ProfileForm({ profile, setProfile, t, onSave, level }) {
         </div>
         <span className="profile-local">
           <ShieldCheck size={14} />
-          {t("Локальный профиль", "Local profile")}
+          {cloud
+            ? t("Профиль аккаунта", "Account profile")
+            : t("Гостевой профиль", "Guest profile")}
         </span>
       </div>
       <div className="form-grid">
@@ -1769,11 +1999,15 @@ function ProfileForm({ profile, setProfile, t, onSave, level }) {
       <div className="form-footer">
         <span>
           {t(
-            "Данные сохраняются в этом браузере",
-            "Your data is saved in this browser",
+            cloud
+              ? "Данные сохраняются в аккаунте"
+              : "Данные сохраняются в этом браузере",
+            cloud
+              ? "Your data is saved in your account"
+              : "Your data is saved in this browser",
           )}
         </span>
-        <button className="button dark" type="submit">
+        <button className="button dark" type="submit" disabled={saving}>
           {t("Сохранить профиль", "Save profile")}
           <Check size={17} />
         </button>
@@ -1781,7 +2015,24 @@ function ProfileForm({ profile, setProfile, t, onSave, level }) {
     </form>
   );
 }
-function Setup({ arena, t, pick, profile, onClose, onStart, retry }) {
+function Setup({
+  arena,
+  t,
+  pick,
+  profile,
+  onClose,
+  onStart,
+  retry,
+  account,
+  projects,
+  activeProjectId,
+  aiReady,
+  launchBusy,
+}) {
+  const [projectId, setProjectId] = useState(
+    account ? activeProjectId || "" : "",
+  );
+  const [useAI, setUseAI] = useState(false);
   const [startup, setStartup] = useState(retry?.startup || profile.startup);
   const [ask, setAsk] = useState(String(retry?.ask ?? 100000));
   const [pitchSeconds, setPitchSeconds] = useState(
@@ -1893,22 +2144,78 @@ function Setup({ arena, t, pick, profile, onClose, onStart, retry }) {
         ))}
       </div>
       <form
-        onSubmit={(e) => {
+        onSubmit={async (e) => {
           e.preventDefault();
-          onStart({
-            arena,
-            startup,
-            ask: Number(ask),
-            files,
-            pitchSeconds: Number(pitchSeconds),
-            spokenQuestions,
-            practiceGoal:
-              retry && startup.trim() === retry.startup.trim()
-                ? retry.nextGoal
-                : null,
-          });
+          setError("");
+          try {
+            await onStart({
+              projectId,
+              useAI,
+              arena,
+              startup,
+              ask: Number(ask),
+              files,
+              pitchSeconds: Number(pitchSeconds),
+              spokenQuestions,
+              practiceGoal:
+                retry && startup.trim() === retry.startup.trim()
+                  ? retry.nextGoal
+                  : null,
+            });
+          } catch (error) {
+            setError(errorText(error, t));
+          }
         }}
       >
+        {account && (
+          <label>
+            {t("Проект", "Project")}
+            <select
+              value={projectId}
+              onChange={(e) => {
+                setProjectId(e.target.value);
+                const p = projects.find((p) => p.id === e.target.value);
+                if (p) setStartup(p.name);
+              }}
+            >
+              <option value="">
+                {t("Создать новый проект", "Create a new project")}
+              </option>
+              {projects.map((p) => (
+                <option key={p.id} value={p.id}>
+                  {p.name}
+                </option>
+              ))}
+            </select>
+          </label>
+        )}
+        <div className="ai-choice">
+          <label>
+            <input
+              type="checkbox"
+              checked={useAI}
+              disabled={!account || !aiReady}
+              onChange={(e) => setUseAI(e.target.checked)}
+            />
+            {t("Разбор с ИИ-наставником", "Review with AI coach")}
+          </label>
+          <small>
+            {!account
+              ? t(
+                  "Для ИИ и сохранения на сервере войди в аккаунт.",
+                  "Sign in for AI and server saves.",
+                )
+              : !aiReady
+                ? t(
+                    "ИИ ещё не настроен на сервере. Локальная тренировка доступна.",
+                    "AI is not configured on the server yet. Local practice is available.",
+                  )
+                : t(
+                    "При включении текст, ответы и загруженные слайды передаются OpenAI для разбора.",
+                    "When enabled, your text, answers and uploaded slides are sent to OpenAI for review.",
+                  )}
+          </small>
+        </div>
         <div className="pitch-settings">
           <div className="pitch-setting-heading">
             <span>
@@ -1965,6 +2272,7 @@ function Setup({ arena, t, pick, profile, onClose, onStart, retry }) {
               required
               maxLength={60}
               value={startup}
+              readOnly={Boolean(account && projectId)}
               onChange={(e) => setStartup(e.target.value)}
               placeholder="Next big thing"
             />
@@ -2056,8 +2364,12 @@ function Setup({ arena, t, pick, profile, onClose, onStart, retry }) {
           <p>
             {files.length
               ? t(
-                  "Файлы готовы к показу. Анализ содержания слайдов ИИ пока не подключён.",
-                  "Files are ready to present. AI analysis of slide contents is not connected yet.",
+                  useAI
+                    ? "Слайды будут учтены ИИ вместе с текстом выступления."
+                    : "Файлы готовы к показу. Разбор ИИ выключен.",
+                  useAI
+                    ? "AI will review the slides alongside your pitch text."
+                    : "Files are ready to present. AI review is off.",
                 )
               : t(
                   "Нет слайдов? Не проблема. Начни с истории о продукте — мы покажем тренировочный экран.",
@@ -2065,15 +2377,25 @@ function Setup({ arena, t, pick, profile, onClose, onStart, retry }) {
                 )}
           </p>
         </div>
-        <button className="button dark full" type="submit">
-          {t("Войти на арену", "Enter the arena")}
+        <button
+          className="button dark full"
+          type="submit"
+          disabled={launchBusy}
+        >
+          {launchBusy
+            ? t("Сохраняем…", "Saving…")
+            : t("Войти на арену", "Enter the arena")}
           <ArrowUpRight size={18} />
         </button>
         <p className="setup-privacy">
           <ShieldCheck size={13} />
           {t(
-            "Презентация остаётся на твоём устройстве",
-            "Your deck stays on your device",
+            account
+              ? "Презентация сохраняется приватно в твоём аккаунте"
+              : "Презентация остаётся на твоём устройстве",
+            account
+              ? "Your deck is saved privately in your account"
+              : "Your deck stays on your device",
           )}
         </p>
       </form>

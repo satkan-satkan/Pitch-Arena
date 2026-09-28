@@ -1,0 +1,159 @@
+export class ApiError extends Error {
+  constructor(code, status) {
+    super(code);
+    this.status = status;
+  }
+}
+export async function api(
+  path,
+  { method = "GET", data, headers = {}, raw = false } = {},
+) {
+  let response;
+  try {
+    response = await fetch(`/api${path}`, {
+      method,
+      credentials: "same-origin",
+      headers: {
+        ...(data !== undefined && !raw
+          ? { "Content-Type": "application/json" }
+          : {}),
+        ...headers,
+      },
+      body: data === undefined ? undefined : raw ? data : JSON.stringify(data),
+    });
+  } catch {
+    throw new ApiError("SERVER_OFFLINE", 0);
+  }
+  let payload;
+  try {
+    payload = await response.json();
+  } catch {
+    throw new ApiError("SERVER_OFFLINE", response.status);
+  }
+  if (!response.ok)
+    throw new ApiError(payload.error || "SERVER_ERROR", response.status);
+  return payload;
+}
+export function errorText(error, t) {
+  const messages = {
+    SERVER_OFFLINE: [
+      "Сервер недоступен. Проверь соединение и повтори. Текст остаётся на этом устройстве.",
+      "Server unavailable. Check your connection and retry. Text remains on this device.",
+    ],
+    LOGIN_REQUIRED: ["Нужно войти в аккаунт.", "Please sign in."],
+    INVALID_CREDENTIALS: [
+      "Неверный email или пароль.",
+      "Incorrect email or password.",
+    ],
+    EMAIL_IN_USE: [
+      "Этот email уже зарегистрирован.",
+      "This email is already registered.",
+    ],
+    INVALID_INPUT: [
+      "Проверь введённые данные. Пароль — от 12 символов.",
+      "Check your input. Passwords need at least 12 characters.",
+    ],
+    STALE_SESSION: [
+      "Эта тренировка изменена в другой вкладке. Вернись на карту и открой сохранённую версию.",
+      "This practice changed in another tab. Return to the map and reopen the saved version.",
+    ],
+    SESSION_BUSY: [
+      "Сервер обрабатывает тренировку. Повтори через несколько секунд.",
+      "The server is processing this session. Retry in a few seconds.",
+    ],
+    DRAFT_EXISTS: [
+      "Сначала продолжи или удали незавершённую тренировку на главной.",
+      "Resume or discard the unfinished practice on the home screen first.",
+    ],
+    RATE_LIMITED: [
+      "Слишком много запросов. Попробуй позже.",
+      "Too many requests. Please try again later.",
+    ],
+    STORAGE_LIMIT: [
+      "Лимит файлов: 40 МБ на презентацию и 100 МБ на аккаунт.",
+      "File limit: 40 MB per deck and 100 MB per account.",
+    ],
+    INVALID_FILE_CONTENT: [
+      "Файл не соответствует выбранному формату.",
+      "The file contents do not match its format.",
+    ],
+    INCOMPLETE_SESSION: [
+      "Сначала закончи все ответы.",
+      "Finish all answers first.",
+    ],
+  };
+  return t(
+    ...(messages[error.message] || [
+      "Не удалось сохранить действие. Повтори попытку.",
+      "Could not save this action. Please retry.",
+    ]),
+  );
+}
+export function sessionClient(initial) {
+  let snapshot = initial,
+    queue = Promise.resolve();
+  const enqueue = (task) => {
+    const result = queue.catch(() => {}).then(task);
+    queue = result;
+    return result;
+  };
+  return {
+    get snapshot() {
+      return snapshot;
+    },
+    call(action, data = {}, method = "POST", extra = {}) {
+      return enqueue(async () => {
+        const response = await api(
+          `/sessions/${snapshot.id}${action ? `/${action}` : ""}`,
+          {
+            method,
+            data,
+            ...extra,
+            headers: {
+              ...extra.headers,
+              "If-Match": String(snapshot.revision),
+            },
+          },
+        );
+        if (response.revision !== undefined)
+          snapshot = { ...snapshot, ...response };
+        return response;
+      });
+    },
+    save(state) {
+      return this.call(
+        "draft",
+        {
+          phase: state.phase,
+          pitch: state.pitch,
+          answer: state.answer,
+          slide: state.slide,
+          voiceEnabled: state.voiceEnabled,
+          pitchDuration: state.pitchDuration,
+        },
+        "PUT",
+      );
+    },
+  };
+}
+export async function hydrateSession(snapshot) {
+  const files = await Promise.all(
+    snapshot.assets.map(async (asset) => {
+      const response = await fetch(asset.url, { credentials: "same-origin" });
+      if (!response.ok) throw new ApiError("SERVER_OFFLINE", response.status);
+      return new File([await response.blob()], asset.name, {
+        type: asset.type,
+      });
+    }),
+  );
+  return {
+    ...snapshot.config,
+    files,
+    cloud: sessionClient(snapshot),
+    restored: snapshot.state,
+    startedAt: snapshot.startedAt,
+    deadline: snapshot.deadline,
+    id: snapshot.id,
+    projectId: snapshot.projectId,
+  };
+}

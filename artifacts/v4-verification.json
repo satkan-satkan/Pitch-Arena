@@ -1,0 +1,30 @@
+{
+  "passed": 23,
+  "checks": [
+    "Music starts off without autoplay",
+    "Prepared MP3 decodes and plays after user action",
+    "Account registration updates UI",
+    "Saved project is selected",
+    "AI remains disabled without a configured API key",
+    "Music pauses before recording or pitch starts",
+    "Text and private slide saved on server",
+    "Reload offers a draft instead of opening microphone",
+    "Pitch text restored after reload",
+    "Private slides restored after reload",
+    "Autosave does not revert the confirmed debrief",
+    "Q&A resumes on the saved feedback without duplicating an answer",
+    "Server computes one completed result and clears the draft",
+    "Account result never leaks into guest history",
+    "Music resumes in results after leaving practice",
+    "Second browser account sees the same project",
+    "Second browser sees server history",
+    "Account and music controls fit a mobile viewport",
+    "Sign out restores separate guest data",
+    "Guest can resume a local draft",
+    "Discard removes local draft",
+    "Music volume setting survives reload",
+    "No browser runtime errors"
+  ],
+  "errors": [],
+  "aiLiveTested": false
+}

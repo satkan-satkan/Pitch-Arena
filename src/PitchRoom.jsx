@@ -36,6 +36,8 @@ import {
 import { EvidenceChecks, PracticeGoal } from "./components/PracticeFeedback";
 
 import useVoice from "./hooks/useVoice";
+import { errorText } from "./services/api";
+import MentorFeedback from "./components/MentorFeedback";
 
 const formatTime = (seconds) =>
   `${String(Math.floor(seconds / 60)).padStart(2, "0")}:${String(seconds % 60).padStart(2, "0")}`;
@@ -64,20 +66,37 @@ export default function PitchRoom({
   const { arena, startup, ask, files } = data,
     limit = data.pitchSeconds || arena.pitchSeconds || 120,
     panel = panelFor(arena);
-  const [phase, setPhase] = useState("ready"),
-    [remaining, setRemaining] = useState(limit),
-    [pitch, setPitch] = useState(""),
-    [analysis, setAnalysis] = useState(null),
-    [questions, setQuestions] = useState([]),
-    [step, setStep] = useState(0),
-    [answer, setAnswer] = useState(""),
-    [answers, setAnswers] = useState([]),
-    [answerFeedback, setAnswerFeedback] = useState(null),
-    [slide, setSlide] = useState(0),
+  const initial = data.restored || {};
+  const expired =
+    initial.phase === "pitch" && data.deadline && data.deadline <= Date.now();
+  const [phase, setPhase] = useState(
+      expired ? "review" : initial.phase || "ready",
+    ),
+    [remaining, setRemaining] = useState(
+      data.deadline
+        ? Math.max(0, Math.ceil((data.deadline - Date.now()) / 1000))
+        : limit,
+    ),
+    [pitch, setPitch] = useState(initial.pitch ?? ""),
+    [analysis, setAnalysis] = useState(initial.analysis ?? null),
+    [questions, setQuestions] = useState(initial.questions ?? []),
+    [step, setStep] = useState(initial.step ?? 0),
+    [answer, setAnswer] = useState(initial.answer ?? ""),
+    [answers, setAnswers] = useState(initial.answers ?? []),
+    [answerFeedback, setAnswerFeedback] = useState(
+      initial.answerFeedback ?? null,
+    ),
+    [slide, setSlide] = useState(initial.slide ?? 0),
     [busy, setBusy] = useState(false),
     [confirmExit, setConfirmExit] = useState(false),
-    [voiceEnabled, setVoiceEnabled] = useState(data.spokenQuestions ?? true),
+    [voiceEnabled, setVoiceEnabled] = useState(
+      initial.voiceEnabled ?? data.spokenQuestions ?? true,
+    ),
     [speechError, setSpeechError] = useState("");
+  const [mentor, setMentor] = useState(initial.mentor || null),
+    [answerMentor, setAnswerMentor] = useState(initial.answerMentor || null),
+    [syncError, setSyncError] = useState(""),
+    [saveState, setSaveState] = useState("saved");
   const [urls] = useState(() =>
     files.map((f) => ({
       url: URL.createObjectURL(f),
@@ -88,14 +107,129 @@ export default function PitchRoom({
   const phaseRef = useRef(phase),
     pitchRef = useRef(pitch),
     answerRef = useRef(answer),
-    deadline = useRef(null),
-    started = useRef(null),
-    pitchDuration = useRef(0),
+    deadline = useRef(data.deadline || null),
+    started = useRef(data.startedAt || null),
+    pitchDuration = useRef(expired ? limit : initial.pitchDuration || 0),
     transition = useRef(false),
     mounted = useRef(true);
   phaseRef.current = phase;
   pitchRef.current = pitch;
   answerRef.current = answer;
+  const stateRef = useRef(null);
+  stateRef.current = {
+    phase,
+    pitch,
+    analysis,
+    questions,
+    step,
+    answer,
+    answers,
+    answerFeedback,
+    slide,
+    voiceEnabled,
+    mentor,
+    answerMentor,
+    pitchDuration: pitchDuration.current,
+  };
+  const applySnapshot = (snapshot) => {
+    const s = snapshot.state;
+    started.current = snapshot.startedAt;
+    deadline.current = snapshot.deadline;
+    pitchDuration.current = s.pitchDuration;
+    phaseRef.current = s.phase;
+    setPhase(s.phase);
+    pitchRef.current = s.pitch;
+    setPitch(s.pitch);
+    setAnalysis(s.analysis);
+    setQuestions(s.questions);
+    setStep(s.step);
+    answerRef.current = s.answer;
+    setAnswer(s.answer);
+    setAnswers(s.answers);
+    setAnswerFeedback(s.answerFeedback);
+    setMentor(s.mentor);
+    setAnswerMentor(s.answerMentor);
+  };
+  useEffect(() => {
+    if (phase === "completed") return;
+    const cached = {
+      id: data.id,
+      revision: data.cloud?.snapshot.revision,
+      state: stateRef.current,
+      config: {
+        startup,
+        ask,
+        arenaId: arena.id,
+        pitchSeconds: limit,
+        language: lang,
+        spokenQuestions: voiceEnabled,
+        practiceGoal: data.practiceGoal || null,
+      },
+      startedAt: started.current,
+      deadline: deadline.current,
+    };
+    try {
+      localStorage.setItem(data.draftKey || "pa-draft", JSON.stringify(cached));
+    } catch {
+      setSyncError(
+        t(
+          "Не удалось сохранить текст на устройстве.",
+          "Could not save text on this device.",
+        ),
+      );
+    }
+    if (!data.cloud) return;
+    setSaveState("saving");
+    const timer = setTimeout(() => {
+      if (transition.current) return;
+      data.cloud
+        .save(stateRef.current)
+        .then(() => {
+          if (mounted.current) {
+            setSaveState("saved");
+            setSyncError("");
+          }
+        })
+        .catch((error) => {
+          if (mounted.current) {
+            setSaveState("error");
+            setSyncError(errorText(error, t));
+          }
+        });
+    }, 600);
+    return () => clearTimeout(timer);
+  }, [
+    phase,
+    pitch,
+    answer,
+    answers,
+    questions,
+    step,
+    slide,
+    voiceEnabled,
+    answerFeedback,
+    analysis,
+    mentor,
+    answerMentor,
+  ]);
+  const cloudAction = async (action, payload = {}, saveFirst = true) => {
+    if (transition.current) return null;
+    transition.current = true;
+    setBusy(true);
+    setSyncError("");
+    try {
+      if (saveFirst) await data.cloud.save(stateRef.current);
+      const snapshot = await data.cloud.call(action, payload);
+      if (mounted.current && snapshot.state) applySnapshot(snapshot);
+      return snapshot;
+    } catch (error) {
+      if (mounted.current) setSyncError(errorText(error, t));
+      return null;
+    } finally {
+      transition.current = false;
+      if (mounted.current) setBusy(false);
+    }
+  };
   const voice = useVoice(lang, t, (text) => {
     if (phaseRef.current === "pitch") {
       pitchRef.current = `${pitchRef.current} ${text}`.trim();
@@ -158,6 +292,16 @@ export default function PitchRoom({
   const startPitch = async (withMic) => {
     if (busy || voice.pending) return;
     setBusy(true);
+    if (data.cloud) {
+      const snapshot = await cloudAction("start", {}, false);
+      if (!snapshot) {
+        setBusy(false);
+        return;
+      }
+      if (withMic) await voice.start();
+      setBusy(false);
+      return;
+    }
     if (withMic) await voice.start();
     if (!mounted.current) return;
     started.current = Date.now();
@@ -165,8 +309,12 @@ export default function PitchRoom({
     move("START");
     setBusy(false);
   };
-  const review = () => {
+  const review = async () => {
     const text = pitch.trim();
+    if (data.cloud) {
+      await cloudAction("analyze", { pitch: text });
+      return;
+    }
     if (text.split(/\s+/).filter(Boolean).length < 10) return;
     setAnalysis(analyzePitch(text, t));
     setQuestions(createQuestions(text, arena, ask, t));
@@ -216,6 +364,11 @@ export default function PitchRoom({
     await voice.stop();
     if (!mounted.current) return;
     const text = answerRef.current.trim();
+    if (data.cloud) {
+      transition.current = false;
+      await cloudAction("answer", { step, answer: text });
+      return;
+    }
     const report = evaluateAnswer(text, questions[step]);
     setAnswers([...answers, text]);
     // At most one extra question per round. It uses the player's answer verbatim.
@@ -232,8 +385,14 @@ export default function PitchRoom({
     setBusy(false);
     transition.current = false;
   };
-  const advance = () => {
+  const advance = async () => {
     if (transition.current || !answerFeedback) return;
+    if (data.cloud) {
+      const last = step === questions.length - 1;
+      const snapshot = await cloudAction(last ? "complete" : "next", {}, false);
+      if (last && snapshot?.result) onComplete(snapshot.result);
+      return;
+    }
     transition.current = true;
     if (step < questions.length - 1) {
       answerRef.current = "";
@@ -247,6 +406,8 @@ export default function PitchRoom({
     move("COMPLETE");
     onComplete({
       ...evaluation,
+      id: data.id,
+      mentor,
       startup,
       arena: pick(arena.title),
       arenaId: arena.id,
@@ -263,8 +424,12 @@ export default function PitchRoom({
       personaId: arena.personaIds?.length === 1 ? arena.personaIds[0] : null,
     });
   };
-  const startQuestions = () => {
+  const startQuestions = async () => {
     voice.clearError();
+    if (data.cloud) {
+      await cloudAction("next", {}, false);
+      return;
+    }
     move("QUESTIONS");
   };
   const speakerIndex = questions[step]?.speakerIndex ?? 0;
@@ -306,6 +471,55 @@ export default function PitchRoom({
           <X size={21} />
         </button>
       </header>
+      <div className="room-save-status" role="status">
+        {data.cloud
+          ? saveState === "saving"
+            ? t("Сохраняем на сервере…", "Saving to server…")
+            : saveState === "error"
+              ? t(
+                  "Нет соединения · текст на устройстве",
+                  "Offline · text saved on device",
+                )
+              : t("Сохранено в аккаунте", "Saved to account")
+          : t(
+              "Черновик сохраняется на этом устройстве",
+              "Draft saved on this device",
+            )}
+      </div>
+      {syncError && (
+        <div className="room-sync-error" role="alert">
+          {syncError}
+          <button
+            className="button white"
+            disabled={busy}
+            onClick={() =>
+              data.cloud &&
+              data.cloud
+                .save(stateRef.current)
+                .then(() => {
+                  setSyncError("");
+                  setSaveState("saved");
+                })
+                .catch((error) => setSyncError(errorText(error, t)))
+            }
+          >
+            {t("Повторить сохранение", "Retry save")}
+          </button>
+        </div>
+      )}
+      {data.resuming && (
+        <p className="resume-note">
+          {t(
+            "Текст восстановлен. Микрофон включается вручную; прежняя аудиозапись не сохраняется.",
+            "Your text is restored. Turn the microphone on manually; the previous audio recording is not retained.",
+          )}
+          {!data.cloud &&
+            t(
+              " При необходимости загрузи презентацию заново в новой тренировке.",
+              " Reattach slides in a new practice if needed.",
+            )}
+        </p>
+      )}
       <div className="room-phase-bar">
         {[
           [Mic, t("Твой питч", "Your pitch")],
@@ -673,7 +887,7 @@ export default function PitchRoom({
                   pitchRef.current = e.target.value;
                   setPitch(e.target.value);
                 }}
-                maxLength={18000}
+                maxLength={12000}
                 placeholder={t(
                   "Здесь появится твоя речь. Можно также печатать…",
                   "Your speech appears here. You can also type…",
@@ -767,7 +981,7 @@ export default function PitchRoom({
                   pitchRef.current = e.target.value;
                   setPitch(e.target.value);
                 }}
-                maxLength={18000}
+                maxLength={12000}
                 placeholder={t(
                   "Если распознавание не сработало, внеси сюда текст выступления.",
                   "If speech recognition did not work, enter your pitch here.",
@@ -784,15 +998,19 @@ export default function PitchRoom({
               <button
                 className="button dark full"
                 onClick={review}
-                disabled={wordCount < 10}
+                disabled={wordCount < 10 || busy}
               >
                 {t("Разобрать мой питч", "Review my pitch")}
                 <Sparkles size={17} />
               </button>
               <p className="analysis-disclosure">
                 {t(
-                  "Сейчас работает локальный разбор текста по ключевым темам. Подключение языковой модели — следующий этап.",
-                  "This version checks your text for key topics locally. Language-model integration is the next step.",
+                  data.useAI
+                    ? "ИИ разберёт смысл выступления и слайды. Учебный балл рассчитывается отдельно по правилам."
+                    : "Работает локальная проверка элементов текста. ИИ-разбор можно включить перед тренировкой в аккаунте.",
+                  data.useAI
+                    ? "AI will review your pitch and slides. Practice points are calculated separately by game rules."
+                    : "Local text checks are active. Enable AI review before a practice in your account.",
                 )}
               </p>
             </>
@@ -802,6 +1020,7 @@ export default function PitchRoom({
           )}
           {phase === "analysis" && (
             <>
+              <MentorFeedback review={mentor} t={t} />
               <div className="conversation-heading">
                 <h3>{t("История услышана", "Your story was heard")}</h3>
                 <Sparkles size={21} />
@@ -840,13 +1059,20 @@ export default function PitchRoom({
                 <span>{t("ИЗ ТВОЕГО ПИТЧА", "FROM YOUR PITCH")}</span>
                 <p>«{analysis.excerpt}»</p>
               </div>
-              <button className="button dark full" onClick={startQuestions}>
+              <button
+                className="button dark full"
+                onClick={startQuestions}
+                disabled={busy}
+              >
                 {t("Перейти к вопросам", "Start investor questions")}
                 <ArrowRight size={17} />
               </button>
               <button
                 className="ready-text-button"
-                onClick={() => move("EDIT")}
+                onClick={() => {
+                  setPhase("review");
+                  phaseRef.current = "review";
+                }}
               >
                 {t("Исправить транскрипт", "Edit transcript")}
               </button>
@@ -899,6 +1125,7 @@ export default function PitchRoom({
               {speechError && <p className="mic-error">{speechError}</p>}
               {answerFeedback ? (
                 <section className="answer-review" aria-live="polite">
+                  <MentorFeedback review={answerMentor} t={t} />
                   <h3>
                     {t("Что прозвучало в ответе", "What your answer covered")}
                   </h3>
@@ -909,7 +1136,11 @@ export default function PitchRoom({
                       "This checks text elements, not the accuracy of your data. A follow-up can complete an answer without adding a reward slot.",
                     )}
                   </p>
-                  <button className="button dark full" onClick={advance}>
+                  <button
+                    className="button dark full"
+                    onClick={advance}
+                    disabled={busy}
+                  >
                     {step === questions.length - 1
                       ? t("Узнать результат", "See my results")
                       : t("Следующий вопрос", "Next question")}
@@ -1005,8 +1236,8 @@ export default function PitchRoom({
           <h2>{t("Покинуть арену?", "Leave the arena?")}</h2>
           <p className="modal-subtitle">
             {t(
-              "Незавершённая миссия не сохранится. Таймер продолжает идти, пока идёт питч.",
-              "An unfinished mission won’t be saved. The timer keeps running during your pitch.",
+              "Текст и этап сохранятся как черновик. Таймер продолжает идти. Аудиозапись после выхода недоступна.",
+              "Your text and stage will be saved as a draft. The timer keeps running. The audio recording is not retained after exit.",
             )}
           </p>
           <div className="modal-actions">
@@ -1016,7 +1247,21 @@ export default function PitchRoom({
             >
               {t("Продолжить", "Keep practicing")}
             </button>
-            <button className="button dark" onClick={onClose}>
+            <button
+              className="button dark"
+              disabled={busy}
+              onClick={async () => {
+                await voice.stop();
+                if (data.cloud) {
+                  try {
+                    await data.cloud.save(stateRef.current);
+                  } catch (error) {
+                    setSyncError(errorText(error, t));
+                  }
+                }
+                onClose();
+              }}
+            >
               {t("Выйти из миссии", "Leave mission")}
               <ArrowRight size={16} />
             </button>

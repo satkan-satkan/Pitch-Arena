@@ -1,4 +1,5 @@
 import React from "react";
+import MentorFeedback from "./MentorFeedback";
 import { CheckCircle2, Target, ArrowUpRight } from "lucide-react";
 
 export function EvidenceChecks({ checks, t }) {
@@ -153,6 +154,7 @@ export default function PracticeFeedback({ result: r, comparison, t }) {
               {i + 1}. {r.questions[i]}
             </h4>
             <blockquote>{r.answers[i]}</blockquote>
+            <MentorFeedback review={r.mentorAnswers?.[i]} t={t} />
             <EvidenceChecks checks={report.checks} t={t} />
           </section>
         ))}

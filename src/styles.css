@@ -6405,3 +6405,258 @@ main {
     padding: 12px;
   }
 }
+
+/* Music, server account and recovery */
+.music-control {
+  position: relative;
+}
+.music-on {
+  color: #9678b7;
+  background: #f0eafa;
+}
+.music-pop {
+  position: absolute;
+  right: 0;
+  top: 44px;
+  z-index: 65;
+  width: 240px;
+  padding: 18px;
+  border: 1px solid #e7dfef;
+  border-radius: 15px;
+  background: white;
+  box-shadow: 0 14px 36px #33244216;
+}
+.music-pop strong {
+  font-size: 15px;
+}
+.music-pop p,
+.music-pop small {
+  font-size: 11px;
+  line-height: 1.6;
+  color: #857492;
+}
+.music-pop .button {
+  margin: 12px 0;
+  width: 100%;
+}
+.music-pop label {
+  display: grid;
+  gap: 7px;
+  font-size: 12px;
+}
+.music-pop input {
+  width: 100%;
+  accent-color: #a486be;
+  margin: 5px 0 12px;
+}
+.account-entry {
+  font: inherit;
+  font-size: 11px;
+  padding: 7px 10px;
+  border: 1px solid #e6deef;
+  border-radius: 9px;
+  background: white;
+  color: #7e668f;
+}
+.auth-form,
+.account-projects {
+  display: grid;
+  gap: 14px;
+  margin: 18px 0;
+}
+.auth-form label,
+.account-projects + form label {
+  display: grid;
+  gap: 7px;
+  font-size: 12px;
+  color: #766780;
+}
+.auth-form input,
+.account-projects + form input {
+  border: 1px solid #e1d8e9;
+  border-radius: 9px;
+  padding: 12px;
+  font: inherit;
+  width: 100%;
+}
+.account-projects {
+  max-height: 260px;
+  overflow: auto;
+}
+.account-projects button {
+  border: 1px solid #e7deee;
+  border-radius: 12px;
+  padding: 14px;
+  text-align: left;
+  background: #faf8fd;
+  display: grid;
+  gap: 6px;
+}
+.account-projects small {
+  color: #9b87ac;
+}
+.account-projects + form .button {
+  margin: 12px 0;
+}
+.import-history {
+  padding: 16px 0;
+  border-top: 1px solid #eee8f3;
+  margin-top: 16px;
+}
+.import-history p,
+.import-history small {
+  font-size: 12px;
+  line-height: 1.7;
+  color: #887794;
+}
+.import-history small {
+  display: block;
+  margin-top: 10px;
+}
+.account-logout {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  background: none;
+  border: 0;
+  padding: 16px 0 0;
+  color: #887794;
+}
+.resume-banner {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+  padding: 20px;
+  border: 1px solid #e4d8ee;
+  border-radius: 16px;
+  background: #f6f0fc;
+  margin: 0 0 24px;
+}
+.resume-banner > div {
+  flex: 1;
+  min-width: 200px;
+}
+.resume-banner strong {
+  font-size: 15px;
+}
+.resume-banner p {
+  font-size: 12px;
+  line-height: 1.6;
+  color: #8d7b9c;
+  margin-top: 6px;
+}
+.resume-banner .button {
+  font-size: 12px;
+  padding: 12px;
+}
+.ai-choice {
+  padding: 16px;
+  border: 1px solid #e5ddef;
+  background: #faf7fd;
+  border-radius: 12px;
+  margin: 18px 0;
+}
+.ai-choice label {
+  display: flex;
+  gap: 9px;
+  align-items: center;
+  font-size: 13px;
+}
+.ai-choice input {
+  width: auto;
+}
+.ai-choice small {
+  display: block;
+  font-size: 11px;
+  color: #8d7d9b;
+  line-height: 1.7;
+  margin-top: 8px;
+}
+.room-save-status {
+  text-align: center;
+  margin: 12px 0 0;
+  font-size: 10px;
+  color: #8f7d9f;
+}
+.room-sync-error {
+  margin: 12px auto;
+  max-width: 760px;
+  background: #fff1e7;
+  border-radius: 12px;
+  padding: 12px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 12px;
+}
+.resume-note {
+  text-align: center;
+  max-width: 720px;
+  margin: 12px auto;
+  padding: 0 20px;
+  font-size: 11px;
+  line-height: 1.6;
+  color: #947f9f;
+}
+.mentor-review {
+  background: #f0eaf9;
+  border: 1px solid #e2d5ef;
+  padding: 18px;
+  margin: 18px 0;
+  border-radius: 15px;
+}
+.mentor-review p {
+  font-size: 13px;
+  line-height: 1.75;
+  color: #6d5e7c;
+  margin: 10px 0;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+.mentor-review h4 {
+  font-size: 13px;
+  margin: 18px 0 10px;
+}
+.mentor-review blockquote {
+  border-left: 2px solid #bda5d0;
+  padding-left: 12px;
+  margin: 10px 0;
+  font-size: 12px;
+  line-height: 1.65;
+  color: #88739a;
+}
+.mentor-review small,
+.mentor-status {
+  font-size: 11px;
+  line-height: 1.7;
+  color: #9886a6;
+}
+.mentor-status {
+  background: #fff5e8;
+  border-radius: 10px;
+  padding: 12px;
+}
+@media (max-width: 600px) {
+  .topbar-actions {
+    gap: 6px;
+  }
+  .account-entry {
+    font-size: 10px;
+    padding: 6px;
+  }
+  .topbar .notification-wrap {
+    display: none;
+  }
+  .music-pop {
+    right: -80px;
+  }
+  .resume-banner {
+    padding: 15px;
+    gap: 9px;
+  }
+  .room-sync-error {
+    margin: 10px;
+    flex-wrap: wrap;
+  }
+}

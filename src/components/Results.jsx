@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 
 import PracticeFeedback from "./PracticeFeedback";
+import MentorFeedback from "./MentorFeedback";
 import { compareAttempt } from "../practice/engine";
 
 export default function Results({
@@ -126,6 +127,7 @@ export default function Results({
           <p>{r.pitchTranscript}</p>
         </details>
       )}
+      <MentorFeedback review={r.mentor} t={t} />
       {r.scoringVersion === 3 ? (
         <PracticeFeedback result={r} comparison={comparison} t={t} />
       ) : (

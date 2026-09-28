@@ -423,7 +423,7 @@ export function evaluateSession({ pitch, questions, answers, arena }) {
   };
 }
 const projectKey = (r) =>
-  r.startup?.trim().normalize("NFKC").toLocaleLowerCase() || "";
+  r.projectId || r.startup?.trim().normalize("NFKC").toLocaleLowerCase() || "";
 export function compareAttempt(current, history) {
   const index = history.findIndex((r) => r.id === current.id);
   const older = index < 0 ? history : history.slice(index + 1);
