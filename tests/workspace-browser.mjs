@@ -83,7 +83,7 @@ try {
     await bootstrapGate;
     await route.continue();
   });
-  await page.goto(origin);
+  await page.goto(origin + "/play");
   await page.locator(".map-pin").first().waitFor();
   check(
     "Pending sign-in never displays a fake account",
@@ -307,7 +307,7 @@ try {
   });
   const mobile = await second.newPage();
   mobile.on("pageerror", (e) => errors.push(e.message));
-  await mobile.goto(origin);
+  await mobile.goto(origin + "/play");
   await signIn(mobile);
   check(
     "Second browser account sees the same project",

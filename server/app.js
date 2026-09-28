@@ -1,5 +1,6 @@
 import { seedCatalog, readCatalog } from "./catalog.js";
 import { handleAdmin } from "./admin.js";
+import { handleCommunity, handleStartupModeration } from "./community.js";
 import http from "node:http";
 import { randomUUID, createHash } from "node:crypto";
 import {
@@ -203,6 +204,32 @@ export function createApp({
         fail(415, "JSON_REQUIRED");
     }
     const user = await currentUser(store, req);
+    if (
+      path === "/api/admin/startups" ||
+      path.startsWith("/api/admin/startups/")
+    )
+      return json(
+        res,
+        200,
+        await handleStartupModeration({ req, url, user, store, body }),
+      );
+    if (
+      path === "/api/startups" ||
+      path.startsWith("/api/startups/") ||
+      path.startsWith("/api/workspace/")
+    ) {
+      if (!["GET", "HEAD"].includes(req.method))
+        throttle(
+          `community:${user?.id || req.socket.remoteAddress}`,
+          60,
+          60000,
+        );
+      return json(
+        res,
+        200,
+        await handleCommunity({ req, url, user, store, body }),
+      );
+    }
     if (path.startsWith("/api/admin/"))
       return json(
         res,

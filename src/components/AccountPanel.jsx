@@ -10,8 +10,9 @@ export default function AccountPanel({
   onClose,
   onRefresh,
   onProject,
+  registerFirst = false,
 }) {
-  const [register, setRegister] = useState(false),
+  const [register, setRegister] = useState(registerFirst),
     [busy, setBusy] = useState(false),
     [error, setError] = useState(""),
     [email, setEmail] = useState(""),

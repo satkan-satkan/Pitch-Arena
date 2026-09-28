@@ -67,6 +67,8 @@ import Results from "./components/Results";
 import BackgroundMusic from "./components/BackgroundMusic";
 import AccountPanel from "./components/AccountPanel";
 import AdminPanel from "./components/AdminPanel";
+import Landing from "./components/Landing";
+import { PublicDirectory, FounderWorkspace } from "./components/Community";
 import useWorkspace from "./hooks/useWorkspace";
 import { api, hydrateSession, sessionClient, errorText } from "./services/api";
 
@@ -507,6 +509,18 @@ function Scene({ kind }) {
   );
 }
 function App() {
+  const [route, setRoute] = useState(window.location.pathname);
+  const navigate = (path) => {
+    if (window.location.pathname !== path)
+      window.history.pushState({}, "", path);
+    setRoute(path);
+    window.scrollTo(0, 0);
+  };
+  useEffect(() => {
+    const update = () => setRoute(window.location.pathname);
+    window.addEventListener("popstate", update);
+    return () => window.removeEventListener("popstate", update);
+  }, []);
   const [lang, setLang] = useState(() => read("pa-lang", "ru"));
   const t = (ru, en) => (lang === "ru" ? ru : en);
   const pick = (a) => a[lang === "ru" ? 0 : 1];
@@ -529,6 +543,11 @@ function App() {
       setPage("home");
   }, [workspace.checking, workspace.account?.role, page]);
   const [accountOpen, setAccountOpen] = useState(false);
+  const [registerFirst, setRegisterFirst] = useState(false);
+  const openAuth = (register = false) => {
+    setRegisterFirst(register);
+    setAccountOpen(true);
+  };
   const [launchBusy, setLaunchBusy] = useState(false);
   const [guestDraft, setGuestDraft] = useState(() => read("pa-draft", null));
   const [guestProfile, setGuestProfile] = useState(() =>
@@ -795,6 +814,11 @@ function App() {
       icon: Trophy,
       label: t("Рейтинг стартапов", "Leaderboard"),
     },
+    {
+      id: "community",
+      icon: Users,
+      label: t("Стартапы и команды", "Startups & teams"),
+    },
   ];
   if (workspace.account?.role === "admin")
     nav.push({ id: "admin", icon: ShieldCheck, label: t("Админка", "Admin") });
@@ -805,6 +829,82 @@ function App() {
         (difficulty === "easy" ? a.level <= 2 : a.level >= 3)) &&
       pick(a.title).toLowerCase().includes(search.toLowerCase()),
   );
+  const accountDialog = accountOpen && (
+    <AccountPanel
+      account={workspace.account}
+      projects={workspace.projects}
+      localHistory={guestHistory}
+      {...{ t, Modal, registerFirst }}
+      onClose={() => setAccountOpen(false)}
+      onRefresh={async () => {
+        const data = await workspace.refresh();
+        if (data.user && route === "/") navigate("/play");
+        return data;
+      }}
+      onProject={(project) => workspace.setActiveProjectId(project.id)}
+    />
+  );
+  const joinCommunity = () => {
+    navigate("/play");
+    go("community");
+    if (!workspace.account) openAuth(true);
+  };
+  if (route !== "/play" && route !== "/play/")
+    return (
+      <>
+        {route.startsWith("/startups") ? (
+          <div className="public-site">
+            <header className="landing-nav">
+              <a
+                href="/"
+                onClick={(e) => {
+                  e.preventDefault();
+                  navigate("/");
+                }}
+              >
+                <Brand />
+              </a>
+              <div className="landing-controls" style={{ marginLeft: "auto" }}>
+                <button
+                  className="landing-language"
+                  aria-label={
+                    lang === "ru"
+                      ? "Switch to English"
+                      : "Переключить на русский"
+                  }
+                  onClick={() => setLang(lang === "ru" ? "en" : "ru")}
+                >
+                  {lang.toUpperCase()}
+                </button>
+                <button
+                  className="button white"
+                  onClick={() => navigate("/play")}
+                >
+                  {t("В игру", "Enter game")}
+                </button>
+              </div>
+            </header>
+            <PublicDirectory
+              key={route}
+              t={t}
+              detailId={route.split("/")[2] || null}
+              onJoin={joinCommunity}
+              onOpen={(id) => navigate(`/startups/${id}`)}
+              onBack={() => navigate("/startups")}
+            />
+          </div>
+        ) : (
+          <Landing
+            {...{ t, lang, setLang, Brand, ArenaArt }}
+            account={workspace.account}
+            onPlay={() => navigate("/play")}
+            onAuth={openAuth}
+            onDirectory={() => navigate("/startups")}
+          />
+        )}
+        {accountDialog}
+      </>
+    );
   return (
     <div className="app-shell">
       {mobile && (
@@ -816,7 +916,7 @@ function App() {
           href="#"
           onClick={(e) => {
             e.preventDefault();
-            go("home");
+            navigate("/");
           }}
         >
           <Brand />
@@ -1002,6 +1102,15 @@ function App() {
           </div>
         </header>
         <main>
+          {page === "community" && (
+            <FounderWorkspace
+              key={workspace.account?.id || "guest"}
+              account={workspace.account}
+              {...{ t, Modal }}
+              onSignIn={() => openAuth(true)}
+              onPublic={() => navigate("/startups")}
+            />
+          )}
           {page === "admin" && workspace.account?.role === "admin" && (
             <AdminPanel
               account={workspace.account}
@@ -1757,17 +1866,7 @@ function App() {
           }}
         />
       )}
-      {accountOpen && (
-        <AccountPanel
-          account={workspace.account}
-          projects={workspace.projects}
-          localHistory={guestHistory}
-          {...{ t, Modal }}
-          onClose={() => setAccountOpen(false)}
-          onRefresh={workspace.refresh}
-          onProject={(project) => workspace.setActiveProjectId(project.id)}
-        />
-      )}
+      {accountDialog}
       {help && (
         <Modal
           onClose={() => setHelp(false)}

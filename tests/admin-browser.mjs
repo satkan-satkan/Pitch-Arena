@@ -81,7 +81,7 @@ try {
     name: "Участник",
   });
   await grantOwner(store, "owner@example.com");
-  await page.goto(origin);
+  await page.goto(origin + "/play");
   check(
     "Guest cannot see admin navigation",
     (await page.locator(".nav-item").filter({ hasText: "Админка" }).count()) ===
@@ -173,7 +173,7 @@ try {
     }),
     player = await guest.newPage();
   player.on("pageerror", (e) => errors.push(e.message));
-  await player.goto(origin);
+  await player.goto(origin + "/play");
   await player
     .getByRole("button", { name: "Арена роста — Москва, Россия", exact: true })
     .click();

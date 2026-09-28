@@ -18,7 +18,10 @@
     "db:import-sqlite": "node --env-file-if-exists=.env scripts/database.mjs import-sqlite",
     "admin:grant": "node --env-file-if-exists=.env scripts/database.mjs grant-admin",
     "test:postgres": "node --env-file-if-exists=.env --test tests/postgres.integration.mjs",
-    "test:admin": "node --env-file-if-exists=.env tests/admin-browser.mjs"
+    "test:admin": "node --env-file-if-exists=.env tests/admin-browser.mjs",
+    "check:secrets": "node scripts/check-secrets.mjs",
+    "test:community": "node --env-file-if-exists=.env --test tests/community.integration.mjs",
+    "test:landing": "node --env-file-if-exists=.env tests/community-browser.mjs"
   },
   "dependencies": {
     "d3-geo": "^3.1.1",

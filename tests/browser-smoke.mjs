@@ -102,7 +102,7 @@ try {
     window.SpeechRecognition = undefined;
     window.webkitSpeechRecognition = undefined;
   });
-  await page.goto(origin);
+  await page.goto(origin + "/play");
   await page.locator(".map-pin").first().waitFor();
   await page
     .getByRole("button", {
@@ -355,7 +355,7 @@ try {
   // Legacy history is opened in a fresh isolated context; it is never compared to v3.
   const legacy = await context.newPage();
   legacy.on("pageerror", (e) => errors.push(e.message));
-  await legacy.goto(origin);
+  await legacy.goto(origin + "/play");
   await legacy.evaluate(() =>
     localStorage.setItem(
       "pa-history",

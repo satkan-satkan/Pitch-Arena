@@ -5,3 +5,12 @@ dist/
 .env.*
 !.env.example
 .data/
+# Local credentials and database exports
+*.pem
+*.key
+*.p12
+*.pfx
+*.dump
+*.backup
+credentials*.json
+service-account*.json

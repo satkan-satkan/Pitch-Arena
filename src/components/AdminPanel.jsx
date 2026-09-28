@@ -14,11 +14,13 @@ import {
 } from "lucide-react";
 import { api, errorText } from "../services/api";
 import "./admin.css";
+import { StartupModeration } from "./Community";
 const sections = [
   ["overview", ShieldCheck, ["Обзор", "Overview"]],
   ["users", Users, ["Пользователи", "Users"]],
   ["projects", Building2, ["Проекты", "Projects"]],
   ["catalog", Compass, ["Арены и инвесторы", "Arenas & investors"]],
+  ["startups", Building2, ["Стартапы", "Startups"]],
   ["audit", ScrollText, ["Журнал действий", "Audit log"]],
 ];
 const selectFields = (item, kind) =>
@@ -207,6 +209,12 @@ export default function AdminPanel({ account, t, onRefresh, Modal }) {
         <p className="admin-notice" role="status">
           {notice}
         </p>
+      )}
+      {!loading && data && section === "startups" && (
+        <StartupModeration
+          {...{ data, t, Modal }}
+          onRefresh={() => setRevision((v) => v + 1)}
+        />
       )}
       {error && !editing && (
         <p className="error-message" role="alert">

@@ -36,6 +36,30 @@ export async function api(
 }
 export function errorText(error, t) {
   const messages = {
+    NOT_FOUND: [
+      "Карточка недоступна или ещё не опубликована.",
+      "This listing is unavailable or not published yet.",
+    ],
+    TEAM_ACCESS_REQUIRED: [
+      "Нет прав на изменение этой карточки.",
+      "You cannot edit this listing.",
+    ],
+    TEAM_OWNER_REQUIRED: [
+      "Управлять участниками может только владелец команды.",
+      "Only the team owner can manage members.",
+    ],
+    ALREADY_MEMBER: [
+      "Этот человек уже в команде.",
+      "This person is already on the team.",
+    ],
+    STALE_LISTING: [
+      "Карточка изменилась. Закрой форму и обнови страницу перед повтором.",
+      "This record changed. Close the form and reload before trying again.",
+    ],
+    INVALID_LISTING_STATE: [
+      "Статус карточки изменился. Обнови страницу.",
+      "The listing status changed. Reload the page.",
+    ],
     ADMIN_REQUIRED: [
       "Доступ только для администратора.",
       "Administrator access required.",
