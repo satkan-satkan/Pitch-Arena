@@ -12,6 +12,7 @@ import {
 import PracticeFeedback from "./PracticeFeedback";
 import MentorFeedback from "./MentorFeedback";
 import { compareAttempt } from "../practice/engine";
+import { GuideMessage } from "../guide/Guide";
 
 export default function Results({
   result: r,
@@ -21,6 +22,7 @@ export default function Results({
   onMap,
   Modal,
   history,
+  guideEnabled = true,
 }) {
   const comparison = compareAttempt(r, history);
   const download = () => {
@@ -81,6 +83,9 @@ export default function Results({
           {r.startup} · {r.arena}
         </p>
       </div>
+      {guideEnabled && (
+        <GuideMessage t={t} phase="completed" score={r.score} compact />
+      )}
       <div className="result-stats">
         <div>
           <strong>

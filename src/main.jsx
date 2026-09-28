@@ -67,6 +67,8 @@ import Results from "./components/Results";
 import BackgroundMusic from "./components/BackgroundMusic";
 import AccountPanel from "./components/AccountPanel";
 import AdminPanel from "./components/AdminPanel";
+import useGuide from "./guide/useGuide";
+import { GuideHome, GuideIntro, GuideMessage } from "./guide/Guide";
 import Landing from "./components/Landing";
 import { PublicDirectory, FounderWorkspace } from "./components/Community";
 import useWorkspace from "./hooks/useWorkspace";
@@ -530,6 +532,13 @@ function App() {
   const [difficulty, setDifficulty] = useState("all");
   const [search, setSearch] = useState("");
   const workspace = useWorkspace();
+  const guide = useGuide(workspace.account?.id);
+  const [guideOpen, setGuideOpen] = useState(false);
+  const [tutorial, setTutorial] = useState(false);
+  const openGuide = () => {
+    guide.dispatch({ type: "intro" });
+    setGuideOpen(true);
+  };
   const arenas = workspace.catalog?.arenas || defaultArenas;
   const investors = (workspace.catalog?.investors || defaultInvestors).filter(
     (v) => v.enabled !== false,
@@ -583,6 +592,7 @@ function App() {
   };
   const [selected, setSelectedState] = useState(null);
   const setSelected = (arena) => {
+    setTutorial(false);
     if (arena?.enabled === false) {
       setToast(
         t(
@@ -638,6 +648,8 @@ function App() {
     window.scrollTo(0, 0);
   };
   const complete = (data) => {
+    if (session?.tutorial)
+      guide.dispatch({ type: "completed", id: session.id });
     const prior = medalsFor(history)
       .filter((m) => m.earned)
       .map((m) => m.id);
@@ -698,6 +710,7 @@ function App() {
             language: lang,
             spokenQuestions: data.spokenQuestions,
             useAI: data.useAI,
+            tutorial: Boolean(data.tutorial),
             practiceGoal: data.practiceGoal || null,
           },
         });
@@ -726,7 +739,12 @@ function App() {
           draftKey,
           restored: cloud.snapshot.state,
         });
-      } else setSession({ ...data, id: crypto.randomUUID(), draftKey });
+        if (data.tutorial) guide.dispatch({ type: "started", id: snap.id });
+      } else {
+        const id = crypto.randomUUID();
+        setSession({ ...data, id, draftKey });
+        if (data.tutorial) guide.dispatch({ type: "started", id });
+      }
       setSelected(null);
       setRetry(null);
     } finally {
@@ -739,6 +757,7 @@ function App() {
       if (workspace.account) {
         const snap = await api(`/sessions/${savedDraft.id}`);
         const data = await hydrateSession(snap);
+        if (data.tutorial) guide.dispatch({ type: "started", id: snap.id });
         const local = read(draftKey, null);
         if (local?.id === snap.id && local.revision === snap.revision) {
           data.restored = {
@@ -757,6 +776,8 @@ function App() {
         });
       } else {
         setLang(savedDraft.config.language || lang);
+        if (savedDraft.config.tutorial)
+          guide.dispatch({ type: "started", id: savedDraft.id });
         setSession({
           ...savedDraft.config,
           id: savedDraft.id,
@@ -785,6 +806,7 @@ function App() {
         workspace.setDraft(null);
       } else setGuestDraft(null);
       localStorage.removeItem(draftKey);
+      guide.dispatch({ type: "discarded", id: savedDraft.id });
     } catch (error) {
       setToast(errorText(error, t));
     }
@@ -900,6 +922,10 @@ function App() {
             onPlay={() => navigate("/play")}
             onAuth={openAuth}
             onDirectory={() => navigate("/startups")}
+            onGuide={() => {
+              navigate("/play");
+              openGuide();
+            }}
           />
         )}
         {accountDialog}
@@ -976,6 +1002,10 @@ function App() {
             <CircleHelp size={19} />
             <span>{t("Как это работает", "How it works")}</span>
             <ArrowUpRight size={15} />
+          </button>
+          <button className="nav-item guide-launcher" onClick={openGuide}>
+            <Sparkles size={19} />
+            <span>{t("Гид Искра", "Guide Iskra")}</span>
           </button>
           <button
             className="profile-button"
@@ -1176,6 +1206,14 @@ function App() {
                   {t("Мои выступления", "My pitches")}
                 </button>
               </div>
+              {!workspace.checking && (
+                <GuideHome
+                  {...{ guide, t }}
+                  onOpen={openGuide}
+                  hasDraft={!!savedDraft}
+                  onResume={resumeDraft}
+                />
+              )}
               <section className="hero-grid">
                 <div className="hero">
                   <div className="hero-content">
@@ -1824,6 +1862,8 @@ function App() {
       {selected && (
         <Setup
           arena={selected}
+          tutorial={tutorial}
+          guideEnabled={guide.state.enabled}
           {...{ t, pick, retry, launchBusy }}
           profile={{
             ...profile,
@@ -1843,6 +1883,7 @@ function App() {
       {session && (
         <PitchRoom
           data={session}
+          guideEnabled={guide.state.enabled}
           {...{ t, pick, lang, Brand, Modal, CameraPreview }}
           onClose={leaveSession}
           onComplete={complete}
@@ -1851,6 +1892,7 @@ function App() {
       {result && (
         <Results
           result={result}
+          guideEnabled={guide.state.enabled}
           {...{ t, Modal, history }}
           onClose={() => setResult(null)}
           onMap={() => {
@@ -1867,6 +1909,23 @@ function App() {
         />
       )}
       {accountDialog}
+      {guideOpen && (
+        <GuideIntro
+          {...{ guide, t, Modal }}
+          hasDraft={!!savedDraft}
+          onClose={() => setGuideOpen(false)}
+          onResume={() => {
+            setGuideOpen(false);
+            resumeDraft();
+          }}
+          onStart={() => {
+            setGuideOpen(false);
+            setRetry(null);
+            setSelected(arenas.find((a) => a.id === "family") || arenas[0]);
+            setTutorial(true);
+          }}
+        />
+      )}
       {help && (
         <Modal
           onClose={() => setHelp(false)}
@@ -2198,6 +2257,8 @@ function Setup({
   activeProjectId,
   aiReady,
   launchBusy,
+  tutorial = false,
+  guideEnabled = true,
 }) {
   const [projectId, setProjectId] = useState(
     account ? activeProjectId || "" : "",
@@ -2206,9 +2267,9 @@ function Setup({
   const [startup, setStartup] = useState(retry?.startup || profile.startup);
   const [ask, setAsk] = useState(String(retry?.ask ?? 100000));
   const [pitchSeconds, setPitchSeconds] = useState(
-    retry?.pitchLimit || arena.pitchSeconds || 120,
+    retry?.pitchLimit || (tutorial ? 60 : arena.pitchSeconds) || 120,
   );
-  const [spokenQuestions, setSpokenQuestions] = useState(true);
+  const [spokenQuestions, setSpokenQuestions] = useState(!tutorial);
   const [files, setFiles] = useState([]);
   const [error, setError] = useState("");
   const [dragging, setDragging] = useState(false);
@@ -2301,6 +2362,32 @@ function Setup({
           {arena.panel.length} {t("собеседника", "panelists")}
         </span>
       </div>
+      {guideEnabled && (
+        <GuideMessage
+          t={t}
+          compact
+          emotion={error ? "support" : "thinking"}
+          title={
+            tutorial
+              ? t(
+                  "Первая миссия: объяснить идею за минуту",
+                  "First mission: explain your idea in a minute",
+                )
+              : t("Настроим твою сцену", "Let’s set your stage")
+          }
+          text={
+            error
+              ? t(
+                  "Проверь сообщение ниже и поправь настройки. Можем идти дальше, когда всё будет готово.",
+                  "Check the message below and adjust your settings before continuing.",
+                )
+              : t(
+                  "Укажи проект и запрос. Слайды можно пропустить. На следующем экране ты сам выберешь микрофон или текст.",
+                  "Enter your project and ask. Slides are optional. Choose microphone or text on the next screen.",
+                )
+          }
+        />
+      )}
       <div className="setup-cast">
         {panelFor(arena).map((v, i) => (
           <div key={i}>
@@ -2319,6 +2406,7 @@ function Setup({
           setError("");
           try {
             await onStart({
+              tutorial,
               projectId,
               useAI,
               arena,

@@ -38,6 +38,7 @@ import { EvidenceChecks, PracticeGoal } from "./components/PracticeFeedback";
 import useVoice from "./hooks/useVoice";
 import { errorText } from "./services/api";
 import MentorFeedback from "./components/MentorFeedback";
+import { GuideMessage } from "./guide/Guide";
 
 const formatTime = (seconds) =>
   `${String(Math.floor(seconds / 60)).padStart(2, "0")}:${String(seconds % 60).padStart(2, "0")}`;
@@ -62,6 +63,7 @@ export default function PitchRoom({
   Brand,
   Modal,
   CameraPreview,
+  guideEnabled = true,
 }) {
   const { arena, startup, ask, files } = data,
     limit = data.pitchSeconds || arena.pitchSeconds || 120,
@@ -165,6 +167,7 @@ export default function PitchRoom({
         language: lang,
         spokenQuestions: voiceEnabled,
         practiceGoal: data.practiceGoal || null,
+        tutorial: Boolean(data.tutorial),
       },
       startedAt: started.current,
       deadline: deadline.current,
@@ -781,6 +784,16 @@ export default function PitchRoom({
           </p>
         </section>
         <aside className="room-conversation game-conversation">
+          {guideEnabled && (
+            <GuideMessage
+              t={t}
+              phase={phase}
+              busy={busy}
+              error={Boolean(syncError || voice.error)}
+              answered={Boolean(answerFeedback)}
+              compact
+            />
+          )}
           {phase === "ready" && (
             <>
               <div className="ready-icon">

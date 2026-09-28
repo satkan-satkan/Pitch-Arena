@@ -12,6 +12,7 @@ import {
   Check,
 } from "lucide-react";
 import "./landing.css";
+import LandingExperience from "./LandingExperience";
 export default function Landing({
   t,
   lang,
@@ -22,6 +23,7 @@ export default function Landing({
   onAuth,
   onDirectory,
   account,
+  onGuide,
 }) {
   return (
     <div className="landing">
@@ -187,6 +189,7 @@ export default function Landing({
             )}
           </small>
         </section>
+        <LandingExperience t={t} onGuide={onGuide} />
         <section id="how" className="landing-how">
           <div className="landing-section-heading">
             <span className="landing-eyebrow">

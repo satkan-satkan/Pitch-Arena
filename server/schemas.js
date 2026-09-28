@@ -27,6 +27,7 @@ export const sessionSchema = z.object({
   language: z.enum(["ru", "en"]),
   spokenQuestions: z.boolean().default(true),
   useAI: z.boolean().default(false),
+  tutorial: z.boolean().default(false),
   practiceGoal: z
     .object({
       topicId: z.string(),
