@@ -325,8 +325,15 @@ export function medalsFor(history) {
       id: "numbers",
       icon: "↗",
       name: ["Цифры говорят", "Numbers talk"],
-      description: ["Используй цифры в 3 ответах", "Use numbers in 3 answers"],
-      earned: history.some((h) => h.evidence >= 3),
+      description: [
+        "Подкрепи спрос и экономику цифрами",
+        "Add numbers to demand and economics",
+      ],
+      earned: history.some((h) =>
+        h.scoringVersion >= 3
+          ? ["observed", "price"].every((id) => h.numericEvidence?.includes(id))
+          : h.evidence >= 3,
+      ),
     },
     {
       id: "globe",
@@ -365,113 +372,5 @@ export function medalsFor(history) {
     },
   ];
 }
-export function analyzePitch(text, t) {
-  const words = text.trim().split(/\s+/u).filter(Boolean).length;
-  const metrics =
-    text.match(/\d+(?:[.,]\d+)?\s*(?:%|[$€₽₸]|тыс|млн|k|million)?/giu) || [];
-  const topics = [
-    {
-      id: "problem",
-      label: t("Проблема и клиент", "Problem & customer"),
-      found:
-        /проблем|клиент|пользовател|команд|люд|customer|user|problem|team|people/iu.test(
-          text,
-        ),
-    },
-    {
-      id: "solution",
-      label: t("Решение и продукт", "Solution & product"),
-      found:
-        /решени|продукт|платформ|помога|приложен|сервис|solution|product|platform|help|app|service/iu.test(
-          text,
-        ),
-    },
-    {
-      id: "traction",
-      label: t("Метрики и доказательства", "Metrics & evidence"),
-      found: metrics.length >= 2,
-    },
-    {
-      id: "business",
-      label: t("Бизнес-модель", "Business model"),
-      found:
-        /выручк|подписк|плат[яиё]|доход|прода|комисси|revenue|subscription|pay|sales|commission|price/iu.test(
-          text,
-        ),
-    },
-    {
-      id: "ask",
-      label: t("Запрос и план", "Ask & plan"),
-      found:
-        /инвест|привлека|раунд|запраш|план|raising|invest|fund|round|plan/iu.test(
-          text,
-        ),
-    },
-  ];
-  return {
-    words,
-    metrics: metrics.slice(0, 6),
-    topics,
-    excerpt: text
-      .trim()
-      .split(/(?<=[.!?])\s/u)[0]
-      .slice(0, 180),
-  };
-}
-export function questionsFromPitch(text, arena, ask, t) {
-  const a = analyzePitch(text, t),
-    has = (id) => a.topics.find((x) => x.id === id).found;
-  const quote = a.excerpt;
-  return [
-    arena.id === "nfactorial"
-      ? t(
-          `В питче прозвучало: «${quote}». Что из этого уже можно попробовать в продукте и что ты узнал от первых пользователей?`,
-          `Your pitch included: “${quote}”. What can users try today, and what have your first users taught you?`,
-        )
-      : arena.id === "arena"
-        ? t(
-            `Ты сказал: «${quote}». Как превратить это в большой бизнес? Назови сегмент рынка и способ посчитать его объём.`,
-            `You said: “${quote}”. How does this become a large business? Name your market segment and how you estimate its size.`,
-          )
-        : t(
-            `Ты сказал: «${quote}». Приведи один конкретный пример того, как клиент пользуется решением.`,
-            `You said: “${quote}”. Give one concrete example of a customer using your solution.`,
-          ),
-    has("traction")
-      ? t(
-          `В тексте есть цифры: ${a.metrics.join(", ")}. Какая из них лучше всего доказывает спрос и за какой период она измерена?`,
-          `Your pitch contains these numbers: ${a.metrics.join(", ")}. Which one best demonstrates demand, and over what period was it measured?`,
-        )
-      : t(
-          "В питче пока мало измеримых доказательств. Как ты проверишь спрос за следующие две недели?",
-          "Your pitch has little measurable evidence so far. How will you validate demand in the next two weeks?",
-        ),
-    has("business")
-      ? arena.level >= 3
-        ? t(
-            "Разложи экономику одного клиента: выручка, себестоимость, стоимость привлечения и срок окупаемости.",
-            "Break down the economics of one customer: revenue, cost, acquisition cost, and payback period.",
-          )
-        : t(
-            "Какой первый платёж ты ожидаешь от клиента и за какую ценность?",
-            "What is the first payment you expect from a customer, and what value do they get?",
-          )
-      : t(
-          "Я не нашёл явного описания дохода. Кто будет платить, за что и сколько?",
-          "I did not find an explicit revenue model. Who will pay, for what, and how much?",
-        ),
-    t(
-      `В заявке указано $${ask.toLocaleString()}. Какую проверяемую цель ты достигнешь на эти деньги и за сколько месяцев?`,
-      `Your funding ask is $${ask.toLocaleString()}. What measurable milestone will it fund, and in how many months?`,
-    ),
-    arena.level >= 3
-      ? t(
-          "Какое преимущество останется у вас, если крупный конкурент повторит продукт? Назови главный риск и план действий.",
-          "What advantage will remain if a larger competitor copies your product? Name your biggest risk and your plan.",
-        )
-      : t(
-          "Какой один шаг ты сделаешь завтра? Кто в команде за него отвечает?",
-          "What is the one step you will take tomorrow? Who on the team owns it?",
-        ),
-  ];
-}
+// Compatibility exports for existing callers; the practice engine owns these rules.
+export { analyzePitch, questionsFromPitch } from "./practice/engine.js";

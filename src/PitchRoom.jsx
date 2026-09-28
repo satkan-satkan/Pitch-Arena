@@ -24,184 +24,19 @@ import {
   X,
   Zap,
 } from "lucide-react";
-import { analyzePitch, questionsFromPitch, panelFor, photo } from "./game-data";
+import { panelFor, photo } from "./game-data";
+import {
+  analyzePitch,
+  createQuestions,
+  evaluateAnswer,
+  createFollowUp,
+  evaluateSession,
+  transitionPhase,
+} from "./practice/engine";
+import { EvidenceChecks, PracticeGoal } from "./components/PracticeFeedback";
 
-// Keeps capture, transcription, and pending permission requests scoped to this room.
-function useVoice(lang, t, onText) {
-  const [active, setActive] = useState(false),
-    [pending, setPending] = useState(false),
-    [error, setError] = useState(""),
-    [interim, setInterim] = useState(""),
-    [url, setUrl] = useState(null),
-    [mime, setMime] = useState("audio/webm");
-  const recorder = useRef(null),
-    stream = useRef(null),
-    recognition = useRef(null),
-    objectUrl = useRef(null),
-    mounted = useRef(true),
-    request = useRef(0),
-    callback = useRef(onText);
-  callback.current = onText;
-  useEffect(() => {
-    mounted.current = true;
-    return () => {
-      mounted.current = false;
-      request.current++;
-      if (recognition.current) {
-        recognition.current.onresult = null;
-        recognition.current.abort();
-      }
-      if (recorder.current?.state === "recording") {
-        recorder.current.onstop = null;
-        recorder.current.stop();
-      }
-      stream.current?.getTracks().forEach((track) => track.stop());
-      if (objectUrl.current) URL.revokeObjectURL(objectUrl.current);
-    };
-  }, []);
-  const stop = async () => {
-    request.current++;
-    setPending(false);
-    const r = recognition.current;
-    recognition.current = null;
-    if (r) {
-      await new Promise((resolve) => {
-        const timeout = setTimeout(resolve, 1000);
-        r.addEventListener(
-          "end",
-          () => {
-            clearTimeout(timeout);
-            resolve();
-          },
-          { once: true },
-        );
-        try {
-          r.stop();
-        } catch {
-          clearTimeout(timeout);
-          resolve();
-        }
-      });
-      r.onresult = null;
-      r.onerror = null;
-    }
-    if (recorder.current?.state === "recording") {
-      const rec = recorder.current;
-      await new Promise((resolve) => {
-        rec.addEventListener("stop", resolve, { once: true });
-        rec.stop();
-      });
-    }
-    stream.current?.getTracks().forEach((track) => track.stop());
-    if (mounted.current) {
-      setActive(false);
-      setInterim("");
-    }
-  };
-  const start = async () => {
-    if (active || pending) return;
-    const token = ++request.current;
-    setPending(true);
-    setError("");
-    setInterim("");
-    try {
-      if (!navigator.mediaDevices?.getUserMedia) throw new Error("unavailable");
-      const media = await navigator.mediaDevices.getUserMedia({ audio: true });
-      if (!mounted.current || request.current !== token) {
-        media.getTracks().forEach((track) => track.stop());
-        return;
-      }
-      stream.current = media;
-      const chunks = [];
-      const rec = new MediaRecorder(media);
-      recorder.current = rec;
-      rec.ondataavailable = (e) => {
-        if (e.data.size) chunks.push(e.data);
-      };
-      rec.onstop = () => {
-        if (!mounted.current) return;
-        const blob = new Blob(chunks, { type: rec.mimeType });
-        if (objectUrl.current) URL.revokeObjectURL(objectUrl.current);
-        objectUrl.current = URL.createObjectURL(blob);
-        setUrl(objectUrl.current);
-        setMime(rec.mimeType);
-      };
-      rec.start();
-      setActive(true);
-      const Recognition =
-        window.SpeechRecognition || window.webkitSpeechRecognition;
-      if (Recognition) {
-        const r = new Recognition();
-        r.lang = lang === "ru" ? "ru-RU" : "en-US";
-        r.continuous = true;
-        r.interimResults = true;
-        r.onresult = (e) => {
-          let interim = "";
-          for (let i = e.resultIndex; i < e.results.length; i++) {
-            if (e.results[i].isFinal)
-              callback.current(e.results[i][0].transcript);
-            else interim += e.results[i][0].transcript;
-          }
-          if (mounted.current) setInterim(interim);
-        };
-        r.onerror = (e) => {
-          if (e.error !== "aborted" && mounted.current)
-            setError(
-              t(
-                "Распознавание речи недоступно. Аудио записывается; после питча добавь транскрипт вручную.",
-                "Speech recognition is unavailable. Audio is recording; add your transcript manually after the pitch.",
-              ),
-            );
-        };
-        r.onend = () => {
-          if (recognition.current === r) recognition.current = null;
-        };
-        recognition.current = r;
-        try {
-          r.start();
-        } catch {
-          recognition.current = null;
-          setError(
-            t(
-              "Запись работает. Введи транскрипт вручную после питча.",
-              "Recording is active. Enter your transcript manually after the pitch.",
-            ),
-          );
-        }
-      } else
-        setError(
-          t(
-            "В этом браузере нет распознавания речи. Аудио записывается; транскрипт можно добавить вручную.",
-            "This browser has no speech recognition. Audio is recording; you can add the transcript manually.",
-          ),
-        );
-    } catch {
-      stream.current?.getTracks().forEach((track) => track.stop());
-      if (mounted.current) {
-        setActive(false);
-        setError(
-          t(
-            "Микрофон недоступен. Можно продолжить текстом или разрешить доступ в браузере.",
-            "Microphone unavailable. Continue with text or allow microphone access in your browser.",
-          ),
-        );
-      }
-    } finally {
-      if (mounted.current && request.current === token) setPending(false);
-    }
-  };
-  return {
-    active,
-    pending,
-    error,
-    interim,
-    url,
-    mime,
-    start,
-    stop,
-    clearError: () => setError(""),
-  };
-}
+import useVoice from "./hooks/useVoice";
+
 const formatTime = (seconds) =>
   `${String(Math.floor(seconds / 60)).padStart(2, "0")}:${String(seconds % 60).padStart(2, "0")}`;
 function Portrait({ person, pick }) {
@@ -237,6 +72,7 @@ export default function PitchRoom({
     [step, setStep] = useState(0),
     [answer, setAnswer] = useState(""),
     [answers, setAnswers] = useState([]),
+    [answerFeedback, setAnswerFeedback] = useState(null),
     [slide, setSlide] = useState(0),
     [busy, setBusy] = useState(false),
     [confirmExit, setConfirmExit] = useState(false),
@@ -269,6 +105,11 @@ export default function PitchRoom({
       setAnswer(answerRef.current);
     }
   });
+  const move = (event) => {
+    const next = transitionPhase(phaseRef.current, event);
+    phaseRef.current = next;
+    setPhase(next);
+  };
   const endPitchRef = useRef(null);
   const endPitch = async () => {
     if (transition.current || phaseRef.current !== "pitch") return;
@@ -280,8 +121,7 @@ export default function PitchRoom({
     );
     await voice.stop();
     if (!mounted.current) return;
-    phaseRef.current = "review";
-    setPhase("review");
+    move("STOP");
     setBusy(false);
     transition.current = false;
   };
@@ -322,16 +162,15 @@ export default function PitchRoom({
     if (!mounted.current) return;
     started.current = Date.now();
     deadline.current = Date.now() + limit * 1000;
-    phaseRef.current = "pitch";
-    setPhase("pitch");
+    move("START");
     setBusy(false);
   };
   const review = () => {
     const text = pitch.trim();
     if (text.split(/\s+/).filter(Boolean).length < 10) return;
     setAnalysis(analyzePitch(text, t));
-    setQuestions(questionsFromPitch(text, arena, ask, t));
-    setPhase("analysis");
+    setQuestions(createQuestions(text, arena, ask, t));
+    move("ANALYZE");
   };
   const speak = (text) => {
     setSpeechError("");
@@ -365,37 +204,49 @@ export default function PitchRoom({
     window.speechSynthesis.speak(utterance);
   };
   useEffect(() => {
-    if (phase === "qa" && voiceEnabled) speak(questions[step]);
+    if (phase === "qa" && voiceEnabled && !answerFeedback)
+      speak(questions[step].text);
     return () => window.speechSynthesis?.cancel();
-  }, [phase, step, voiceEnabled]);
+  }, [phase, step, voiceEnabled, answerFeedback]);
   const send = async () => {
-    if (!answer.trim() || busy) return;
+    if (!answer.trim() || busy || transition.current || answerFeedback) return;
+    transition.current = true;
     setBusy(true);
     window.speechSynthesis?.cancel();
     await voice.stop();
     if (!mounted.current) return;
-    const list = [...answers, answerRef.current.trim()];
+    const text = answerRef.current.trim();
+    const report = evaluateAnswer(text, questions[step]);
+    setAnswers([...answers, text]);
+    // At most one extra question per round. It uses the player's answer verbatim.
+    if (!questions.some((q) => q.followUp)) {
+      const followUp = createFollowUp(text, questions[step], report, t);
+      if (followUp)
+        setQuestions([
+          ...questions.slice(0, step + 1),
+          followUp,
+          ...questions.slice(step + 1),
+        ]);
+    }
+    setAnswerFeedback(report);
+    setBusy(false);
+    transition.current = false;
+  };
+  const advance = () => {
+    if (transition.current || !answerFeedback) return;
+    transition.current = true;
     if (step < questions.length - 1) {
-      setAnswers(list);
       answerRef.current = "";
       setAnswer("");
+      setAnswerFeedback(null);
       setStep(step + 1);
-      setBusy(false);
+      transition.current = false;
       return;
     }
-    const coverage = list.filter((a) => a.split(/\s+/).length >= 15).length,
-      evidence = list.filter((a) => /\d/.test(a)).length,
-      words = list.join(" ").split(/\s+/).length;
-    const structure = analysis.topics.filter((v) => v.found).length * 5;
-    const score = Math.min(
-      100,
-      structure +
-        coverage * 8 +
-        evidence * 5 +
-        Math.min(10, Math.floor(analysis.words / 15)),
-    );
-    const xp = arena.xp + Math.floor(score / 10) * 5;
+    const evaluation = evaluateSession({ pitch, questions, answers, arena });
+    move("COMPLETE");
     onComplete({
+      ...evaluation,
       startup,
       arena: pick(arena.title),
       arenaId: arena.id,
@@ -403,27 +254,21 @@ export default function PitchRoom({
       duration: Math.max(1, Math.round((Date.now() - started.current) / 1000)),
       pitchDuration: pitchDuration.current,
       pitchLimit: limit,
-      score,
-      answers: list,
-      questions,
+      answers,
+      questions: questions.map((q) => q.text),
+      questionPlan: questions,
       pitchTranscript: pitch,
-      analysis,
       ask,
-      words,
-      coverage,
-      evidence,
-      xp,
-      stars: score >= 80 ? 3 : score >= 50 ? 2 : 1,
-      scoringVersion: 2,
+      practiceGoal: data.practiceGoal || null,
       personaId: arena.personaIds?.length === 1 ? arena.personaIds[0] : null,
     });
   };
   const startQuestions = () => {
     voice.clearError();
-    phaseRef.current = "qa";
-    setPhase("qa");
+    move("QUESTIONS");
   };
-  const current = panel[step % panel.length];
+  const speakerIndex = questions[step]?.speakerIndex ?? 0;
+  const current = panel[speakerIndex % panel.length];
   const stagePhase = ["ready", "pitch"].includes(phase);
   const phaseIndex = stagePhase ? 0 : phase === "qa" ? 2 : 1;
   const wordCount = pitch.trim().split(/\s+/).filter(Boolean).length;
@@ -652,7 +497,11 @@ export default function PitchRoom({
                   ? Math.min(
                       92,
                       25 +
-                        answers.filter((a) => a.length > 60).length * 14 +
+                        answers.reduce(
+                          (sum, a, index) =>
+                            sum + evaluateAnswer(a, questions[index]).points,
+                          0,
+                        ) +
                         (analysis?.topics.filter((x) => x.found).length || 0) *
                           2,
                     )
@@ -660,7 +509,7 @@ export default function PitchRoom({
               return (
                 <div
                   key={i}
-                  className={`stage-investor ${phase === "qa" && step % panel.length === i ? "speaking" : ""}`}
+                  className={`stage-investor ${phase === "qa" && speakerIndex % panel.length === i ? "speaking" : ""}`}
                 >
                   <div className="investor-seat">
                     <Portrait person={person} pick={pick} />
@@ -671,7 +520,7 @@ export default function PitchRoom({
                         <i />
                       </span>
                     )}
-                    {phase === "qa" && step % panel.length === i && (
+                    {phase === "qa" && speakerIndex % panel.length === i && (
                       <span className="speaker-mark">
                         <Volume2 size={13} />
                       </span>
@@ -680,7 +529,7 @@ export default function PitchRoom({
                   <strong>{pick(person.name)}</strong>
                   <span>
                     {phase === "qa"
-                      ? step % panel.length === i
+                      ? speakerIndex % panel.length === i
                         ? t("Задаёт вопрос", "Asking a question")
                         : t("Слушает ответ", "Listening")
                       : phase === "ready"
@@ -753,8 +602,8 @@ export default function PitchRoom({
                   <Target size={17} />
                   <span>
                     {t(
-                      "5 вопросов после разбора",
-                      "5 questions after the debrief",
+                      "5 вопросов + до 1 уточнения",
+                      "5 questions + up to 1 follow-up",
                     )}
                   </span>
                 </div>
@@ -948,6 +797,9 @@ export default function PitchRoom({
               </p>
             </>
           )}
+          {data.practiceGoal && (
+            <PracticeGoal goal={data.practiceGoal} t={t} compact />
+          )}
           {phase === "analysis" && (
             <>
               <div className="conversation-heading">
@@ -973,21 +825,15 @@ export default function PitchRoom({
                   <span>{t("тем обнаружено", "topics found")}</span>
                 </div>
               </div>
-              <div className="topic-checklist">
+              <div className="topic-evidence-list">
                 {analysis.topics.map((topic) => (
-                  <div key={topic.id} className={topic.found ? "found" : ""}>
-                    {topic.found ? (
-                      <CheckCircle2 size={17} />
-                    ) : (
-                      <Target size={17} />
-                    )}
-                    <span>{topic.label}</span>
-                    <small>
-                      {topic.found
-                        ? t("есть", "found")
-                        : t("уточним", "follow up")}
-                    </small>
-                  </div>
+                  <details key={topic.id}>
+                    <summary>
+                      <span>{t(...topic.name)}</span>
+                      <b>{topic.points}/10</b>
+                    </summary>
+                    <EvidenceChecks checks={topic.checks} t={t} />
+                  </details>
                 ))}
               </div>
               <div className="debrief-quote">
@@ -1000,7 +846,7 @@ export default function PitchRoom({
               </button>
               <button
                 className="ready-text-button"
-                onClick={() => setPhase("review")}
+                onClick={() => move("EDIT")}
               >
                 {t("Исправить транскрипт", "Edit transcript")}
               </button>
@@ -1027,13 +873,18 @@ export default function PitchRoom({
                 </div>
                 <button
                   className="icon-button"
-                  onClick={() => speak(questions[step])}
+                  onClick={() => speak(questions[step].text)}
                   aria-label={t("Озвучить вопрос", "Read question aloud")}
                 >
                   <Volume2 size={18} />
                 </button>
               </div>
-              <div className="question-bubble">{questions[step]}</div>
+              {questions[step].followUp && (
+                <span className="practice-eyebrow">
+                  {t("УТОЧНЕНИЕ ПО ТВОЕМУ ОТВЕТУ", "FOLLOW-UP TO YOUR ANSWER")}
+                </span>
+              )}
+              <div className="question-bubble">{questions[step].text}</div>
               <div className="question-voice-setting">
                 <button
                   onClick={() => setVoiceEnabled(!voiceEnabled)}
@@ -1046,68 +897,89 @@ export default function PitchRoom({
                 <span>{t("Нейтральный голос", "Neutral voice")}</span>
               </div>
               {speechError && <p className="mic-error">{speechError}</p>}
-              <div className="answer-header">
-                <label htmlFor="pitch-answer">
-                  {t("Твой ответ", "Your answer")}
-                </label>
-                <span>
-                  {voice.active
-                    ? t("Идёт запись", "Recording")
-                    : t("Голосом или текстом", "Speak or type")}
-                </span>
-              </div>
-              <textarea
-                id="pitch-answer"
-                value={answer}
-                maxLength={12000}
-                onChange={(e) => {
-                  answerRef.current = e.target.value;
-                  setAnswer(e.target.value);
-                }}
-                placeholder={t(
-                  "Ответь на вопрос — голосом или текстом…",
-                  "Answer the question — speak or type…",
-                )}
-              />
-              {voice.interim && (
-                <p className="interim-transcript">{voice.interim}</p>
+              {answerFeedback ? (
+                <section className="answer-review" aria-live="polite">
+                  <h3>
+                    {t("Что прозвучало в ответе", "What your answer covered")}
+                  </h3>
+                  <EvidenceChecks checks={answerFeedback.checks} t={t} />
+                  <p className="analysis-disclosure">
+                    {t(
+                      "Это проверка элементов текста, а не достоверности данных. Уточнение может дополнить ответ без дополнительного слота награды.",
+                      "This checks text elements, not the accuracy of your data. A follow-up can complete an answer without adding a reward slot.",
+                    )}
+                  </p>
+                  <button className="button dark full" onClick={advance}>
+                    {step === questions.length - 1
+                      ? t("Узнать результат", "See my results")
+                      : t("Следующий вопрос", "Next question")}
+                    <ArrowRight size={17} />
+                  </button>
+                </section>
+              ) : (
+                <>
+                  <div className="answer-header">
+                    <label htmlFor="pitch-answer">
+                      {t("Твой ответ", "Your answer")}
+                    </label>
+                    <span>
+                      {voice.active
+                        ? t("Идёт запись", "Recording")
+                        : t("Голосом или текстом", "Speak or type")}
+                    </span>
+                  </div>
+                  <textarea
+                    id="pitch-answer"
+                    value={answer}
+                    maxLength={12000}
+                    onChange={(e) => {
+                      answerRef.current = e.target.value;
+                      setAnswer(e.target.value);
+                    }}
+                    placeholder={t(
+                      "Ответь на вопрос — голосом или текстом…",
+                      "Answer the question — speak or type…",
+                    )}
+                  />
+                  {voice.interim && (
+                    <p className="interim-transcript">{voice.interim}</p>
+                  )}
+                  {voice.error && (
+                    <p className="mic-error" role="status">
+                      {voice.error}
+                    </p>
+                  )}
+                  <div className="answer-actions">
+                    <button
+                      className={`mic-button ${voice.active ? "recording" : ""}`}
+                      disabled={voice.pending || busy}
+                      onClick={
+                        voice.active
+                          ? voice.stop
+                          : () => {
+                              window.speechSynthesis?.cancel();
+                              voice.start();
+                            }
+                      }
+                      aria-label={
+                        voice.active
+                          ? t("Остановить запись", "Stop recording")
+                          : t("Включить микрофон", "Start microphone")
+                      }
+                    >
+                      {voice.active ? <Square size={19} /> : <Mic size={22} />}
+                    </button>
+                    <button
+                      className="button dark"
+                      disabled={!answer.trim() || busy}
+                      onClick={send}
+                    >
+                      {t("Разобрать ответ", "Review answer")}
+                      <ArrowRight size={17} />
+                    </button>
+                  </div>
+                </>
               )}
-              {voice.error && (
-                <p className="mic-error" role="status">
-                  {voice.error}
-                </p>
-              )}
-              <div className="answer-actions">
-                <button
-                  className={`mic-button ${voice.active ? "recording" : ""}`}
-                  disabled={voice.pending || busy}
-                  onClick={
-                    voice.active
-                      ? voice.stop
-                      : () => {
-                          window.speechSynthesis?.cancel();
-                          voice.start();
-                        }
-                  }
-                  aria-label={
-                    voice.active
-                      ? t("Остановить запись", "Stop recording")
-                      : t("Включить микрофон", "Start microphone")
-                  }
-                >
-                  {voice.active ? <Square size={19} /> : <Mic size={22} />}
-                </button>
-                <button
-                  className="button dark"
-                  disabled={!answer.trim() || busy}
-                  onClick={send}
-                >
-                  {step === questions.length - 1
-                    ? t("Узнать результат", "See my results")
-                    : t("Ответить", "Send answer")}
-                  <ArrowRight size={17} />
-                </button>
-              </div>
               <div className="coach-tip">
                 <Lightbulb size={17} />
                 <p>

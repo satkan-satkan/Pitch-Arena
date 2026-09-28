@@ -6183,3 +6183,225 @@ main {
     stroke-dasharray: 4 7;
   }
 }
+
+/* Evidence-based practice loop */
+.practice-feedback {
+  display: grid;
+  gap: 22px;
+  margin: 24px 0;
+}
+.practice-eyebrow {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 10px;
+  letter-spacing: 1px;
+  font-weight: 750;
+  color: #766599;
+}
+.attempt-comparison {
+  background: #f3effa;
+  border: 1px solid #e3d9f2;
+  border-radius: 18px;
+  padding: 22px;
+}
+.attempt-comparison h3,
+.practice-goal h3,
+.practice-rubric h3 {
+  margin: 9px 0;
+  font-size: 18px;
+}
+.attempt-comparison p,
+.practice-goal p,
+.practice-rubric > p {
+  color: #746e7c;
+  font-size: 13px;
+  line-height: 1.65;
+  margin: 8px 0 0;
+}
+.comparison-score {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  align-items: center;
+  margin: 18px 0 8px;
+}
+.comparison-score strong {
+  font-size: 32px;
+  letter-spacing: -1px;
+}
+.comparison-score > span {
+  border-radius: 20px;
+  padding: 6px 11px;
+  background: #dcebdc;
+  color: #386148;
+  font-size: 13px;
+  font-weight: 700;
+}
+.comparison-score.decreased > span {
+  background: #f4e2d3;
+  color: #80583f;
+}
+.rubric-row {
+  display: grid;
+  grid-template-columns: minmax(150px, 1fr) 100px 44px 28px;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 0;
+  border-bottom: 1px solid #eeeaf0;
+  font-size: 12px;
+}
+.rubric-row strong {
+  font-size: 13px;
+}
+.rubric-row small {
+  display: block;
+  color: #8a8492;
+  margin-top: 5px;
+  font-size: 11px;
+}
+.rubric-track {
+  height: 6px;
+  border-radius: 10px;
+  background: #eee9f3;
+  overflow: hidden;
+}
+.rubric-track span {
+  display: block;
+  height: 100%;
+  background: #a78acb;
+  border-radius: inherit;
+}
+.rubric-delta {
+  color: #766599;
+  font-weight: 700;
+}
+.practice-goal {
+  padding: 22px;
+  border: 1px solid #e7ddce;
+  background: #faf4e9;
+  border-radius: 18px;
+}
+.practice-goal.compact {
+  margin: 16px 0;
+  padding: 16px;
+}
+.practice-goal.compact h3 {
+  font-size: 15px;
+}
+.practice-goal blockquote,
+.practice-evidence blockquote {
+  margin: 12px 0;
+  padding: 9px 12px;
+  border-left: 2px solid #c1acd7;
+  font-size: 12px;
+  line-height: 1.7;
+  color: #6c627a;
+  overflow-wrap: anywhere;
+}
+.practice-evidence {
+  border: 1px solid #e9e4ed;
+  border-radius: 14px;
+  padding: 16px;
+}
+.practice-evidence summary {
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 650;
+  line-height: 1.6;
+}
+.practice-evidence summary svg {
+  vertical-align: middle;
+  margin-left: 6px;
+}
+.practice-evidence section + section {
+  border-top: 1px solid #eeeaf0;
+  padding-top: 12px;
+}
+.practice-evidence h4 {
+  font-size: 13px;
+  line-height: 1.7;
+  margin: 18px 0 10px;
+  overflow-wrap: anywhere;
+}
+.evidence-checks {
+  margin: 12px 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 13px;
+}
+.evidence-checks li {
+  display: flex;
+  gap: 9px;
+  align-items: flex-start;
+}
+.evidence-checks svg {
+  flex-shrink: 0;
+  color: #a08c68;
+  margin-top: 2px;
+}
+.evidence-checks .matched svg {
+  color: #6b927b;
+}
+.evidence-checks strong {
+  font-size: 12px;
+  line-height: 1.5;
+}
+.evidence-checks p {
+  font-size: 12px;
+  line-height: 1.6;
+  margin: 4px 0;
+  color: #82798a;
+}
+.evidence-checks blockquote {
+  font-size: 12px;
+  line-height: 1.6;
+  margin: 7px 0 0;
+  padding: 8px 10px;
+  background: #f6f3f8;
+  border-left: 2px solid #c8b6dd;
+  color: #6c627a;
+  overflow-wrap: anywhere;
+}
+.topic-evidence-list {
+  display: grid;
+  gap: 9px;
+  margin: 18px 0;
+}
+.topic-evidence-list details {
+  padding: 12px;
+  border: 1px solid #e9e2ef;
+  border-radius: 12px;
+}
+.topic-evidence-list summary {
+  cursor: pointer;
+  font-size: 12px;
+  line-height: 1.6;
+}
+.topic-evidence-list summary b {
+  float: right;
+  color: #8d73ac;
+}
+.answer-review {
+  margin-top: 20px;
+}
+.answer-review h3 {
+  font-size: 16px;
+}
+@media (max-width: 600px) {
+  .rubric-row {
+    grid-template-columns: minmax(0, 1fr) 46px 27px;
+    gap: 7px;
+  }
+  .rubric-track {
+    display: none;
+  }
+  .attempt-comparison,
+  .practice-goal {
+    padding: 17px;
+  }
+  .practice-evidence {
+    padding: 12px;
+  }
+}

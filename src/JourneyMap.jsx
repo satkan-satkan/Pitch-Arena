@@ -22,6 +22,7 @@ import {
   panelFor,
   photo,
 } from "./game-data";
+import { summarizeScores } from "./practice/engine";
 const countries = feature(world, world.objects.countries).features.filter(
   (c) => c.id !== "010",
 );
@@ -151,9 +152,8 @@ export function JourneyMap({ history, t, pick, onSelect }) {
       });
   }, [activeId]);
   const done = history.some((h) => h.arenaId === activeId);
-  const best = Math.max(
-    0,
-    ...history.filter((h) => h.arenaId === activeId).map((h) => h.score),
+  const { best } = summarizeScores(
+    history.filter((h) => h.arenaId === activeId),
   );
   const panel = panelFor(active);
   const visible = (a) =>
@@ -369,8 +369,13 @@ export function JourneyMap({ history, t, pick, onSelect }) {
           <strong>
             <Zap size={14} />+{active.xp} XP
           </strong>
-          {done && (
-            <small>
+          {best !== null && (
+            <small
+              title={t(
+                "По текущим правилам оценки",
+                "Using the current scoring rules",
+              )}
+            >
               <Star size={11} />
               {t("Лучший", "Best")}: {best}/100
             </small>

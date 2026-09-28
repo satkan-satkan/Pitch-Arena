@@ -18,7 +18,7 @@ test("Questions follow the actual pitch and distinguish missing revenue evidence
     "Мы строим сервис доставки лекарств. У нас 120 клиентов и рост 15% каждый месяц.";
   const questions = questionsFromPitch(text, arena, 50000, ru);
   assert.equal(questions.length, 5);
-  assert.ok(questions[0].includes("сервис доставки лекарств"));
+  assert.ok(questions[0].includes("120 клиентов"));
   assert.ok(questions[1].includes("120"));
   assert.ok(questions[2].includes("Кто будет платить"));
   assert.ok(questions[3].includes("50,000"));
