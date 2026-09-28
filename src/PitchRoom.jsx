@@ -160,6 +160,7 @@ export default function PitchRoom({
         startup,
         ask,
         arenaId: arena.id,
+        arena,
         pitchSeconds: limit,
         language: lang,
         spokenQuestions: voiceEnabled,

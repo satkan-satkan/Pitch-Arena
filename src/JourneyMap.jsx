@@ -15,7 +15,7 @@ import {
   Zap,
 } from "lucide-react";
 import {
-  arenas,
+  arenas as defaultArenas,
   campaign,
   nextArena,
   medalsFor,
@@ -34,8 +34,14 @@ const projection = geoNaturalEarth1().fitExtent(
   { type: "FeatureCollection", features: countries },
 );
 const path = geoPath(projection);
-export function QuestStrip({ history, t, pick, onSelect }) {
-  const next = nextArena(history);
+export function QuestStrip({
+  history,
+  t,
+  pick,
+  onSelect,
+  arenas = defaultArenas,
+}) {
+  const next = nextArena(history, arenas);
   return (
     <section
       className="quest-strip"
@@ -65,6 +71,7 @@ export function QuestStrip({ history, t, pick, onSelect }) {
             <button
               key={id}
               className={`quest-node ${done ? "cleared" : ""} ${next.id === id ? "current" : ""}`}
+              disabled={a.enabled === false}
               onClick={() => onSelect(a)}
               title={pick(a.title)}
             >
@@ -132,8 +139,14 @@ export function TrophyShelf({ history, t, pick }) {
     </section>
   );
 }
-export function JourneyMap({ history, t, pick, onSelect }) {
-  const [activeId, setActiveId] = useState(nextArena(history).id);
+export function JourneyMap({
+  history,
+  t,
+  pick,
+  onSelect,
+  arenas = defaultArenas,
+}) {
+  const [activeId, setActiveId] = useState(nextArena(history, arenas).id);
   const [region, setRegion] = useState("all");
   const id = useId().replaceAll(":", "");
   const active = arenas.find((a) => a.id === activeId);
@@ -381,7 +394,11 @@ export function JourneyMap({ history, t, pick, onSelect }) {
             </small>
           )}
         </div>
-        <button className="button dark" onClick={() => onSelect(active)}>
+        <button
+          className="button dark"
+          disabled={active.enabled === false}
+          onClick={() => onSelect(active)}
+        >
           {done
             ? t("Улучшить результат", "Beat your score")
             : t("На сцену", "Enter the arena")}

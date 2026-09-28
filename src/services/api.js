@@ -36,6 +36,34 @@ export async function api(
 }
 export function errorText(error, t) {
   const messages = {
+    ADMIN_REQUIRED: [
+      "Доступ только для администратора.",
+      "Administrator access required.",
+    ],
+    ACCOUNT_BLOCKED: [
+      "Доступ к аккаунту приостановлен.",
+      "This account is blocked.",
+    ],
+    STALE_ADMIN_DATA: [
+      "Данные уже изменились. Закрой форму, обнови список и повтори.",
+      "Data changed. Close the editor, refresh and try again.",
+    ],
+    SELF_LOCKOUT: [
+      "Нельзя заблокировать себя или снять свою роль администратора.",
+      "You cannot block yourself or remove your own admin role.",
+    ],
+    LAST_ADMIN: [
+      "Нельзя удалить последнего активного администратора.",
+      "The last active administrator must remain.",
+    ],
+    START_ARENA_REQUIRED: [
+      "Стартовая арена должна оставаться доступной.",
+      "The starting arena must remain available.",
+    ],
+    ARENA_UNAVAILABLE: [
+      "Арена временно недоступна. Выбери другую.",
+      "This arena is temporarily unavailable. Choose another.",
+    ],
     SERVER_OFFLINE: [
       "Сервер недоступен. Проверь соединение и повтори. Текст остаётся на этом устройстве.",
       "Server unavailable. Check your connection and retry. Text remains on this device.",

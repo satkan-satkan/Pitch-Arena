@@ -13,11 +13,17 @@
     "dev:server": "node --env-file-if-exists=.env server/index.js",
     "start": "node --env-file-if-exists=.env server/index.js",
     "audio:prepare": "node scripts/prepare-audio.mjs",
-    "test:workspace": "node tests/workspace-browser.mjs"
+    "test:workspace": "node tests/workspace-browser.mjs",
+    "db:migrate": "node --env-file-if-exists=.env scripts/database.mjs migrate",
+    "db:import-sqlite": "node --env-file-if-exists=.env scripts/database.mjs import-sqlite",
+    "admin:grant": "node --env-file-if-exists=.env scripts/database.mjs grant-admin",
+    "test:postgres": "node --env-file-if-exists=.env --test tests/postgres.integration.mjs",
+    "test:admin": "node --env-file-if-exists=.env tests/admin-browser.mjs"
   },
   "dependencies": {
     "d3-geo": "^3.1.1",
     "lucide-react": "^0.468.0",
+    "pg": "^8.23.0",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
     "topojson-client": "^3.1.0",

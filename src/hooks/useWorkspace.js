@@ -7,6 +7,7 @@ export default function useWorkspace() {
     [draft, setDraft] = useState(null),
     [aiReady, setAiReady] = useState(false),
     [online, setOnline] = useState(false),
+    [catalog, setCatalog] = useState(null),
     [checking, setChecking] = useState(true),
     [activeProjectId, setActiveProjectId] = useState("");
   const latestRequest = useRef(0);
@@ -24,6 +25,7 @@ export default function useWorkspace() {
     }
     if (request !== latestRequest.current) return r;
     setAccount(r.user);
+    setCatalog(r.catalog);
     setProjects(r.projects);
     setHistory(r.history);
     setDraft(r.draft);
@@ -50,6 +52,7 @@ export default function useWorkspace() {
     setDraft,
     aiReady,
     online,
+    catalog,
     checking,
     activeProjectId,
     setActiveProjectId,

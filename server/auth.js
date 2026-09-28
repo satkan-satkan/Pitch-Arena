@@ -20,10 +20,10 @@ export async function checkPassword(password, encoded) {
     candidate.length === expected.length && timingSafeEqual(candidate, expected)
   );
 }
-export function createLogin(store, userId, secure = false) {
+export async function createLogin(store, userId, secure = false) {
   const token = randomBytes(32).toString("hex");
-  store.run("DELETE FROM logins WHERE expires < ?", Date.now());
-  store.run(
+  await store.run("DELETE FROM logins WHERE expires < ?", Date.now());
+  await store.run(
     "INSERT INTO logins VALUES(?,?,?)",
     tokenHash(token),
     userId,
@@ -40,19 +40,24 @@ export function readToken(req) {
       ?.slice(11) || ""
   );
 }
-export function currentUser(store, req) {
+export async function currentUser(store, req) {
   const token = readToken(req);
   if (!/^[a-f0-9]{64}$/.test(token)) return null;
   return (
-    store.get(
-      "SELECT users.* FROM users JOIN logins ON users.id=logins.user_id WHERE token_hash=? AND expires>?",
+    (await store.get(
+      "SELECT users.* FROM users JOIN logins ON users.id=logins.user_id WHERE token_hash=? AND expires>? AND users.status='active'",
       tokenHash(token),
       Date.now(),
-    ) || null
+    )) || null
   );
 }
 export function publicUser(user) {
   return user
-    ? { id: user.id, email: user.email, profile: JSON.parse(user.profile) }
+    ? {
+        id: user.id,
+        email: user.email,
+        role: user.role || "member",
+        profile: JSON.parse(user.profile),
+      }
     : null;
 }

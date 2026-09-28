@@ -1,3 +1,5 @@
+import { seedCatalog, readCatalog } from "./catalog.js";
+import { handleAdmin } from "./admin.js";
 import http from "node:http";
 import { randomUUID, createHash } from "node:crypto";
 import {
@@ -11,7 +13,7 @@ import {
 } from "node:fs";
 import { resolve, extname, sep } from "node:path";
 import { ZodError } from "zod";
-import { openStore } from "./store.js";
+
 import {
   currentUser,
   publicUser,
@@ -39,7 +41,6 @@ import {
   evaluateAnswer,
   evaluateSession,
 } from "../src/practice/engine.js";
-
 class HttpError extends Error {
   constructor(status, code) {
     super(code);
@@ -93,7 +94,7 @@ const assetView = (a) => ({
   url: `/api/assets/${a.id}`,
 });
 export function createApp({
-  store = openStore(),
+  store,
   assetDir = resolve(".data/assets"),
   distDir = resolve("dist"),
   mentor = createMentor(),
@@ -106,35 +107,46 @@ export function createApp({
     process.env.APP_ORIGIN,
   ].filter(Boolean),
 } = {}) {
-  mkdirSync(assetDir, { recursive: true, mode: 0o700 });
-  const buckets = new Map(),
-    locks = new Set();
+  if (!store) throw new Error("A database store is required");
+  mkdirSync(assetDir, {
+    recursive: true,
+    mode: 0o700,
+  });
+  const ready = seedCatalog(store);
+  const buckets = new Map();
+  const respond = (status, payload) => ({ status, payload });
   function throttle(key, limit, period) {
     const now = Date.now();
     if (buckets.size > 5000)
       for (const [k, v] of buckets) if (v.until < now) buckets.delete(k);
     const b = buckets.get(key);
     if (!b || b.until < now) {
-      buckets.set(key, { count: 1, until: now + period });
+      buckets.set(key, {
+        count: 1,
+        until: now + period,
+      });
       return;
     }
     if (++b.count > limit) fail(429, "RATE_LIMITED");
   }
-  const ownedSession = (id, user) =>
-    store.get("SELECT * FROM sessions WHERE id=? AND user_id=?", id, user.id) ||
-    fail(404, "NOT_FOUND");
-  const snapshot = (row) => ({
+  const ownedSession = async (id, user) =>
+    (await store.get(
+      "SELECT * FROM sessions WHERE id=? AND user_id=?",
+      id,
+      user.id,
+    )) || fail(404, "NOT_FOUND");
+  const snapshot = async (row) => ({
     ...JSON.parse(row.data),
     id: row.id,
     projectId: row.project_id,
     revision: row.revision,
-    assets: store
-      .all("SELECT * FROM assets WHERE session_id=?", row.id)
-      .map(assetView),
+    assets: (
+      await store.all("SELECT * FROM assets WHERE session_id=?", row.id)
+    ).map(assetView),
   });
-  function save(row, data, status = "draft") {
+  async function save(row, data, status = "draft") {
     const now = new Date().toISOString();
-    const r = store.run(
+    const r = await store.run(
       "UPDATE sessions SET data=?,revision=revision+1,status=?,updated_at=? WHERE id=? AND revision=?",
       JSON.stringify(data),
       status,
@@ -143,18 +155,20 @@ export function createApp({
       row.revision,
     );
     if (!r.changes) fail(409, "STALE_SESSION");
-    return snapshot(store.get("SELECT * FROM sessions WHERE id=?", row.id));
+    return await snapshot(
+      await store.get("SELECT * FROM sessions WHERE id=?", row.id),
+    );
   }
-  function history(user) {
-    const completed = store
-      .all(
+  async function history(user) {
+    const completed = (
+      await store.all(
         "SELECT data FROM sessions WHERE user_id=? AND status='completed' ORDER BY updated_at DESC",
         user.id,
       )
-      .map((row) => JSON.parse(row.data).result);
-    const imported = store
-      .all("SELECT data FROM imports WHERE user_id=?", user.id)
-      .map((row) => JSON.parse(row.data));
+    ).map((row) => JSON.parse(row.data).result);
+    const imported = (
+      await store.all("SELECT data FROM imports WHERE user_id=?", user.id)
+    ).map((row) => JSON.parse(row.data));
     return [...completed, ...imported].sort(
       (a, b) => new Date(b.date) - new Date(a.date),
     );
@@ -162,6 +176,7 @@ export function createApp({
   const tFor = (lang) => (ru, en) => (lang === "en" ? en : ru);
   const readState = (row) => JSON.parse(row.data);
   async function handle(req, res) {
+    await ready;
     res.setHeader("X-Content-Type-Options", "nosniff");
     const url = new URL(req.url, "http://localhost");
     const path = url.pathname;
@@ -187,27 +202,47 @@ export function createApp({
       )
         fail(415, "JSON_REQUIRED");
     }
-    const user = currentUser(store, req);
+    const user = await currentUser(store, req);
+    if (path.startsWith("/api/admin/"))
+      return json(
+        res,
+        200,
+        await handleAdmin({
+          req,
+          url,
+          user,
+          store,
+          body,
+          aiReady: mentor.ready,
+        }),
+      );
+    if (path === "/api/catalog" && req.method === "GET")
+      return json(res, 200, await readCatalog(store));
     if (path === "/api/health" && req.method === "GET")
-      return json(res, 200, { ok: true, aiReady: mentor.ready });
+      return json(res, 200, {
+        ok: true,
+        database: store.dialect,
+        aiReady: mentor.ready,
+      });
     if (path === "/api/bootstrap" && req.method === "GET")
       return json(res, 200, {
+        catalog: await readCatalog(store),
         user: publicUser(user),
         aiReady: mentor.ready,
         projects: user
-          ? store.all(
+          ? await store.all(
               "SELECT id,name,industry,description FROM projects WHERE user_id=? ORDER BY created_at",
               user.id,
             )
           : [],
-        history: user ? history(user) : [],
+        history: user ? await history(user) : [],
         draft: user
-          ? (() => {
-              const row = store.get(
+          ? await (async () => {
+              const row = await store.get(
                 "SELECT * FROM sessions WHERE user_id=? AND status='draft'",
                 user.id,
               );
-              return row ? snapshot(row) : null;
+              return row ? await snapshot(row) : null;
             })()
           : null,
       });
@@ -217,7 +252,10 @@ export function createApp({
     ) {
       throttle(`auth:${req.socket.remoteAddress}`, 15, 10 * 60000);
       const input = credentials.parse(await body(req));
-      let account = store.get("SELECT * FROM users WHERE email=?", input.email);
+      let account = await store.get(
+        "SELECT * FROM users WHERE email=?",
+        input.email,
+      );
       if (path.endsWith("/register")) {
         if (account) fail(409, "EMAIL_IN_USE");
         const id = randomUUID(),
@@ -229,8 +267,8 @@ export function createApp({
           };
         const password = await hashPassword(input.password);
         try {
-          store.run(
-            "INSERT INTO users VALUES(?,?,?,?,?)",
+          await store.run(
+            "INSERT INTO users(id,email,password_hash,profile,created_at) VALUES(?,?,?,?,?)",
             id,
             input.email,
             password,
@@ -238,10 +276,11 @@ export function createApp({
             new Date().toISOString(),
           );
         } catch (error) {
-          if (error.code?.startsWith("ERR_SQLITE")) fail(409, "EMAIL_IN_USE");
+          if (error.code === "23505" || error.code?.startsWith("ERR_SQLITE"))
+            fail(409, "EMAIL_IN_USE");
           throw error;
         }
-        account = store.get("SELECT * FROM users WHERE id=?", id);
+        account = await store.get("SELECT * FROM users WHERE id=?", id);
       } else {
         // Same slow verification path for unknown accounts.
         const encoded =
@@ -249,22 +288,29 @@ export function createApp({
         if (!(await checkPassword(input.password, encoded)) || !account)
           fail(401, "INVALID_CREDENTIALS");
       }
+      if (account.status === "blocked") fail(403, "ACCOUNT_BLOCKED");
       return json(
         res,
         200,
-        { user: publicUser(account) },
-        { "Set-Cookie": createLogin(store, account.id, secureCookies) },
+        {
+          user: publicUser(account),
+        },
+        {
+          "Set-Cookie": await createLogin(store, account.id, secureCookies),
+        },
       );
     }
     if (path === "/api/auth/logout" && req.method === "POST") {
-      store.run(
+      await store.run(
         "DELETE FROM logins WHERE token_hash=?",
         tokenHash(readToken(req)),
       );
       return json(
         res,
         200,
-        { ok: true },
+        {
+          ok: true,
+        },
         {
           "Set-Cookie": `pa_session=; HttpOnly; SameSite=Lax; Path=/; Max-Age=0${secureCookies ? "; Secure" : ""}`,
         },
@@ -273,22 +319,28 @@ export function createApp({
     if (!user) fail(401, "LOGIN_REQUIRED");
     if (path === "/api/profile" && req.method === "PUT") {
       const profile = profileSchema.parse(await body(req));
-      store.run(
+      await store.run(
         "UPDATE users SET profile=? WHERE id=?",
         JSON.stringify(profile),
         user.id,
       );
-      return json(res, 200, { profile });
+      return json(res, 200, {
+        profile,
+      });
     }
     if (path === "/api/projects" && req.method === "POST") {
       const input = projectSchema.parse(await body(req));
       if (
-        store.get("SELECT count(*) AS n FROM projects WHERE user_id=?", user.id)
-          .n >= 50
+        (
+          await store.get(
+            "SELECT count(*) AS n FROM projects WHERE user_id=?",
+            user.id,
+          )
+        ).n >= 50
       )
         fail(409, "PROJECT_LIMIT");
       const id = randomUUID();
-      store.run(
+      await store.run(
         "INSERT INTO projects VALUES(?,?,?,?,?,?)",
         id,
         user.id,
@@ -297,30 +349,38 @@ export function createApp({
         input.description,
         new Date().toISOString(),
       );
-      return json(res, 201, { id, ...input });
+      return json(res, 201, {
+        id,
+        ...input,
+      });
     }
     if (/^\/api\/projects\/[^/]+$/.test(path) && req.method === "PUT") {
       const input = projectSchema.parse(await body(req));
       const id = path.split("/").at(-1);
       if (
-        !store.run(
-          "UPDATE projects SET name=?,industry=?,description=? WHERE id=? AND user_id=?",
-          input.name,
-          input.industry,
-          input.description,
-          id,
-          user.id,
+        !(
+          await store.run(
+            "UPDATE projects SET name=?,industry=?,description=? WHERE id=? AND user_id=?",
+            input.name,
+            input.industry,
+            input.description,
+            id,
+            user.id,
+          )
         ).changes
       )
         fail(404, "NOT_FOUND");
-      return json(res, 200, { id, ...input });
+      return json(res, 200, {
+        id,
+        ...input,
+      });
     }
     if (path === "/api/history/import" && req.method === "POST") {
       const { records } = await body(req, 2 * 1024 * 1024);
       if (!Array.isArray(records) || records.length > 200)
         fail(400, "INVALID_IMPORT");
       let count = 0;
-      store.transaction(() => {
+      await store.transaction(async () => {
         for (const raw of records) {
           const parsed = historySchema.safeParse(raw);
           if (!parsed.success) continue;
@@ -345,29 +405,45 @@ export function createApp({
             xp: Math.min(500, Math.max(0, item.xp ?? 100)),
           };
           count += Number(
-            store.run(
-              "INSERT OR IGNORE INTO imports VALUES(?,?,?)",
-              user.id,
-              sourceId,
-              JSON.stringify(safe),
+            (
+              await store.run(
+                "INSERT INTO imports VALUES(?,?,?) ON CONFLICT(user_id,source_id) DO NOTHING",
+                user.id,
+                sourceId,
+                JSON.stringify(safe),
+              )
             ).changes,
           );
         }
       });
-      return json(res, 200, { count, history: history(user) });
+      return json(res, 200, {
+        count,
+        history: await history(user),
+      });
     }
     if (path === "/api/sessions" && req.method === "POST") {
       const input = sessionSchema.parse(await body(req));
-      const project = store.get(
+      const project = await store.get(
         "SELECT * FROM projects WHERE id=? AND user_id=?",
         input.projectId,
         user.id,
       );
       if (!project) fail(404, "NOT_FOUND");
-      if (!arenas.some((a) => a.id === input.arenaId))
-        fail(400, "INVALID_ARENA");
+      const selectedArena = (await readCatalog(store)).arenas.find(
+        (a) => a.id === input.arenaId,
+      );
+      if (!selectedArena) fail(400, "INVALID_ARENA");
+      if (!selectedArena.enabled) fail(409, "ARENA_UNAVAILABLE");
+      if (input.personaId) {
+        if (!selectedArena.personaIds?.includes(input.personaId))
+          fail(400, "INVALID_PERSONA");
+        selectedArena.personaIds = [input.personaId];
+        selectedArena.panelMembers = selectedArena.panelMembers.filter(
+          (v) => v.id === input.personaId,
+        );
+      }
       if (
-        store.get(
+        await store.get(
           "SELECT id FROM sessions WHERE user_id=? AND status='draft'",
           user.id,
         )
@@ -376,7 +452,11 @@ export function createApp({
       const id = randomUUID(),
         now = new Date().toISOString();
       const data = {
-        config: { ...input, startup: project.name },
+        config: {
+          ...input,
+          startup: project.name,
+          arena: selectedArena,
+        },
         state: {
           phase: "ready",
           pitch: "",
@@ -397,21 +477,26 @@ export function createApp({
         startedAt: null,
         deadline: null,
       };
-      store.run(
-        "INSERT INTO sessions VALUES(?,?,?,?,?,0,?,?)",
-        id,
-        user.id,
-        input.projectId,
-        "draft",
-        JSON.stringify(data),
-        now,
-        now,
-      );
-      return json(res, 201, snapshot(ownedSession(id, user)));
+      try {
+        await store.run(
+          "INSERT INTO sessions VALUES(?,?,?,?,?,0,?,?)",
+          id,
+          user.id,
+          input.projectId,
+          "draft",
+          JSON.stringify(data),
+          now,
+          now,
+        );
+      } catch (error) {
+        if (error.code === "23505") fail(409, "DRAFT_EXISTS");
+        throw error;
+      }
+      return json(res, 201, await snapshot(await ownedSession(id, user)));
     }
     const assetMatch = path.match(/^\/api\/assets\/([^/]+)$/);
     if (assetMatch && req.method === "GET") {
-      const asset = store.get(
+      const asset = await store.get(
         "SELECT * FROM assets WHERE id=? AND user_id=?",
         assetMatch[1],
         user.id,
@@ -432,32 +517,36 @@ export function createApp({
     );
     if (!match) fail(404, "NOT_FOUND");
     const [, id, action] = match;
-    let row = ownedSession(id, user);
-    if (req.method === "GET" && !action) return json(res, 200, snapshot(row));
-    if (
-      req.method === "POST" &&
-      action === "complete" &&
-      row.status === "completed"
-    )
-      return json(res, 200, {
-        result: readState(row).result,
-        revision: row.revision,
-      });
-    if (row.status !== "draft") fail(409, "SESSION_CLOSED");
-    if (locks.has(id)) fail(409, "SESSION_BUSY");
-    if (
-      Number(req.headers["if-match"]) !== row.revision ||
-      req.headers["if-match"] === undefined
-    )
-      fail(409, "STALE_SESSION");
-    locks.add(id);
-    try {
+    await ownedSession(id, user);
+    if (req.method === "GET" && !action)
+      return json(res, 200, await snapshot(await ownedSession(id, user)));
+    const output = await store.transaction(async () => {
+      await store.lock(`session:${id}`);
+      const row = await ownedSession(id, user);
+      if (
+        req.method === "POST" &&
+        action === "complete" &&
+        row.status === "completed"
+      )
+        return respond(200, {
+          result: readState(row).result,
+          revision: row.revision,
+        });
+      if (row.status !== "draft") fail(409, "SESSION_CLOSED");
+
+      if (
+        Number(req.headers["if-match"]) !== row.revision ||
+        req.headers["if-match"] === undefined
+      )
+        fail(409, "STALE_SESSION");
+
       const data = readState(row),
         s = data.state,
         t = tFor(data.config.language),
-        arena = arenas.find((a) => a.id === data.config.arenaId);
+        arena =
+          data.config.arena || arenas.find((a) => a.id === data.config.arenaId);
       if (req.method === "DELETE" && !action) {
-        for (const a of store.all(
+        for (const a of await store.all(
           "SELECT * FROM assets WHERE session_id=?",
           id,
         )) {
@@ -465,11 +554,17 @@ export function createApp({
             unlinkSync(a.path);
           } catch {}
         }
-        store.run("DELETE FROM sessions WHERE id=? AND user_id=?", id, user.id);
-        return json(res, 200, { ok: true });
+        await store.run(
+          "DELETE FROM sessions WHERE id=? AND user_id=?",
+          id,
+          user.id,
+        );
+        return respond(200, {
+          ok: true,
+        });
       }
       if (req.method === "POST" && action === "assets") {
-        const existing = store.all(
+        const existing = await store.all(
           "SELECT * FROM assets WHERE session_id=?",
           id,
         );
@@ -507,9 +602,11 @@ export function createApp({
                 : bytes.subarray(0, 4).toString() === "RIFF" &&
                   bytes.subarray(8, 12).toString() === "WEBP";
         if (!valid) fail(400, "INVALID_FILE_CONTENT");
-        const used = store.get(
-          "SELECT coalesce(sum(bytes),0) AS n FROM assets WHERE user_id=?",
-          user.id,
+        const used = (
+          await store.get(
+            "SELECT coalesce(sum(bytes),0) AS n FROM assets WHERE user_id=?",
+            user.id,
+          )
         ).n;
         if (
           used + bytes.length > 100 * 1024 * 1024 ||
@@ -519,9 +616,11 @@ export function createApp({
           fail(413, "STORAGE_LIMIT");
         const assetId = randomUUID(),
           file = resolve(assetDir, assetId);
-        writeFileSync(file, bytes, { mode: 0o600 });
+        writeFileSync(file, bytes, {
+          mode: 0o600,
+        });
         try {
-          store.run(
+          await store.run(
             "INSERT INTO assets VALUES(?,?,?,?,?,?,?)",
             assetId,
             id,
@@ -535,7 +634,7 @@ export function createApp({
           unlinkSync(file);
           throw error;
         }
-        return json(res, 201, save(row, data));
+        return respond(201, await save(row, data));
       }
       const input = await body(req);
       if (action === "draft" && req.method === "PUT") {
@@ -547,7 +646,6 @@ export function createApp({
           s.questions = [];
           s.mentor = null;
         }
-
         if (["ready", "pitch", "review"].includes(s.phase)) {
           if (draft.phase === "review" && s.phase === "pitch") {
             s.phase = "review";
@@ -566,14 +664,14 @@ export function createApp({
         s.answer = draft.answer;
         s.slide = draft.slide;
         s.voiceEnabled = draft.voiceEnabled;
-        return json(res, 200, save(row, data));
+        return respond(200, await save(row, data));
       }
       if (action === "start" && req.method === "POST") {
         if (s.phase !== "ready") fail(409, "INVALID_PHASE");
         data.startedAt = Date.now();
         data.deadline = data.startedAt + data.config.pitchSeconds * 1000;
         s.phase = "pitch";
-        return json(res, 200, save(row, data));
+        return respond(200, await save(row, data));
       }
       if (action === "analyze" && req.method === "POST") {
         if (!["review", "analysis"].includes(s.phase))
@@ -588,20 +686,20 @@ export function createApp({
         if (data.config.useAI) {
           throttle(`ai:${user.id}`, 20, 3600000);
           try {
-            const attachments = store
-              .all("SELECT * FROM assets WHERE session_id=?", id)
-              .map((a) =>
-                a.mime === "application/pdf"
-                  ? {
-                      type: "input_file",
-                      filename: a.name,
-                      file_data: `data:application/pdf;base64,${readFileSync(a.path).toString("base64")}`,
-                    }
-                  : {
-                      type: "input_image",
-                      image_url: `data:${a.mime};base64,${readFileSync(a.path).toString("base64")}`,
-                    },
-              );
+            const attachments = (
+              await store.all("SELECT * FROM assets WHERE session_id=?", id)
+            ).map((a) =>
+              a.mime === "application/pdf"
+                ? {
+                    type: "input_file",
+                    filename: a.name,
+                    file_data: `data:application/pdf;base64,${readFileSync(a.path).toString("base64")}`,
+                  }
+                : {
+                    type: "input_image",
+                    image_url: `data:${a.mime};base64,${readFileSync(a.path).toString("base64")}`,
+                  },
+            );
             s.mentor = await mentor.reviewPitch({
               pitch,
               questions: s.questions,
@@ -622,7 +720,7 @@ export function createApp({
           }
         }
         s.phase = "analysis";
-        return json(res, 200, save(row, data));
+        return respond(200, await save(row, data));
       }
       if (action === "next" && req.method === "POST") {
         if (s.phase === "analysis") {
@@ -637,7 +735,7 @@ export function createApp({
           s.answerFeedback = null;
           s.answerMentor = null;
         } else fail(409, "INVALID_PHASE");
-        return json(res, 200, save(row, data));
+        return respond(200, await save(row, data));
       }
       if (action === "answer" && req.method === "POST") {
         const { step, answer } = answerSchema.parse(input);
@@ -660,7 +758,9 @@ export function createApp({
               language: data.config.language,
             });
           } catch {
-            s.answerMentor = { unavailable: true };
+            s.answerMentor = {
+              unavailable: true,
+            };
           }
         }
         (s.mentorAnswers ||= []).push(s.answerMentor);
@@ -676,7 +776,7 @@ export function createApp({
             };
           if (follow) s.questions.splice(step + 1, 0, follow);
         }
-        return json(res, 200, save(row, data));
+        return respond(200, await save(row, data));
       }
       if (action === "complete" && req.method === "POST") {
         if (
@@ -692,7 +792,7 @@ export function createApp({
           answers: s.answers,
           arena,
         });
-        const prior = history(user),
+        const prior = await history(user),
           earned = new Set(
             medalsFor(prior)
               .filter((m) => m.earned)
@@ -728,26 +828,36 @@ export function createApp({
         );
         data.result = result;
         s.phase = "completed";
-        const saved = save(row, data, "completed");
-        return json(res, 200, { result, revision: saved.revision });
+        const saved = await save(row, data, "completed");
+        return respond(200, {
+          result,
+          revision: saved.revision,
+        });
       }
       fail(405, "METHOD_NOT_ALLOWED");
-    } finally {
-      locks.delete(id);
-    }
+    });
+    return json(res, output.status, output.payload);
   }
+
   function serveStatic(req, res, path) {
     if (!["GET", "HEAD"].includes(req.method))
-      return json(res, 405, { error: "METHOD_NOT_ALLOWED" });
+      return json(res, 405, {
+        error: "METHOD_NOT_ALLOWED",
+      });
     let file = resolve(distDir, `.${decodeURIComponent(path)}`);
     if (
       !file.startsWith(`${resolve(distDir)}${sep}`) &&
       file !== resolve(distDir)
     )
-      return json(res, 404, { error: "NOT_FOUND" });
+      return json(res, 404, {
+        error: "NOT_FOUND",
+      });
     if (!existsSync(file) || !statSync(file).isFile())
       file = resolve(distDir, "index.html");
-    if (!existsSync(file)) return json(res, 404, { error: "BUILD_NOT_FOUND" });
+    if (!existsSync(file))
+      return json(res, 404, {
+        error: "BUILD_NOT_FOUND",
+      });
     const mime =
       {
         ".html": "text/html; charset=utf-8",
@@ -765,17 +875,26 @@ export function createApp({
     res.setHeader("Accept-Ranges", "bytes");
     if (req.headers.range) {
       const m = req.headers.range.match(/^bytes=(\d+)-(\d*)$/);
-      if (!m) return json(res, 416, { error: "INVALID_RANGE" });
+      if (!m)
+        return json(res, 416, {
+          error: "INVALID_RANGE",
+        });
       const start = Number(m[1]),
         end = m[2] ? Math.min(Number(m[2]), size - 1) : size - 1;
-      if (start > end) return json(res, 416, { error: "INVALID_RANGE" });
+      if (start > end)
+        return json(res, 416, {
+          error: "INVALID_RANGE",
+        });
       res.writeHead(206, {
         "Content-Range": `bytes ${start}-${end}/${size}`,
         "Content-Length": end - start + 1,
       });
       return req.method === "HEAD"
         ? res.end()
-        : createReadStream(file, { start, end })
+        : createReadStream(file, {
+            start,
+            end,
+          })
             .on("error", () => res.destroy())
             .pipe(res);
     }
@@ -806,5 +925,9 @@ export function createApp({
     }),
   );
   server.requestTimeout = 60000;
-  return { server, store };
+  return {
+    server,
+    store,
+    ready,
+  };
 }

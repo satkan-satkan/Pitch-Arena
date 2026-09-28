@@ -5,12 +5,15 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { createApp } from "../server/app.js";
 import { openStore } from "../server/store.js";
+import { createPgTestStore } from "./postgres-fixture.mjs";
 import { createMentor } from "../server/mentor.js";
 const pitch =
   "Small clinics waste hours on manual bookings. Our product automates bookings. We have 120 customers in the last month. Customers pay a subscription of $30 per month. We will use the funds for development and reach 200 customers in three months.";
 async function fixture(t, mentor = { ready: false }) {
   const dir = mkdtempSync(join(tmpdir(), "pitch-api-"));
-  const store = openStore(join(dir, "db.sqlite"));
+  const store = process.env.PA_TEST_POSTGRES
+    ? await createPgTestStore()
+    : openStore(join(dir, "db.sqlite"));
   const app = createApp({
     store,
     assetDir: join(dir, "assets"),
@@ -21,7 +24,7 @@ async function fixture(t, mentor = { ready: false }) {
   const base = `http://127.0.0.1:${app.server.address().port}`;
   t.after(async () => {
     await new Promise((resolve) => app.server.close(resolve));
-    store.close();
+    await store.close();
     rmSync(dir, { recursive: true, force: true });
   });
   async function request(
@@ -84,7 +87,7 @@ test("Accounts use hashed credentials, HttpOnly sessions, login and logout", asy
   assert.equal(r.status, 200);
   assert.match(r.headers.get("set-cookie"), /HttpOnly/);
   assert.match(r.headers.get("set-cookie"), /SameSite=Lax/);
-  const row = f.store.get("SELECT * FROM users");
+  const row = await f.store.get("SELECT * FROM users");
   assert.ok(!row.password_hash.includes("testing"));
   assert.equal(r.data.user.password_hash, undefined);
   assert.equal(
@@ -383,7 +386,7 @@ test("SQLite data survives reopening the database", () => {
   const path = join(dir, "db.sqlite");
   let store = openStore(path);
   store.run(
-    "INSERT INTO users VALUES(?,?,?,?,?)",
+    "INSERT INTO users(id,email,password_hash,profile,created_at) VALUES(?,?,?,?,?)",
     "id",
     "mail@example.com",
     "hash",

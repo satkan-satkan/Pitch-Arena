@@ -53,8 +53,8 @@ import {
 import "./styles.css";
 
 import {
-  arenas,
-  investors,
+  arenas as defaultArenas,
+  investors as defaultInvestors,
   photo,
   panelFor,
   totalXP,
@@ -66,6 +66,7 @@ import PitchRoom from "./PitchRoom";
 import Results from "./components/Results";
 import BackgroundMusic from "./components/BackgroundMusic";
 import AccountPanel from "./components/AccountPanel";
+import AdminPanel from "./components/AdminPanel";
 import useWorkspace from "./hooks/useWorkspace";
 import { api, hydrateSession, sessionClient, errorText } from "./services/api";
 
@@ -515,6 +516,18 @@ function App() {
   const [difficulty, setDifficulty] = useState("all");
   const [search, setSearch] = useState("");
   const workspace = useWorkspace();
+  const arenas = workspace.catalog?.arenas || defaultArenas;
+  const investors = (workspace.catalog?.investors || defaultInvestors).filter(
+    (v) => v.enabled !== false,
+  );
+  useEffect(() => {
+    if (
+      !workspace.checking &&
+      page === "admin" &&
+      workspace.account?.role !== "admin"
+    )
+      setPage("home");
+  }, [workspace.checking, workspace.account?.role, page]);
   const [accountOpen, setAccountOpen] = useState(false);
   const [launchBusy, setLaunchBusy] = useState(false);
   const [guestDraft, setGuestDraft] = useState(() => read("pa-draft", null));
@@ -549,7 +562,19 @@ function App() {
       return false;
     }
   };
-  const [selected, setSelected] = useState(null);
+  const [selected, setSelectedState] = useState(null);
+  const setSelected = (arena) => {
+    if (arena?.enabled === false) {
+      setToast(
+        t(
+          "Эта арена временно недоступна для новых питчей.",
+          "This arena is temporarily unavailable for new practices.",
+        ),
+      );
+      return;
+    }
+    setSelectedState(arena);
+  };
   const [retry, setRetry] = useState(null);
   const [session, setSession] = useState(null);
   const [result, setResult] = useState(null);
@@ -645,6 +670,10 @@ function App() {
           data: {
             projectId,
             arenaId: data.arena.id,
+            personaId:
+              data.arena.personaIds?.length === 1
+                ? data.arena.personaIds[0]
+                : undefined,
             ask: data.ask,
             pitchSeconds: data.pitchSeconds,
             language: lang,
@@ -671,6 +700,7 @@ function App() {
         workspace.setDraft(cloud.snapshot);
         setSession({
           ...data,
+          arena: snap.config.arena,
           id: snap.id,
           projectId,
           cloud,
@@ -702,7 +732,7 @@ function App() {
         setLang(snap.config.language);
         setSession({
           ...data,
-          arena: arenas.find((a) => a.id === data.arenaId),
+          arena: data.arena || arenas.find((a) => a.id === data.arenaId),
           draftKey,
           resuming: true,
         });
@@ -711,7 +741,9 @@ function App() {
         setSession({
           ...savedDraft.config,
           id: savedDraft.id,
-          arena: arenas.find((a) => a.id === savedDraft.config.arenaId),
+          arena:
+            savedDraft.config.arena ||
+            arenas.find((a) => a.id === savedDraft.config.arenaId),
           files: [],
           restored: savedDraft.state,
           startedAt: savedDraft.startedAt,
@@ -764,6 +796,8 @@ function App() {
       label: t("Рейтинг стартапов", "Leaderboard"),
     },
   ];
+  if (workspace.account?.role === "admin")
+    nav.push({ id: "admin", icon: ShieldCheck, label: t("Админка", "Admin") });
   const filtered = arenas.filter(
     (a) =>
       (region === "all" || a.region === region || a.region === "all") &&
@@ -968,6 +1002,14 @@ function App() {
           </div>
         </header>
         <main>
+          {page === "admin" && workspace.account?.role === "admin" && (
+            <AdminPanel
+              account={workspace.account}
+              t={t}
+              onRefresh={workspace.refresh}
+              Modal={Modal}
+            />
+          )}
           {savedDraft && !session && (
             <section className="resume-banner">
               <div>
@@ -1045,7 +1087,7 @@ function App() {
                     </p>
                     <button
                       className="button dark"
-                      onClick={() => setSelected(nextArena(history))}
+                      onClick={() => setSelected(nextArena(history, arenas))}
                     >
                       {history.length
                         ? t("Продолжить путь", "Continue journey")
@@ -1054,9 +1096,9 @@ function App() {
                     </button>
                     <div className="hero-footnote">
                       <span className="mini-avatars">
-                        <img src={photo(investors[0].photo, 60)} alt="" />
-                        <img src={photo(investors[1].photo, 60)} alt="" />
-                        <img src={photo(investors[2].photo, 60)} alt="" />
+                        {investors.slice(0, 3).map((v) => (
+                          <img key={v.id} src={photo(v.photo, 60)} alt="" />
+                        ))}
                       </span>
                       <span>
                         {t(
@@ -1140,6 +1182,7 @@ function App() {
                 </div>
               </section>
               <QuestStrip
+                arenas={arenas}
                 history={history}
                 t={t}
                 pick={pick}
@@ -1156,6 +1199,7 @@ function App() {
                 </button>
               </div>
               <JourneyMap
+                arenas={arenas}
                 history={history}
                 t={t}
                 pick={pick}
@@ -1295,6 +1339,7 @@ function App() {
                 )}
               />
               <JourneyMap
+                arenas={arenas}
                 history={history}
                 t={t}
                 pick={pick}

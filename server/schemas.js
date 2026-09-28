@@ -21,6 +21,7 @@ export const projectSchema = z.object({
 export const sessionSchema = z.object({
   projectId: z.uuid(),
   arenaId: z.string(),
+  personaId: z.string().optional(),
   ask: z.number().finite().min(1).max(1e10),
   pitchSeconds: z.number().int().min(30).max(600),
   language: z.enum(["ru", "en"]),

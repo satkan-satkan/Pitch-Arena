@@ -1,0 +1,20 @@
+{
+  "passed": 12,
+  "checks": [
+    "Guest cannot see admin navigation",
+    "Selecting the active section keeps its content visible",
+    "Owner dashboard reads actual PostgreSQL metrics",
+    "AI status is honest without a key",
+    "Owner can block a member through the UI",
+    "Arena editor persists revision and pitch duration",
+    "Public map and setup use the edited catalog",
+    "Investor edits appear in the player directory",
+    "User and catalog changes appear in audit log",
+    "Admin overview fits mobile width",
+    "Admin interface supports English",
+    "No browser runtime errors"
+  ],
+  "errors": [],
+  "database": "postgres",
+  "aiLiveTested": false
+}

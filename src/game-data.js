@@ -88,13 +88,17 @@ const generic = [
   persona(["Дэвид", "David"], "D", "Finance"),
 ];
 export const panelFor = (arena) =>
-  arena.personaIds
+  (arena.panelMembers &&
+    (arena.personaIds
+      ? arena.panelMembers.filter((v) => arena.personaIds.includes(v.id))
+      : arena.panelMembers)) ||
+  (arena.personaIds
     ? arena.personaIds
         .map((id) => investors.find((v) => v.id === id))
         .filter(Boolean)
     : arena.id === "family"
       ? family
-      : generic;
+      : generic);
 const definitions = [
   {
     id: "family",
@@ -306,11 +310,18 @@ export const arenas = definitions.map((a) => ({
 export const campaign = ["family", "nfactorial", "arena", "yc", "a16z"];
 export const totalXP = (history) =>
   history.reduce((sum, h) => sum + (h.xp ?? 100), 0);
-export const nextArena = (history) =>
-  arenas.find(
+export const nextArena = (history, catalog = arenas) =>
+  catalog.find(
     (a) =>
       a.id ===
-      (campaign.find((id) => !history.some((h) => h.arenaId === id)) || "a16z"),
+      (campaign.find(
+        (id) =>
+          catalog.some((a) => a.id === id && a.enabled !== false) &&
+          !history.some((h) => h.arenaId === id),
+      ) ||
+        (catalog.find((a) => a.id === "a16z")?.enabled !== false
+          ? "a16z"
+          : "family")),
   );
 export function medalsFor(history) {
   return [
