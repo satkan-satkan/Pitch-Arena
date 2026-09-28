@@ -227,11 +227,11 @@ export function JourneyMap({
                 height="12"
                 patternUnits="userSpaceOnUse"
               >
-                <circle cx="1" cy="1" r=".65" fill="#9aa48c" opacity=".23" />
+                <circle cx="1" cy="1" r=".65" fill="#b4a4ca" opacity=".23" />
               </pattern>
               <linearGradient id={`land-${id}`} x1="0" y1="0" x2="0" y2="1">
-                <stop stopColor="#d6ddc9" />
-                <stop offset="1" stopColor="#e5e9dc" />
+                <stop stopColor="#e5deee" />
+                <stop offset="1" stopColor="#f0e9f5" />
               </linearGradient>
             </defs>
             <rect width="1000" height="460" fill={`url(#dots-${id})`} />

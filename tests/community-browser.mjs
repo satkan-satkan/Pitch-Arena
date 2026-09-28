@@ -50,7 +50,7 @@ try {
   );
   mkdirSync("artifacts", { recursive: true });
   await page.screenshot({
-    path: "artifacts/v8-community-landing.png",
+    path: "artifacts/v9-community-landing.png",
     fullPage: true,
   });
   await button("Попробовать без регистрации").click();
@@ -165,7 +165,7 @@ try {
       .isVisible(),
   );
   await visitor.screenshot({
-    path: "artifacts/v8-community-directory.png",
+    path: "artifacts/v9-community-directory.png",
     fullPage: true,
   });
   await visitor
@@ -205,9 +205,10 @@ try {
     (await f.request("/startups")).data.total === 0,
   );
   await page.screenshot({
-    path: "artifacts/v8-community-workspace.png",
+    path: "artifacts/v9-community-workspace.png",
     fullPage: true,
   });
+  await visitor.emulateMedia({ reducedMotion: "reduce" });
   await visitor.goto(f.origin);
   await visitor.setViewportSize({ width: 390, height: 844 });
   await visitor.locator(".landing-hero").waitFor();
@@ -218,7 +219,7 @@ try {
     ),
   );
   await visitor.screenshot({
-    path: "artifacts/v8-community-landing-mobile.png",
+    path: "artifacts/v9-community-landing-mobile.png",
     fullPage: true,
   });
   await button("Switch to English", visitor).click();
@@ -242,7 +243,7 @@ try {
   );
   check("No browser runtime errors", errors.length === 0);
   writeFileSync(
-    "artifacts/v8-community-verification.json",
+    "artifacts/v9-community-verification.json",
     JSON.stringify(
       { passed: checks.length, checks, errors, liveAI: false },
       null,

@@ -11,7 +11,7 @@
   height: 150px;
   object-fit: contain;
   flex-shrink: 0;
-  filter: drop-shadow(0 9px 11px #666e5e16);
+  filter: drop-shadow(0 9px 11px #76609216);
 }
 .guide-bubble {
   min-width: 0;
@@ -21,13 +21,13 @@
   display: block;
   font-size: 9px;
   letter-spacing: 1.7px;
-  color: #666e5e;
+  color: #9474bb;
   font-weight: 600;
   margin-bottom: 9px;
 }
 .guide-bubble > strong {
   display: block;
-  color: #252b25;
+  color: #42384f;
   font-size: 19px;
   line-height: 1.35;
   letter-spacing: -0.3px;
@@ -35,16 +35,16 @@
 .guide-bubble > p {
   font-size: 13px;
   line-height: 1.75;
-  color: #666e5e;
+  color: #82728f;
   margin: 10px 0 0;
 }
 .guide-home {
   position: relative;
   padding: 23px 42px 24px 14px;
   margin: 0 0 26px;
-  border: 1px solid #dfded5;
+  border: 1px solid #e5d9f3;
   border-radius: 22px;
-  background: linear-gradient(110deg, #faf9f5, #faf9f5);
+  background: linear-gradient(110deg, #f4edff, #fffdff);
 }
 .guide-home .guide-portrait {
   width: 168px;
@@ -63,16 +63,16 @@
 }
 .guide-actions > span {
   font-size: 10px;
-  color: #888e80;
+  color: #a292ae;
 }
 .guide-dismiss {
   position: absolute;
   top: 14px;
   right: 14px;
   background: white;
-  border: 1px solid #dfded5;
+  border: 1px solid #e7dcf0;
   border-radius: 8px;
-  color: #888e80;
+  color: #a690b7;
   display: grid;
   place-items: center;
   width: 26px;
@@ -82,8 +82,8 @@
 .guide-message.compact {
   gap: 12px;
   padding: 13px 14px;
-  background: #faf9f5;
-  border: 1px solid #f1f0e9;
+  background: #f8f3ff;
+  border: 1px solid #ece2f6;
   border-radius: 14px;
   margin: 14px 0 22px;
 }
@@ -106,8 +106,8 @@
   margin-bottom: 5px;
 }
 .phase-pitch .guide-message.compact {
-  background: #faf9f5;
-  border-color: #f1f0e9;
+  background: #f7f8fa;
+  border-color: #eae8ee;
 }
 .phase-pitch .guide-message.compact .guide-portrait {
   width: 55px;
@@ -124,7 +124,7 @@
   position: relative;
   min-height: 360px;
   border-radius: 22px;
-  background: radial-gradient(ellipse, #f1f0e9, transparent 70%);
+  background: radial-gradient(ellipse, #e8dcfa, transparent 70%);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -137,14 +137,14 @@
   position: relative;
 }
 .guide-intro-art > span {
-  color: #b6b7aa;
+  color: #b89ada;
   position: absolute;
   font-size: 45px;
   top: 30px;
   left: 15px;
 }
 .guide-intro-art > small {
-  color: #888e80;
+  color: #a08aaf;
   max-width: 240px;
   text-align: center;
   font-size: 8px;
@@ -158,17 +158,17 @@
   margin: 18px 0;
 }
 .guide-intro-copy > p {
-  color: #666e5e;
+  color: #85768f;
   line-height: 1.8;
   font-size: 13px;
 }
 .guide-intro-copy blockquote {
   margin: 22px 0;
   padding: 17px 18px;
-  border-left: 3px solid #b6b7aa;
-  background: #faf9f5;
+  border-left: 3px solid #c5a3e8;
+  background: #f8f3fd;
   border-radius: 0 10px 10px 0;
-  color: #666e5e;
+  color: #7e6595;
   font-size: 13px;
   line-height: 1.7;
 }
@@ -178,20 +178,20 @@
   margin: 25px 0;
 }
 .guide-intro-progress button {
-  border: 1px solid #dfded5;
+  border: 1px solid #e8dcef;
   border-radius: 50%;
   background: white;
   display: grid;
   place-items: center;
   width: 29px;
   height: 29px;
-  color: #888e80;
+  color: #b7a1c7;
   cursor: pointer;
   font-size: 11px;
 }
 .guide-intro-progress button[aria-current] {
-  background: #888e80;
-  border-color: #888e80;
+  background: #9d77d8;
+  border-color: #9d77d8;
   color: white;
 }
 .guide-intro-copy > .ready-text-button {
@@ -201,10 +201,10 @@
   display: flex;
   align-items: center;
   gap: 10px;
-  border-top: 1px solid #f1f0e9;
+  border-top: 1px solid #eee5f4;
   padding-top: 20px;
   margin-top: 18px;
-  color: #888e80;
+  color: #a18dab;
   font-size: 10px;
   line-height: 1.7;
 }
@@ -214,17 +214,17 @@
 .guide-preferences > button {
   border: 0;
   background: transparent;
-  color: #666e5e;
+  color: #8865a4;
   text-decoration: underline;
   font: inherit;
   flex-shrink: 0;
   cursor: pointer;
 }
 .guide-launcher {
-  color: #888e80 !important;
+  color: #997abb !important;
 }
 .guide-launcher svg {
-  color: #888e80;
+  color: #a583d1;
 }
 .guide-message img {
   animation: guide-appear 0.25s ease-out;

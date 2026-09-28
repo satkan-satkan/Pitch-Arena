@@ -59,15 +59,21 @@ try {
     ["Приветствие", "welcome"],
   ]) {
     await button(label).click();
+    await page.waitForFunction(
+      (emotion) =>
+        document.querySelector(".bento-guide .guide-portrait")?.dataset
+          .emotion === emotion,
+      id,
+    );
     check(
-      `Guide signal reflects ${id} context`,
+      `Guide character reflects ${id} context`,
       (await page
-        .locator(".bento-guide .guide-signal")
+        .locator(".bento-guide .guide-portrait")
         .getAttribute("data-emotion")) === id,
     );
   }
   mkdirSync("artifacts", { recursive: true });
-  await page.screenshot({ path: "artifacts/v8-landing.png", fullPage: true });
+  await page.screenshot({ path: "artifacts/v9-landing.png", fullPage: true });
   await button("Познакомиться с Искрой").click();
   await page.getByRole("dialog", { name: "Знакомство с Искрой" }).waitFor();
   check(
@@ -75,7 +81,7 @@ try {
     (await state()).status === "learning" &&
       (await page.evaluate(() => window.micRequests)) === 0,
   );
-  await page.screenshot({ path: "artifacts/v8-guide-intro.png" });
+  await page.screenshot({ path: "artifacts/v9-guide-intro.png" });
   await button("Дальше").click();
   await button("Дальше").click();
   check(
@@ -102,8 +108,20 @@ try {
     "Preparing first mission is not counted as completed",
     (await state()).status === "practicing",
   );
+  await page.emulateMedia({ reducedMotion: "no-preference" });
   await button("Начать текстом").click();
   check("Guide listens during the pitch", (await mood()) === "listening");
+  check(
+    "Guide stays still while the player pitches",
+    await page
+      .locator(".game-conversation .guide-portrait")
+      .evaluate(
+        (el) =>
+          el.dataset.quiet === "true" &&
+          getComputedStyle(el).transform === "none",
+      ),
+  );
+  await page.emulateMedia({ reducedMotion: "reduce" });
   await page
     .locator("#pitch-transcript")
     .fill(
@@ -150,7 +168,7 @@ try {
     "Guide never requests microphone access in text mode",
     await page.evaluate(() => window.micRequests === 0),
   );
-  await page.screenshot({ path: "artifacts/v8-guide-result.png" });
+  await page.screenshot({ path: "artifacts/v9-guide-result.png" });
   await button("Close").click();
   await page
     .locator(".nav-item")
@@ -196,7 +214,7 @@ try {
   await page.locator(".guide-home").waitFor();
   await page.setViewportSize({ width: 390, height: 844 });
   await page.screenshot({
-    path: "artifacts/v8-guide-mobile.png",
+    path: "artifacts/v9-guide-mobile.png",
     fullPage: true,
   });
   check(
@@ -224,7 +242,7 @@ try {
   );
   check("No browser runtime errors", errors.length === 0);
   writeFileSync(
-    "artifacts/v8-verification.json",
+    "artifacts/v9-verification.json",
     JSON.stringify(
       { passed: checks.length, checks, errors, liveAI: false },
       null,

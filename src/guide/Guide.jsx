@@ -1,4 +1,6 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
+import { AnimatePresence, motion } from "framer-motion";
+import { useArenaMotion } from "../motion/Motion";
 import { ArrowRight, Check, Sparkles, X } from "lucide-react";
 import { guideCue } from "./model";
 import "./guide.css";
@@ -9,54 +11,65 @@ const emotions = {
   support: ["поддерживает", "encouraging"],
   celebrate: ["радуется", "celebrating"],
 };
-export function GuidePortrait({ emotion = "welcome", t, className = "" }) {
+export function GuidePortrait({
+  emotion = "welcome",
+  t,
+  className = "",
+  quiet = false,
+}) {
   const mood = emotions[emotion] ? emotion : "welcome";
-  const levels = {
-    welcome: [18, 30, 46, 30, 18],
-    thinking: [38, 18, 30, 46, 24],
-    listening: [14, 24, 54, 24, 14],
-    support: [24, 24, 24, 24, 24],
-    celebrate: [18, 28, 38, 48, 58],
-  }[mood];
+  const { enabled } = useArenaMotion();
+  const [loadedMood, setLoadedMood] = useState(mood);
+  useEffect(() => {
+    let active = true;
+    const image = new Image();
+    image.src = `/guide/iskra-${mood}.png`;
+    image
+      .decode()
+      .then(() => {
+        if (active) setLoadedMood(mood);
+      })
+      .catch(() => {});
+    return () => {
+      active = false;
+    };
+  }, [mood]);
+  const poses = {
+    welcome: { rotate: [0, -3, 2, 0], y: [0, -5, 0] },
+    thinking: { rotate: [0, -5, -3, 0], y: [0, -2, 0] },
+    listening: { rotate: [0, 1, 0], y: [0, -2, 0] },
+    support: { rotate: [0, 3, 0], y: [0, -3, 0] },
+    celebrate: { rotate: [0, -5, 5, 0], y: [0, -12, 0, -5, 0] },
+  };
+  const moving = enabled && !quiet;
   return (
-    <svg
-      className={`guide-portrait guide-signal ${className}`}
-      data-emotion={mood}
-      role="img"
-      aria-label={`${t("Искра", "Iskra")} — ${t(...emotions[mood])}`}
-      viewBox="0 0 120 120"
-      width="120"
-      height="120"
+    <motion.span
+      className={`guide-portrait ${className}`}
+      data-emotion={loadedMood}
+      data-quiet={quiet}
+      animate={moving ? poses[loadedMood] : { rotate: 0, y: 0 }}
+      transition={{ duration: moving ? 1.2 : 0, ease: "easeInOut" }}
+      whileHover={
+        moving
+          ? { y: -5, rotate: -3, transition: { duration: 0.25 } }
+          : undefined
+      }
     >
-      <rect x="1" y="1" width="118" height="118" rx="6" fill="currentColor" />
-      <path
-        d="M12 20v-8h8M100 12h8v8M108 100v8h-8M20 108h-8v-8"
-        fill="none"
-        stroke="#747a70"
-      />
-      {levels.map((height, i) => (
-        <rect
-          key={i}
-          x={30 + i * 13}
-          y={60 - height / 2}
-          width="7"
-          height={height}
-          rx="1"
-          fill="#ed784b"
+      <AnimatePresence initial={false}>
+        <motion.img
+          key={loadedMood}
+          src={`/guide/iskra-${loadedMood}.png`}
+          alt={`${t("Искра", "Iskra")} — ${t(...emotions[loadedMood])}`}
+          width="180"
+          height="180"
+          decoding="async"
+          initial={{ opacity: moving ? 0 : 1, scale: moving ? 0.95 : 1 }}
+          animate={{ opacity: 1, scale: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: moving ? 0.24 : 0 }}
         />
-      ))}
-      <text
-        x="60"
-        y="99"
-        textAnchor="middle"
-        fill="#d5d8cd"
-        fontFamily="monospace"
-        fontSize="8"
-        letterSpacing="3"
-      >
-        ISKRA
-      </text>
-    </svg>
+      </AnimatePresence>
+    </motion.span>
   );
 }
 export function GuideMessage({
@@ -76,10 +89,14 @@ export function GuideMessage({
       data-emotion={emotion || cue.emotion}
       aria-label={t("Подсказка Искры", "Iskra’s tip")}
     >
-      <GuidePortrait emotion={emotion || cue.emotion} t={t} />
+      <GuidePortrait
+        emotion={emotion || cue.emotion}
+        t={t}
+        quiet={phase === "pitch"}
+      />
       <div className="guide-bubble">
         <span className="guide-name">
-          {t("ИСКРА / РЕДАКТОР ПИТЧА", "ISKRA / PITCH EDITOR")}
+          {t("ИСКРА · ТВОЙ ГИД", "ISKRA · YOUR GUIDE")}
         </span>
         <strong>{title || t(...cue.title)}</strong>
         <p>{text || t(...cue.text)}</p>

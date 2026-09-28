@@ -1,0 +1,19 @@
+{
+  "passed": 13,
+  "checks": [
+    "Scene reacts to a fine pointer",
+    "Scene has a live breathing animation",
+    "Pause stops scene loops and pointer transforms",
+    "Motion preference survives reload",
+    "Paused reveals leave content accessible",
+    "Animated tabs preserve keyboard selection and focus",
+    "Active tab uses the animated background",
+    "Iskra swaps the actual celebrate pose",
+    "Iskra swaps the actual thinking pose",
+    "System reduced motion stops all decorative loops",
+    "Reduced-motion preference cannot be overridden accidentally",
+    "Restored scene and motion controls fit mobile",
+    "No animation runtime errors"
+  ],
+  "errors": []
+}

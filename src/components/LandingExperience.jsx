@@ -1,7 +1,9 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useId } from "react";
 import { ArrowRight, Check, Mic, Sparkles, Globe2, Route } from "lucide-react";
 import { GuidePortrait } from "../guide/Guide";
 import "./landing-experience.css";
+import { motion } from "framer-motion";
+import { Reveal, useArenaMotion } from "../motion/Motion";
 const steps = [
   ["Твой питч", "Your pitch"],
   ["Разбор", "Review"],
@@ -18,6 +20,8 @@ export default function LandingExperience({ t, onGuide }) {
   const [step, setStep] = useState(0),
     [mood, setMood] = useState("welcome");
   const refs = useRef([]);
+  const tabGroup = useId();
+  const { enabled } = useArenaMotion();
   const tabKey = (e, i) => {
     let next;
     if (e.key === "ArrowRight") next = (i + 1) % 3;
@@ -30,21 +34,18 @@ export default function LandingExperience({ t, onGuide }) {
     refs.current[next]?.focus();
   };
   return (
-    <section className="landing-experience" id="experience">
+    <Reveal as="section" className="landing-experience" id="experience">
       <div className="landing-section-heading">
         <span className="landing-eyebrow">
           {t("ВНУТРИ СИМУЛЯТОРА", "INSIDE THE SIMULATOR")}
         </span>
         <h2>
-          {t(
-            "«Это платформа на базе ИИ». И что?",
-            "“It’s an AI platform.” And?",
-          )}
+          {t("Твоя история. Их вопросы.", "Your story. Their questions.")}
         </h2>
         <p>
           {t(
-            "Хорошее начало. Теперь объясни, чью проблему ты решаешь.",
-            "A start. Now explain whose problem you solve.",
+            "Отрепетируй выступление и посмотри, где твоей истории не хватает фактов.",
+            "Rehearse your pitch and see where your story needs evidence.",
           )}
         </p>
       </div>
@@ -75,8 +76,20 @@ export default function LandingExperience({ t, onGuide }) {
               onKeyDown={(e) => tabKey(e, i)}
               onClick={() => setStep(i)}
             >
-              <span>0{i + 1}</span>
-              {t(...v)}
+              {step === i && (
+                <motion.span
+                  aria-hidden="true"
+                  className="tab-active-background"
+                  layoutId={enabled ? `experience-${tabGroup}` : undefined}
+                  transition={{
+                    type: "spring",
+                    bounce: 0.15,
+                    duration: enabled ? 0.35 : 0,
+                  }}
+                />
+              )}
+              <span className="tab-number">0{i + 1}</span>
+              <span className="tab-label">{t(...v)}</span>
             </button>
           ))}
         </div>
@@ -87,7 +100,13 @@ export default function LandingExperience({ t, onGuide }) {
           aria-labelledby={`experience-tab-${step}`}
           tabIndex={0}
         >
-          <div className="experience-demo">
+          <motion.div
+            className="experience-demo"
+            key={step}
+            initial={enabled ? { opacity: 0, y: 10 } : false}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: enabled ? 0.28 : 0 }}
+          >
             <span className="demo-eyebrow">
               {t("ПРИМЕР · ВЫМЫШЛЕННЫЙ ПРОЕКТ", "EXAMPLE · FICTIONAL PROJECT")}
             </span>
@@ -182,7 +201,7 @@ export default function LandingExperience({ t, onGuide }) {
                 </button>
               </>
             )}
-          </div>
+          </motion.div>
           <aside className="experience-coach">
             <GuidePortrait
               t={t}
@@ -217,9 +236,12 @@ export default function LandingExperience({ t, onGuide }) {
               {t("НА СВЯЗИ / ИСКРА", "ON COMMS / ISKRA")}
             </span>
             <h3>
-              {t("Твой редактор.", "Your editor.")}
+              {t("Искра на твоей стороне.", "Iskra is in your corner.")}
               <br />
-              {t("Без аплодисментов авансом.", "No applause in advance.")}
+              {t(
+                "Даже после трудного вопроса.",
+                "Even after a tough question.",
+              )}
             </h3>
             <p>
               {t(
@@ -284,6 +306,6 @@ export default function LandingExperience({ t, onGuide }) {
           </span>
         </article>
       </div>
-    </section>
+    </Reveal>
   );
 }

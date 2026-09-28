@@ -76,7 +76,8 @@ import { api, hydrateSession, sessionClient, errorText } from "./services/api";
 
 import { summarizeScores } from "./practice/engine";
 import { PracticeGoal } from "./components/PracticeFeedback";
-import "./direction.css";
+import "./motion/motion.css";
+import { ArenaMotionProvider, MotionControls } from "./motion/Motion";
 
 const seedRanking = [
   {
@@ -1065,6 +1066,7 @@ function App() {
             </strong>
           </div>
           <div className="topbar-actions">
+            <MotionControls t={t} />
             <BackgroundMusic blocked={Boolean(session)} t={t} />
             <button
               className="account-entry"
@@ -1231,9 +1233,9 @@ function App() {
                       )}
                     </div>
                     <h2>
-                      {t("Хороший слайд.", "Nice slide.")}
+                      {t("Твоя идея.", "Your idea.")}
                       <br />
-                      {t("А бизнес где?", "Where’s the business?")}
+                      {t("Твой выход.", "Your stage.")}
                     </h2>
                     <p>
                       {t(
@@ -1264,16 +1266,8 @@ function App() {
                       </span>
                     </div>
                   </div>
-                  <div className="round-poster" aria-hidden="true">
-                    <span>PITCH / REPEAT</span>
-                    <strong>?</strong>
-                    <small>
-                      THE DECK IS NOT
-                      <br />
-                      THE BUSINESS.
-                    </small>
-                  </div>
-                  <div className="hero-corner">DEMO DAY STARTS HERE ↗</div>
+                  <ArenaArt />
+                  <div className="hero-corner">PRACTICE MAKES PROGRESS ↗</div>
                 </div>
                 <div className="progress-card">
                   <div className="card-topline">
@@ -2749,4 +2743,8 @@ function CameraPreview({ t }) {
     </div>
   );
 }
-createRoot(document.getElementById("root")).render(<App />);
+createRoot(document.getElementById("root")).render(
+  <ArenaMotionProvider>
+    <App />
+  </ArenaMotionProvider>,
+);

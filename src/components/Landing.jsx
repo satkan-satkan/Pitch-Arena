@@ -3,6 +3,8 @@ import {
   ArrowRight,
   ArrowUpRight,
   Mic,
+  Sparkles,
+  Trophy,
   Globe2,
   Layers,
   MessageCircle,
@@ -11,11 +13,13 @@ import {
 } from "lucide-react";
 import "./landing.css";
 import LandingExperience from "./LandingExperience";
+import { Reveal, Tilt, MotionControls } from "../motion/Motion";
 export default function Landing({
   t,
   lang,
   setLang,
   Brand,
+  ArenaArt,
   onPlay,
   onAuth,
   onDirectory,
@@ -33,6 +37,7 @@ export default function Landing({
           <button onClick={onDirectory}>{t("Стартапы", "Startups")}</button>
         </nav>
         <div className="landing-controls">
+          <MotionControls t={t} />
           <button
             className="landing-language"
             aria-label={
@@ -53,7 +58,7 @@ export default function Landing({
       </header>
       <main>
         <section className="landing-hero">
-          <div className="landing-copy">
+          <Reveal className="landing-copy">
             <span className="landing-eyebrow">
               <span />
               {t(
@@ -103,52 +108,53 @@ export default function Landing({
                 {t("Вопросы после питча", "Questions after your pitch")}
               </span>
             </div>
-          </div>
-          <div className="pitch-dossier">
-            <div className="dossier-top">
-              <span>DEMO DAY / 001</span>
-              <span>{t("СИМУЛЯЦИЯ", "SIMULATION")}</span>
+          </Reveal>
+          <Tilt className="landing-scene">
+            <div className="scene-orbit orbit-one" />
+            <div className="scene-orbit orbit-two" />
+            <span className="scene-star star-one">✦</span>
+            <span className="scene-star star-two">✧</span>
+            <div className="scene-top-label">
+              <span />
+              {t("ТВОЯ СЛЕДУЮЩАЯ АРЕНА", "YOUR NEXT ARENA")}
             </div>
-            <div className="dossier-clock">
-              <span>{t("ВРЕМЯ НА ИДЕЮ", "TIME FOR YOUR IDEA")}</span>
-              <strong>
-                02:00<span>→</span>
-              </strong>
+            <ArenaArt />
+            <div className="scene-timer">
+              <Mic size={20} />
+              <div>
+                <small>{t("ТВОЙ МОМЕНТ", "YOUR MOMENT")}</small>
+                <strong>02:00</strong>
+              </div>
+              <div className="scene-wave">
+                {[12, 23, 15, 31, 22, 37, 18, 28, 12].map((v, i) => (
+                  <i key={i} style={{ height: v }} />
+                ))}
+              </div>
             </div>
-            <div className="dossier-slide">
-              <span>PITCH DECK / 01</span>
-              <h2>
-                {t("Мы меняем", "We’re changing")}
-                <br />
-                <s>{t("мир.", "the world.")}</s>
-                <br />
-                {t("Что именно?", "What, exactly?")}
-              </h2>
-              <div className="dossier-rule" />
-              <small>
-                {t(
-                  "Проблема. Клиент. Доказательства.",
-                  "Problem. Customer. Evidence.",
-                )}
-              </small>
+            <div className="scene-feedback">
+              <span>
+                <Sparkles size={17} />
+              </span>
+              <div>
+                <strong>
+                  {t(
+                    "Уверенность начинается с репетиции",
+                    "Confidence starts with rehearsal",
+                  )}
+                </strong>
+                <small>
+                  {t(
+                    "Начни с первой репетиции",
+                    "Start with your first rehearsal",
+                  )}
+                </small>
+              </div>
             </div>
-            <div className="dossier-note">
-              <span>{t("ВОПРОС ПОСЛЕ ПИТЧА", "AFTER YOUR PITCH")}</span>
-              <p>
-                {t(
-                  "«А кто-нибудь уже за это платит?»",
-                  "“Is anyone paying for this yet?”",
-                )}
-              </p>
-              <small>
-                {t("Пример вопроса симулятора", "Example simulator question")}
-              </small>
+            <div className="scene-level">
+              <Trophy size={15} />
+              {t("От идеи к единорогу", "From idea to unicorn")}
             </div>
-            <div className="dossier-bottom">
-              <span>NO EQUITY REQUIRED.</span>
-              <span>↗</span>
-            </div>
-          </div>
+          </Tilt>
         </section>
         <section className="landing-path">
           <p>
@@ -186,7 +192,7 @@ export default function Landing({
           </small>
         </section>
         <LandingExperience t={t} onGuide={onGuide} />
-        <section id="how" className="landing-how">
+        <Reveal as="section" id="how" className="landing-how">
           <div className="landing-section-heading">
             <span className="landing-eyebrow">
               {t("КАК ПРОХОДИТ РАУНД", "HOW THE ROUND WORKS")}
@@ -244,8 +250,8 @@ export default function Landing({
               </article>
             ))}
           </div>
-        </section>
-        <section className="landing-community">
+        </Reveal>
+        <Reveal as="section" className="landing-community">
           <div>
             <span className="landing-eyebrow">
               {t(
@@ -283,8 +289,8 @@ export default function Landing({
               </strong>
             </div>
           </div>
-        </section>
-        <section className="landing-end">
+        </Reveal>
+        <Reveal as="section" className="landing-end">
           <span>✦</span>
           <h2>
             {t(
@@ -302,7 +308,7 @@ export default function Landing({
             {t("Попробовать первую арену", "Try your first arena")}
             <ArrowRight size={18} />
           </button>
-        </section>
+        </Reveal>
       </main>
       <footer className="landing-footer">
         <Brand small />

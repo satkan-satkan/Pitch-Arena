@@ -18,12 +18,12 @@
 .admin-help {
   font-size: 12px;
   line-height: 1.8;
-  color: #666e5e;
+  color: #827d8f;
 }
 .admin-tabs {
   display: flex;
   gap: 6px;
-  border-bottom: 1px solid #f1f0e9;
+  border-bottom: 1px solid #e8e3f0;
   padding-bottom: 12px;
   margin-bottom: 24px;
   overflow: auto;
@@ -37,11 +37,11 @@
   border-radius: 10px;
   background: transparent;
   font-size: 12px;
-  color: #666e5e;
+  color: #787181;
 }
 .admin-tabs button[aria-current] {
-  background: #f1f0e9;
-  color: #666e5e;
+  background: #ece5fa;
+  color: #7857bd;
 }
 .admin-stats {
   display: grid;
@@ -50,13 +50,13 @@
 }
 .admin-stats > div {
   background: white;
-  border: 1px solid #f1f0e9;
+  border: 1px solid #e9e4f0;
   border-radius: 15px;
   padding: 23px;
 }
 .admin-stats span {
   font-size: 11px;
-  color: #666e5e;
+  color: #82758f;
 }
 .admin-stats strong {
   display: block;
@@ -66,16 +66,16 @@
 .admin-system {
   margin-top: 24px;
   padding: 26px;
-  background: linear-gradient(120deg, #f1f0e9, #fff);
-  border: 1px solid #f1f0e9;
+  background: linear-gradient(120deg, #f1ebfc, #fff);
+  border: 1px solid #e5dcf5;
   border-radius: 16px;
   display: flex;
   gap: 20px;
-  color: #666e5e;
+  color: #79609f;
 }
 .admin-system h2 {
   font-size: 17px;
-  color: #252b25;
+  color: #30283e;
 }
 .admin-system dl {
   display: grid;
@@ -86,7 +86,7 @@
 }
 .admin-system dd {
   margin: 0;
-  color: #252b25;
+  color: #30283e;
 }
 .admin-system p {
   font-size: 11px;
@@ -95,7 +95,7 @@
 .admin-table-wrap {
   overflow: auto;
   background: white;
-  border: 1px solid #f1f0e9;
+  border: 1px solid #e9e4f0;
   border-radius: 14px;
 }
 .admin-panel table {
@@ -107,20 +107,20 @@
 .admin-panel th {
   font-size: 10px;
   letter-spacing: 0.4px;
-  color: #666e5e;
-  background: #faf9f5;
+  color: #8d809c;
+  background: #fcfaff;
   padding: 16px;
 }
 .admin-panel td {
   padding: 18px 16px;
-  border-top: 1px solid #f1f0e9;
+  border-top: 1px solid #f0ecf5;
 }
 .admin-panel td strong,
 .admin-panel td small {
   display: block;
 }
 .admin-panel td small {
-  color: #666e5e;
+  color: #93889f;
   margin-top: 5px;
 }
 .admin-panel td .button {
@@ -132,8 +132,8 @@
   padding: 5px 8px;
   display: inline-flex;
   align-items: center;
-  background: #f1f0e9;
-  color: #666e5e;
+  background: #f0eafa;
+  color: #815eae;
   border-radius: 6px;
 }
 .admin-badge.blocked {
@@ -151,7 +151,7 @@
   max-width: 380px;
   width: 100%;
   padding: 12px 14px;
-  border: 1px solid #dfded5;
+  border: 1px solid #e6dfef;
   border-radius: 9px;
   background: white;
   font-size: 12px;
@@ -163,7 +163,7 @@
   gap: 10px;
   margin-top: 18px;
   font-size: 12px;
-  color: #666e5e;
+  color: #8d809c;
 }
 .admin-pagination > span:first-child {
   margin-right: auto;
@@ -172,7 +172,7 @@
   padding: 40px 24px;
   text-align: center;
   font-size: 13px;
-  color: #666e5e;
+  color: #95869f;
 }
 .admin-catalog-switch {
   display: flex;
@@ -187,7 +187,7 @@
 }
 .admin-catalog-grid article {
   padding: 20px;
-  border: 1px solid #f1f0e9;
+  border: 1px solid #e9e4f0;
   border-radius: 14px;
   background: white;
 }
@@ -201,7 +201,7 @@
   margin: 20px 0 9px;
 }
 .admin-catalog-grid p {
-  color: #666e5e;
+  color: #8f839b;
   font-size: 11px;
   min-height: 32px;
   line-height: 1.6;
@@ -215,7 +215,7 @@
 }
 .admin-audit article {
   padding: 20px;
-  border: 1px solid #f1f0e9;
+  border: 1px solid #e9e4f0;
   border-radius: 12px;
   background: white;
 }
@@ -227,7 +227,7 @@
 }
 .admin-audit time,
 .admin-audit p {
-  color: #666e5e;
+  color: #92879c;
   font-size: 11px;
 }
 .admin-audit p {
@@ -236,7 +236,7 @@
 }
 .admin-audit summary {
   font-size: 11px;
-  color: #666e5e;
+  color: #80659f;
   cursor: pointer;
 }
 .admin-audit pre {
@@ -246,7 +246,7 @@
   overflow-wrap: anywhere;
   font-size: 11px;
   line-height: 1.7;
-  background: #faf9f5;
+  background: #f7f4fa;
   padding: 14px;
   border-radius: 8px;
 }
@@ -262,18 +262,18 @@
   display: grid;
   gap: 8px;
   font-size: 12px;
-  color: #666e5e;
+  color: #7a6c88;
 }
 .admin-editor input:not([type="checkbox"]),
 .admin-editor textarea,
 .admin-editor select {
   width: 100%;
   padding: 12px;
-  border: 1px solid #dfded5;
+  border: 1px solid #ded5e9;
   border-radius: 8px;
   font-size: 13px;
   background: #fff;
-  color: #252b25;
+  color: #39313f;
 }
 .admin-editor .admin-checkbox {
   display: flex;

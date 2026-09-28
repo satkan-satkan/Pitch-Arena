@@ -22,10 +22,12 @@
     "check:secrets": "node scripts/check-secrets.mjs",
     "test:community": "node --env-file-if-exists=.env --test tests/community.integration.mjs",
     "test:landing": "node --env-file-if-exists=.env tests/community-browser.mjs",
-    "test:guide": "node --env-file-if-exists=.env tests/guide-browser.mjs"
+    "test:guide": "node --env-file-if-exists=.env tests/guide-browser.mjs",
+    "test:motion": "node --env-file-if-exists=.env tests/motion-browser.mjs"
   },
   "dependencies": {
     "d3-geo": "^3.1.1",
+    "framer-motion": "^13.4.4",
     "lucide-react": "^0.468.0",
     "pg": "^8.23.0",
     "react": "^19.1.0",

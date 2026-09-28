@@ -1,0 +1,176 @@
+/* Motion language: staged entrances, spring depth and contextual character poses. */
+.motion-control {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  color: #877897;
+  background: #f3edf9;
+  border: 1px solid #e9dff3;
+}
+.motion-control:hover {
+  color: #614c80;
+  background: #e9def6;
+}
+.landing-controls {
+  gap: 15px;
+}
+.landing-scene {
+  will-change: transform;
+}
+.landing-scene .scene-timer {
+  transform: translateZ(28px) rotate(-5deg);
+}
+.landing-scene .scene-feedback {
+  transform: translateZ(42px) rotate(3deg);
+}
+.guide-portrait {
+  display: block;
+  position: relative;
+  transform-origin: 50% 85%;
+}
+.guide-portrait > img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+.guide-message .guide-portrait > img {
+  animation: none;
+}
+.experience-tabs button {
+  position: relative;
+  isolation: isolate;
+  border-bottom-color: transparent;
+}
+.experience-tabs button[aria-selected="true"] {
+  border-bottom-color: transparent;
+}
+.experience-tabs .tab-active-background {
+  position: absolute;
+  inset: 3px 0 0;
+  background: #f1e8fc;
+  border-bottom: 2px solid #a17cd4;
+  border-radius: 9px 9px 0 0;
+  z-index: -1;
+  pointer-events: none;
+}
+.experience-tabs .tab-number {
+  flex: 0 0 auto;
+}
+.experience-tabs .tab-label {
+  font-size: 12px;
+  color: inherit;
+  letter-spacing: normal;
+}
+.landing-copy h1 {
+  font-weight: 650;
+}
+.landing .button,
+.landing-steps article,
+.emotion-picker button,
+.guide-actions .button {
+  transition:
+    transform 0.22s ease,
+    box-shadow 0.22s ease,
+    background 0.22s ease;
+}
+@media (hover: hover) and (pointer: fine) {
+  html[data-motion="on"] .landing .button:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 25px #81629b24;
+  }
+  html[data-motion="on"] .landing-steps article:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 14px 40px #81629b12;
+  }
+  html[data-motion="on"] .emotion-picker button:hover {
+    transform: translateY(-2px);
+  }
+  html[data-motion="on"] .guide-actions .button:active {
+    transform: scale(0.98);
+  }
+}
+html[data-motion="on"] .landing-scene .arena-art {
+  animation: scene-breathe 7s ease-in-out infinite;
+}
+html[data-motion="on"] .scene-star {
+  animation: scene-spark 5s ease-in-out infinite;
+}
+html[data-motion="on"] .scene-star.star-two {
+  animation-delay: -2.5s;
+}
+html[data-motion="on"] .scene-wave i {
+  transform-origin: center;
+  animation: scene-wave 1.6s ease-in-out infinite alternate;
+}
+html[data-motion="on"] .scene-wave i:nth-child(3n) {
+  animation-delay: -0.8s;
+}
+html[data-motion="on"] .scene-wave i:nth-child(3n + 1) {
+  animation-delay: -0.4s;
+}
+@keyframes scene-breathe {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-9px);
+  }
+}
+@keyframes scene-spark {
+  0%,
+  100% {
+    transform: rotate(0) scale(0.9);
+    opacity: 0.65;
+  }
+  50% {
+    transform: rotate(12deg) scale(1.08);
+    opacity: 1;
+  }
+}
+@keyframes scene-wave {
+  from {
+    transform: scaleY(0.6);
+  }
+  to {
+    transform: scaleY(1);
+  }
+}
+html[data-motion="off"] .landing *,
+html[data-motion="off"] .guide-portrait,
+html[data-motion="off"] .guide-portrait * {
+  animation: none !important;
+  transition: none !important;
+}
+@media (prefers-reduced-motion: reduce) {
+  .landing *,
+  .guide-portrait,
+  .guide-portrait * {
+    animation: none !important;
+    transition: none !important;
+    scroll-behavior: auto !important;
+  }
+}
+@media (max-width: 700px) {
+  .landing-controls {
+    gap: 8px;
+  }
+  .motion-control {
+    width: 27px;
+    height: 27px;
+  }
+  .experience-tabs .tab-label {
+    font-size: 10px;
+  }
+  .landing-scene {
+    will-change: auto;
+  }
+  .topbar-actions {
+    gap: 6px;
+  }
+}
