@@ -12,6 +12,7 @@ import {
 import { api, errorText } from "../services/api";
 import "./community.css";
 import { ProfileSelector, ProfileIcon } from "@/components/ui/profile-selector";
+import { GarageScene } from "./GarageWorld";
 export const socialNames = {
   website: "Website",
   telegram: "Telegram",
@@ -674,25 +675,27 @@ export function FounderWorkspace({ account, t, Modal, onSignIn, onPublic }) {
   };
   return (
     <section className="community-page">
-      <div className="community-heading">
-        <div>
-          <span className="eyebrow">
-            <Users size={15} />
-            {t("СТРОИМ ВМЕСТЕ", "BUILD TOGETHER")}
-          </span>
-          <h1>{t("Стартапы и команды", "Startups & teams")}</h1>
-          <p>
-            {t(
-              "Преврати идею в историю, которую увидят другие.",
-              "Turn your idea into a story others can discover.",
-            )}
-          </p>
+      <GarageScene scene="crew" className="community-garage-header">
+        <div className="community-heading">
+          <div>
+            <span className="eyebrow">
+              <Users size={15} />
+              {t("СТРОИМ ВМЕСТЕ", "BUILD TOGETHER")}
+            </span>
+            <h1>{t("Стартапы и команды", "Startups & teams")}</h1>
+            <p>
+              {t(
+                "Преврати идею в историю, которую увидят другие.",
+                "Turn your idea into a story others can discover.",
+              )}
+            </p>
+          </div>
+          <button className="button white" onClick={onPublic}>
+            <Globe2 size={16} />
+            {t("Открыть каталог", "Explore directory")}
+          </button>
         </div>
-        <button className="button white" onClick={onPublic}>
-          <Globe2 size={16} />
-          {t("Открыть каталог", "Explore directory")}
-        </button>
-      </div>
+      </GarageScene>
       {error && (
         <p className="error-message" role="alert">
           {error}

@@ -77,6 +77,7 @@ import useWorkspace from "./hooks/useWorkspace";
 import useBodyScrollLock from "./hooks/useBodyScrollLock";
 import StartupLeaderboard from "./components/StartupLeaderboard";
 import Notifications from "./components/Notifications";
+import { GarageScene } from "./components/GarageWorld";
 import { api, hydrateSession, sessionClient, errorText } from "./services/api";
 
 import { summarizeScores } from "./practice/engine";
@@ -669,6 +670,10 @@ function App() {
             {...{ t, lang, setLang, Brand }}
             account={workspace.account}
             onPlay={() => navigate("/play")}
+            onWorkbench={() => {
+              navigate("/play");
+              setPage("home");
+            }}
             onAuth={openAuth}
             onDirectory={() => navigate("/startups")}
             onStartup={(id) => navigate(`/startups/${id}`)}
@@ -999,7 +1004,9 @@ function App() {
                       </span>
                     </div>
                   </div>
-                  <div className="hero-corner">01 / THE GARAGE</div>
+                  <div className="hero-corner">
+                    01 / {t("РАБОЧИЙ СТОЛ", "THE WORKBENCH")}
+                  </div>
                 </div>
                 <div className="progress-card">
                   <div className="card-topline">
@@ -1205,17 +1212,19 @@ function App() {
           )}
           {page === "arenas" && (
             <>
-              <PageTitle
-                eyebrow={t("ВЫБЕРИ СВОЙ ВЫЗОВ", "CHOOSE YOUR CHALLENGE")}
-                title={t(
-                  "Выбери точку на карте.",
-                  "Choose your next destination.",
-                )}
-                subtitle={t(
-                  "Начни с простого разговора. Дойди до самых сложных вопросов.",
-                  "Start with a friendly conversation. Work your way up to the toughest questions.",
-                )}
-              />
+              <GarageScene scene="rehearsal" className="arena-garage-intro">
+                <PageTitle
+                  eyebrow={t("ВЫБЕРИ СВОЙ ВЫЗОВ", "CHOOSE YOUR CHALLENGE")}
+                  title={t(
+                    "Выбери точку на карте.",
+                    "Choose your next destination.",
+                  )}
+                  subtitle={t(
+                    "Начни с простого разговора. Дойди до самых сложных вопросов.",
+                    "Start with a friendly conversation. Work your way up to the toughest questions.",
+                  )}
+                />
+              </GarageScene>
               <JourneyMap
                 arenas={arenas}
                 history={history}

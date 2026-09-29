@@ -8,17 +8,18 @@ import {
   Mic,
   Layers,
   MessageCircle,
-  Users,
 } from "lucide-react";
 import "./landing.css";
 import LandingExperience from "./LandingExperience";
 import { Reveal, Tilt, MotionControls } from "../motion/Motion";
+import { GarageChapters, GarageScene } from "./GarageWorld";
 export default function Landing({
   t,
   lang,
   setLang,
   Brand,
   onPlay,
+  onWorkbench,
   onAuth,
   onDirectory,
   onStartup,
@@ -141,6 +142,12 @@ export default function Landing({
             )}
           </small>
         </section>
+        <GarageChapters
+          t={t}
+          onPlay={onWorkbench}
+          onGuide={onGuide}
+          onTeam={onCreateStartup}
+        />
         <StartupBoard
           t={t}
           onDirectory={onDirectory}
@@ -225,14 +232,11 @@ export default function Landing({
               <ArrowUpRight size={17} />
             </button>
           </div>
-          <div className="crew-visual" aria-hidden="true">
-            <div className="crew-chair">
-              <Users size={54} strokeWidth={1} />
-            </div>
-            <span>CO-FOUNDERS WANTED.</span>
-            <div className="crew-line" />
-            <small>BUILD SOMETHING PEOPLE WANT.</small>
-          </div>
+          <GarageScene scene="crew" className="crew-photograph">
+            <span>
+              {t("ОБЩИЙ СТОЛ. ОБЩАЯ ИДЕЯ.", "ONE TABLE. ONE SHARED IDEA.")}
+            </span>
+          </GarageScene>
         </Reveal>
         <Reveal as="section" className="landing-end">
           <span className="landing-eyebrow">TAKE 01</span>

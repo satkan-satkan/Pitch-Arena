@@ -1,0 +1,17 @@
+{
+  "checks": [
+    "Original landing scene preserved",
+    "Three distinct scenes load",
+    "Workbench opens founder room",
+    "Rehearsal opens guide and preparation",
+    "Shared table opens team workspace",
+    "Landing fits mobile width",
+    "Reduced motion disables scene hover zoom",
+    "New scenes have English copy",
+    "Team header fits mobile width",
+    "Map header fits mobile width",
+    "No browser errors",
+    "Workbench selects founder room even after visiting teams"
+  ],
+  "errors": []
+}

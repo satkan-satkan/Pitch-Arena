@@ -511,7 +511,7 @@ option {
 .hero {
   background:
     linear-gradient(90deg, #101113e8 5%, #10111399 60%, #10111322),
-    url("/scenes/garage-night.png") 68% center / cover;
+    url("/scenes/garage-workbench.webp") 68% center / cover;
   border-radius: 6px;
   border: 1px solid #37383b;
   min-height: 335px;
