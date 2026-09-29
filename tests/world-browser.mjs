@@ -63,10 +63,79 @@ try {
   const first = await create("Orbit Studio", 1200),
     second = await create("Zero Studio", 0);
   await page.goto(f.origin);
+  const network = page.locator(".global-network");
+  await loaded(network);
+  const worldMap = network.locator("[data-world-map]");
+  check(
+    "Supplied world map draws six routes",
+    (await worldMap.locator("path").count()) === 6,
+  );
+  check(
+    "Reduced motion leaves routes visible without SVG pulse animations",
+    (await worldMap.locator("animate").count()) === 0 &&
+      (await worldMap.getAttribute("data-motion")) === "off",
+  );
+  check(
+    "Original dark map palette is preserved",
+    await worldMap.evaluate(
+      (e) => getComputedStyle(e).backgroundColor === "rgb(0, 0, 0)",
+    ),
+  );
+  await page.emulateMedia({ reducedMotion: "no-preference" });
+  await page.waitForFunction(
+    () => document.querySelector("[data-world-map]")?.dataset.motion === "on",
+  );
+  check(
+    "SVG pulses run with animations enabled",
+    (await worldMap.locator("animate").count()) === 24,
+  );
+  const route = worldMap.locator("path").first();
+  const initialStroke = await route.getAttribute("stroke-dasharray");
+  await page.waitForFunction(
+    (initial) =>
+      document
+        .querySelector("[data-world-map] path")
+        ?.getAttribute("stroke-dasharray") !== initial,
+    initialStroke,
+  );
+  check("Route drawing advances over time", true);
+  await page.waitForTimeout(2000);
+  await network.screenshot({ path: "artifacts/v17-network.png" });
+  await page
+    .getByRole("button", { name: "Приостановить анимации", exact: true })
+    .click();
+  await page.waitForFunction(
+    () => document.querySelector("[data-world-map]")?.dataset.motion === "off",
+  );
+  check(
+    "Global pause also stops map pulses",
+    (await worldMap.locator("animate").count()) === 0,
+  );
+  await page
+    .getByRole("button", { name: "Включить анимации", exact: true })
+    .click();
+  await page.setViewportSize({ width: 390, height: 844 });
+  await network.scrollIntoViewIfNeeded();
+  check(
+    "Mobile map stays inside the viewport",
+    await page.evaluate(
+      () => document.documentElement.scrollWidth <= innerWidth,
+    ),
+  );
+  await network.screenshot({ path: "artifacts/v17-network-mobile.png" });
+  await button("Switch to English").click();
+  check(
+    "World map supports English",
+    (await network.innerText()).includes("Your pitch. Worldwide.") &&
+      (await network.innerText()).includes("London"),
+  );
+  await button("Переключить на русский").click();
+  await page.setViewportSize({ width: 1440, height: 1050 });
+  await page.emulateMedia({ reducedMotion: "reduce" });
   await loaded(page.locator(".beyond-garage"));
   await page
     .locator(".beyond-garage")
-    .screenshot({ path: "artifacts/v16-beyond-garage.png" });
+    .screenshot({ path: "artifacts/v17-beyond-garage.png" });
   check(
     "Old garage and three garage chapters remain",
     (await page.locator(".garage-image").getAttribute("src")) ===
@@ -79,7 +148,7 @@ try {
     "Office leads to real investor selection",
     (await page.locator(".investor-full").count()) > 0,
   );
-  await page.screenshot({ path: "artifacts/v16-investor-office.png" });
+  await page.screenshot({ path: "artifacts/v17-investor-office.png" });
   const home = async () => {
     await page.goto(f.origin + "/play");
     await loaded(page.locator(".valley-map"));
@@ -87,7 +156,7 @@ try {
   await home();
   await page
     .locator(".valley-map")
-    .screenshot({ path: "artifacts/v16-valley.png" });
+    .screenshot({ path: "artifacts/v17-valley.png" });
   check(
     "Valley contains six destinations",
     (await page.locator(".valley-hotspot").count()) === 6,
@@ -124,11 +193,22 @@ try {
   await loaded(page.locator(".public-campus-header"));
   await page
     .locator(".startup-detail")
-    .screenshot({ path: "artifacts/v16-startup-widgets.png" });
+    .screenshot({ path: "artifacts/v17-startup-widgets.png" });
   check(
     "Six widgets show published data",
     (await page.locator('[data-slot="widget"]').count()) === 6 &&
       (await page.locator(".widget-revenue").innerText()).includes("1 200"),
+  );
+  check(
+    "Widget grid uses the reference radius and neutral palette",
+    await page
+      .locator('[data-slot="widget"] > div')
+      .first()
+      .evaluate(
+        (e) =>
+          getComputedStyle(e).borderRadius === "24px" &&
+          getComputedStyle(e).backgroundColor === "rgb(20, 20, 23)",
+      ),
   );
   const description = page.locator(".widget-about .startup-widget-body");
   check(
@@ -219,7 +299,7 @@ try {
   );
   await page
     .locator(".startup-detail")
-    .screenshot({ path: "artifacts/v16-startup-mobile.png" });
+    .screenshot({ path: "artifacts/v17-startup-mobile.png" });
   await button("Switch to English").click();
   await page
     .getByRole("heading", { name: "About the product", exact: true })
@@ -238,7 +318,7 @@ try {
   );
   await page
     .locator(".valley-map")
-    .screenshot({ path: "artifacts/v16-valley-mobile.png" });
+    .screenshot({ path: "artifacts/v17-valley-mobile.png" });
   check(
     "Mobile map offers readable destination buttons",
     (await page.locator(".valley-mobile-places button").count()) === 6 &&
@@ -310,7 +390,7 @@ try {
   await touchContext.close();
   check("No browser runtime errors", errors.length === 0);
   writeFileSync(
-    "artifacts/v16-world-verification.json",
+    "artifacts/v17-world-verification.json",
     JSON.stringify({ checks, errors }, null, 2) + "\n",
   );
 } finally {

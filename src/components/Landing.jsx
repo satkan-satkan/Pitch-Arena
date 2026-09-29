@@ -14,6 +14,7 @@ import LandingExperience from "./LandingExperience";
 import { Reveal, Tilt, MotionControls } from "../motion/Motion";
 import { GarageChapters, GarageScene } from "./GarageWorld";
 import { BeyondGarage } from "./ValleyMap";
+import GlobalNetwork from "./GlobalNetwork";
 export default function Landing({
   t,
   lang,
@@ -161,6 +162,7 @@ export default function Landing({
           onInvestors={onInvestors}
           onDirectory={onDirectory}
         />
+        <GlobalNetwork t={t} />
         <LandingExperience t={t} onGuide={onGuide} />
         <Reveal as="section" id="how" className="landing-how">
           <div className="landing-section-heading">

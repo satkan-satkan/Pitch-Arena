@@ -1,26 +1,16 @@
 import React, { useState } from "react";
-import {
-  Grip,
-  RotateCcw,
-  Check,
-  ArrowUpRight,
-  Globe2,
-  Layers,
-  TrendingUp,
-  FileText,
-  Link2,
-} from "lucide-react";
+import { Grip, RotateCcw, Check } from "lucide-react";
 import { DraggableWidgetGrid } from "@/components/ui/draggable-widget-grid";
 import { useArenaMotion } from "../motion/Motion";
 import "./startup-widgets.css";
 
 const definitions = [
-  { id: "about", size: "wide", icon: FileText },
-  { id: "revenue", size: "sm", icon: TrendingUp },
-  { id: "stage", size: "sm", icon: Layers },
-  { id: "links", size: "wide", icon: Link2 },
-  { id: "region", size: "sm", icon: Globe2 },
-  { id: "category", size: "sm", icon: ArrowUpRight },
+  { id: "about", size: "wide" },
+  { id: "revenue", size: "sm" },
+  { id: "stage", size: "sm" },
+  { id: "links", size: "wide" },
+  { id: "region", size: "sm" },
+  { id: "category", size: "sm" },
 ];
 const ids = definitions.map((i) => i.id);
 const readOrder = (key) => {
@@ -169,22 +159,16 @@ export default function StartupWidgets({ data, t, category, stage, links }) {
         editable={editing}
         motionEnabled={enabled}
         maxColumns={4}
-        cellSize={255}
-        gap={14}
-        radius={14}
         listLabel={t("Блоки карточки стартапа", "Startup profile blocks")}
         instructions={t(
           "Удерживай Alt и нажимай стрелки для перестановки. На телефоне удерживай блок перед перемещением.",
           "Hold Alt and press arrow keys to rearrange. On touch screens, press and hold before dragging.",
         )}
         renderItem={(item) => {
-          const Icon = definitions.find((v) => v.id === item.id).icon;
           return (
             <div className={`startup-widget-panel widget-${item.id}`}>
               <div className="startup-widget-heading">
-                <Icon size={17} />
                 <h3>{labels[item.id]}</h3>
-                {editing && <Grip size={15} />}
               </div>
               <div
                 className="startup-widget-body"

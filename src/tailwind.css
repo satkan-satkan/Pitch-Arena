@@ -3,6 +3,7 @@
 @import "tailwindcss/theme.css" layer(theme);
 @import "tailwindcss/utilities.css" layer(utilities);
 @source "./components/ui";
+@custom-variant dark (&:where(.dark, .dark *));
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
@@ -10,9 +11,9 @@
   --color-muted-foreground: var(--text-secondary);
   --color-primary: var(--accent);
   --color-ring: var(--accent);
-  --color-card: #1b2024;
+  --color-card: var(--card, #1b2024);
   --color-card-foreground: var(--foreground);
-  --color-border: #3b4249;
+  --color-border: var(--widget-border, #3b4249);
 }
 :root {
   --background: #111214;

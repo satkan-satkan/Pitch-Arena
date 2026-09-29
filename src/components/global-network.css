@@ -1,0 +1,26 @@
+/* The host uses unlayered resets: restore the supplied demo's Tailwind values here. */
+.global-network > div:first-child {
+  margin-inline: auto;
+}
+.landing .global-network h2 {
+  margin: 0;
+  font-size: 20px;
+  line-height: 1.4;
+  font-weight: 700;
+  letter-spacing: normal;
+}
+.global-network p {
+  margin: 0 auto;
+}
+.global-network [data-world-map] img {
+  display: block;
+}
+.global-network [data-world-map] span {
+  border-style: solid;
+}
+@media (min-width: 768px) {
+  .landing .global-network h2 {
+    font-size: 36px;
+    line-height: 1.111111;
+  }
+}
