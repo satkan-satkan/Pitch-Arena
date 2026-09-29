@@ -3,6 +3,7 @@ import { handleAdmin } from "./admin.js";
 import { handleCommunity, handleStartupModeration } from "./community.js";
 import http from "node:http";
 import { normalizeImage } from "./images.js";
+import { createAccountEmail, expiredCookie } from "./account-email.js";
 import { randomUUID, createHash } from "node:crypto";
 import {
   mkdirSync,
@@ -100,6 +101,9 @@ export function createApp({
   assetDir = resolve(".data/assets"),
   distDir = resolve("dist"),
   mentor = createMentor(),
+  mailer = { ready: false },
+  appOrigin = process.env.APP_ORIGIN || "http://localhost:5173",
+  accountClock = Date.now,
   secureCookies = process.env.NODE_ENV === "production",
   origins = [
     "http://localhost:5173",
@@ -115,6 +119,13 @@ export function createApp({
     mode: 0o700,
   });
   const ready = seedCatalog(store);
+  const accountEmail = createAccountEmail({
+    store,
+    mailer,
+    appOrigin,
+    secureCookies,
+    now: accountClock,
+  });
   const buckets = new Map();
   const respond = (status, payload) => ({ status, payload });
   function throttle(key, limit, period) {
@@ -180,6 +191,7 @@ export function createApp({
   async function handle(req, res) {
     await ready;
     res.setHeader("X-Content-Type-Options", "nosniff");
+    res.setHeader("Referrer-Policy", "no-referrer");
     const url = new URL(req.url, "http://localhost");
     const path = url.pathname;
     if (!path.startsWith("/api/")) return serveStatic(req, res, path);
@@ -257,6 +269,7 @@ export function createApp({
         catalog: await readCatalog(store),
         user: publicUser(user),
         aiReady: mentor.ready,
+        mailReady: accountEmail.ready,
         projects: user
           ? await store.all(
               "SELECT id,name,industry,description FROM projects WHERE user_id=? ORDER BY created_at",
@@ -274,6 +287,36 @@ export function createApp({
             })()
           : null,
       });
+    if (
+      [
+        "/api/auth/forgot-password",
+        "/api/auth/resend-verification",
+        "/api/auth/verify-email",
+        "/api/auth/reset-password",
+        "/api/auth/change-password",
+        "/api/auth/logout-all",
+      ].includes(path) &&
+      req.method === "POST"
+    ) {
+      throttle(`account-action:${req.socket.remoteAddress}`, 20, 60000);
+      const result = await accountEmail.handle(
+        path,
+        await body(req),
+        user,
+        req.socket.remoteAddress || "local",
+      );
+      const { cookie, ...payload } = result;
+      return json(
+        res,
+        200,
+        payload,
+        cookie
+          ? { "Set-Cookie": cookie }
+          : ["/api/auth/reset-password", "/api/auth/logout-all"].includes(path)
+            ? { "Set-Cookie": expiredCookie(secureCookies) }
+            : {},
+      );
+    }
     if (
       ["/api/auth/register", "/api/auth/login"].includes(path) &&
       req.method === "POST"
@@ -309,14 +352,31 @@ export function createApp({
           throw error;
         }
         account = await store.get("SELECT * FROM users WHERE id=?", id);
-      } else {
-        // Same slow verification path for unknown accounts.
-        const encoded =
-          account?.password_hash || `${"0".repeat(32)}:${"0".repeat(128)}`;
-        if (!(await checkPassword(input.password, encoded)) || !account)
-          fail(401, "INVALID_CREDENTIALS");
       }
-      if (account.status === "blocked") fail(403, "ACCOUNT_BLOCKED");
+      const cookie = await store.transaction(async () => {
+        if (account) {
+          await store.lock(`auth-user:${account.id}`);
+          account = await store.get(
+            "SELECT * FROM users WHERE id=?",
+            account.id,
+          );
+        }
+        if (path.endsWith("/login")) {
+          // Re-read under the password-reset lock before creating a login.
+          const encoded =
+            account?.password_hash || `${"0".repeat(32)}:${"0".repeat(128)}`;
+          if (!(await checkPassword(input.password, encoded)) || !account)
+            fail(401, "INVALID_CREDENTIALS");
+        }
+        if (account.status === "blocked") fail(403, "ACCOUNT_BLOCKED");
+        return createLogin(store, account.id, secureCookies);
+      });
+      if (path.endsWith("/register"))
+        await accountEmail.onRegister(
+          account,
+          input.language,
+          req.socket.remoteAddress || "local",
+        );
       return json(
         res,
         200,
@@ -324,7 +384,7 @@ export function createApp({
           user: publicUser(account),
         },
         {
-          "Set-Cookie": await createLogin(store, account.id, secureCookies),
+          "Set-Cookie": cookie,
         },
       );
     }
@@ -961,5 +1021,6 @@ export function createApp({
     server,
     store,
     ready,
+    drainMail: () => accountEmail.drain(),
   };
 }

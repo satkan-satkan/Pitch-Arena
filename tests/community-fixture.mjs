@@ -19,7 +19,11 @@ export const listing = {
   monthlyRevenue: 0,
   currency: "USD",
 };
-export async function communityFixture() {
+export async function communityFixture({
+  mailer = { ready: false },
+  verified = true,
+  accountClock,
+} = {}) {
   const store = await createPgTestStore(),
     dir = mkdtempSync(join(tmpdir(), "pa-community-"));
   const app = createApp({
@@ -27,6 +31,9 @@ export async function communityFixture() {
     assetDir: join(dir, "assets"),
     mentor: { ready: false },
     secureCookies: false,
+    mailer,
+    appOrigin: "https://arena.example.com",
+    accountClock,
   });
   await app.ready;
   await new Promise((r) => app.server.listen(0, "127.0.0.1", r));
@@ -56,6 +63,14 @@ export async function communityFixture() {
       },
     });
     if (admin) await grantOwner(store, email);
+    // Most community fixtures test publication/roles, not email ownership.
+    // Auth-specific tests opt out and exercise the real one-time-link flow.
+    if (verified && r.status === 200)
+      await store.run(
+        "UPDATE users SET email_verified_at=? WHERE id=?",
+        new Date().toISOString(),
+        r.data.user.id,
+      );
     return r;
   };
   return {
@@ -63,8 +78,10 @@ export async function communityFixture() {
     origin,
     request,
     register,
+    drainMail: () => app.drainMail(),
     close: async () => {
       await new Promise((r) => app.server.close(r));
+      await app.drainMail();
       await store.close();
       rmSync(dir, { recursive: true, force: true });
     },

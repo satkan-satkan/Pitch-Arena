@@ -763,7 +763,7 @@ export function FounderWorkspace({ account, t, Modal, onSignIn, onPublic }) {
     return () => {
       active = false;
     };
-  }, [account?.id]);
+  }, [account?.id, account?.emailVerified]);
   const act = async (path, method = "POST", data = {}) => {
     setBusy(true);
     setError("");
@@ -803,6 +803,25 @@ export function FounderWorkspace({ account, t, Modal, onSignIn, onPublic }) {
           </button>
         </div>
       </GarageScene>
+      {account && !account.emailVerified && (
+        <div className="email-verification">
+          <strong>
+            {t(
+              "Приглашения ждут подтверждения почты",
+              "Verify your email to see invitations",
+            )}
+          </strong>
+          <p>
+            {t(
+              "Подтверди адрес в окне аккаунта, чтобы просматривать и принимать приглашения. Свои стартапы можно редактировать уже сейчас.",
+              "Confirm your address in your account panel to view and accept invitations. You can edit your own startups now.",
+            )}
+          </p>
+          <button className="button white" onClick={onSignIn}>
+            {t("Открыть аккаунт", "Open account")}
+          </button>
+        </div>
+      )}
       {error && (
         <p className="error-message" role="alert">
           {error}

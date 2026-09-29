@@ -7,6 +7,7 @@ export const credentials = z.object({
     .transform((s) => s.toLowerCase().trim()),
   password: z.string().min(12).max(128),
   name: z.string().trim().min(1).max(60).optional(),
+  language: z.enum(["ru", "en"]).default("ru"),
 });
 export const profileSchema = z.object({
   avatar: imageSchema,

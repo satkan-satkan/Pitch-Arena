@@ -1,0 +1,24 @@
+{
+  "checks": [
+    "Registration queues a verification email",
+    "Unverified founders can still create their startup",
+    "Private project can be saved before verification",
+    "Email link is removed from address bar",
+    "Opening a link does not consume it",
+    "Verification page fits mobile width",
+    "Verification works after signing in on another device",
+    "Verified status is shown in the account profile",
+    "Resend is disabled during cooldown",
+    "Mismatched passwords do not submit a reset",
+    "Reset signs out the other device",
+    "New password signs in and preserves the project",
+    "Password change rejects wrong credentials and accepts the current one",
+    "Account security supports English",
+    "Sign out everywhere invalidates the current cookie",
+    "Used email links show a recovery action",
+    "Missing mail configuration disables delivery instead of pretending to send",
+    "Mail-off has an explicit explanation",
+    "No browser errors"
+  ],
+  "errors": []
+}

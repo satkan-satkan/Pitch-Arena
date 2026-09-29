@@ -26,7 +26,7 @@ for (const file of files) {
     const source = readFileSync(file, "utf8");
     if (source.includes("\0")) continue;
     if (
-      /\bsk-(?:proj-|svcacct-)?[A-Za-z0-9_-]{24,}\b|\bgh[pousr]_[A-Za-z0-9]{30,}\b|-----BEGIN (?:RSA |EC |OPENSSH )?PRIVATE KEY-----|postgres(?:ql)?:\/\/[^\s/:]+:[^\s/@]+@/i.test(
+      /\bsk-(?:proj-|svcacct-)?[A-Za-z0-9_-]{24,}\b|\bxkeysib-[A-Za-z0-9_-]{20,}\b|\bgh[pousr]_[A-Za-z0-9]{30,}\b|-----BEGIN (?:RSA |EC |OPENSSH )?PRIVATE KEY-----|postgres(?:ql)?:\/\/[^\s/:]+:[^\s/@]+@/i.test(
         source,
       )
     )

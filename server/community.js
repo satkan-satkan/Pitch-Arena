@@ -218,6 +218,8 @@ export async function handleCommunity({ req, url, user, store, body }) {
     return { teams };
   }
   if (path === "/api/workspace/invitations" && req.method === "GET") {
+    if (!user.email_verified_at)
+      return { items: [], verificationRequired: true };
     const rows = await store.all(
       "SELECT i.id,i.team_id,i.role,t.data FROM team_invitations i JOIN teams t ON t.id=i.team_id WHERE i.email=? AND i.status='pending'",
       user.email,
@@ -351,6 +353,7 @@ export async function handleCommunity({ req, url, user, store, body }) {
       /^\/api\/workspace\/invitations\/([^/]+)\/(accept|decline)$/,
     );
     if (invitation && req.method === "POST") {
+      if (!user.email_verified_at) fail(403, "EMAIL_VERIFICATION_REQUIRED");
       const r = await store.get(
         "SELECT * FROM team_invitations WHERE id=? AND email=? AND status='pending'",
         invitation[1],

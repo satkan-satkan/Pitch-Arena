@@ -34,7 +34,7 @@ export async function importSqlite(
   let backupDir;
   try {
     const version = db.prepare("PRAGMA user_version").get().user_version;
-    if (version > 2) throw new Error("Unsupported SQLite schema");
+    if (version > 3) throw new Error("Unsupported SQLite schema");
     backupDir = join(
       backupRoot,
       new Date().toISOString().replace(/[:.]/g, "-"),

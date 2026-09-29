@@ -7,7 +7,7 @@ export function openStore(filename = resolve(".data/pitch-arena.sqlite")) {
     mkdirSync(dirname(filename), { recursive: true, mode: 0o700 });
   const db = new DatabaseSync(filename);
   if (filename !== ":memory:") chmodSync(filename, 0o600);
-  if (db.prepare("PRAGMA user_version").get().user_version > 2) {
+  if (db.prepare("PRAGMA user_version").get().user_version > 3) {
     db.close();
     throw new Error("Database schema is newer than this server");
   }
@@ -41,6 +41,8 @@ export function openStore(filename = resolve(".data/pitch-arena.sqlite")) {
 
   `);
   const columns = db.prepare("PRAGMA table_info(users)").all();
+  if (!columns.some((c) => c.name === "email_verified_at"))
+    db.exec("ALTER TABLE users ADD COLUMN email_verified_at TEXT;");
   if (!columns.some((c) => c.name === "role"))
     db.exec(
       "ALTER TABLE users ADD COLUMN role TEXT NOT NULL DEFAULT 'member'; ALTER TABLE users ADD COLUMN status TEXT NOT NULL DEFAULT 'active';",
@@ -48,7 +50,9 @@ export function openStore(filename = resolve(".data/pitch-arena.sqlite")) {
   db.exec(`CREATE TABLE IF NOT EXISTS catalog(kind TEXT NOT NULL,id TEXT NOT NULL,data TEXT NOT NULL,revision INTEGER NOT NULL DEFAULT 1,updated_at TEXT NOT NULL,PRIMARY KEY(kind,id));
     CREATE TABLE IF NOT EXISTS audit_events(id TEXT PRIMARY KEY,actor_id TEXT REFERENCES users(id),action TEXT NOT NULL,target_type TEXT NOT NULL,target_id TEXT NOT NULL,details TEXT NOT NULL,created_at TEXT NOT NULL);
     CREATE TABLE IF NOT EXISTS data_imports(source_hash TEXT PRIMARY KEY,counts TEXT NOT NULL,created_at TEXT NOT NULL);
-    PRAGMA user_version = 2;`);
+    CREATE TABLE IF NOT EXISTS account_tokens(token_hash TEXT PRIMARY KEY,user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,purpose TEXT NOT NULL CHECK(purpose IN ('verify','reset')),expires INTEGER NOT NULL,UNIQUE(user_id,purpose));
+    CREATE TABLE IF NOT EXISTS auth_mail_limits(bucket TEXT PRIMARY KEY,count INTEGER NOT NULL,expires INTEGER NOT NULL);
+    PRAGMA user_version = 3;`);
   return {
     db,
     get(sql, ...params) {

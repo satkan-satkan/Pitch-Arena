@@ -57,6 +57,7 @@ export function publicUser(user) {
         id: user.id,
         email: user.email,
         role: user.role || "member",
+        emailVerified: !!user.email_verified_at,
         profile: JSON.parse(user.profile),
       }
     : null;

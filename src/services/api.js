@@ -36,6 +36,22 @@ export async function api(
 }
 export function errorText(error, t) {
   const messages = {
+    MAIL_UNAVAILABLE: [
+      "Отправка писем пока недоступна. Попробуй позже.",
+      "Email delivery is unavailable. Please try again later.",
+    ],
+    INVALID_AUTH_LINK: [
+      "Ссылка истекла или уже использована. Запроси новое письмо.",
+      "This link has expired or was already used. Request a new email.",
+    ],
+    EMAIL_VERIFICATION_REQUIRED: [
+      "Сначала подтверди почту в профиле или окне аккаунта.",
+      "First verify your email in your profile or account panel.",
+    ],
+    VERIFICATION_ACCOUNT_REQUIRED: [
+      "Войди в тот аккаунт, для которого пришло письмо.",
+      "Sign in to the account this email was sent for.",
+    ],
     INVALID_IMAGE: [
       "Изображение не удалось прочитать. Загрузи JPG, PNG или WebP заново.",
       "Could not read this image. Upload a JPG, PNG or WebP again.",

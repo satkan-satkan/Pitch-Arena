@@ -6,6 +6,7 @@ export default function useWorkspace() {
     [history, setHistory] = useState([]),
     [draft, setDraft] = useState(null),
     [aiReady, setAiReady] = useState(false),
+    [mailReady, setMailReady] = useState(false),
     [online, setOnline] = useState(false),
     [catalog, setCatalog] = useState(null),
     [checking, setChecking] = useState(true),
@@ -30,6 +31,7 @@ export default function useWorkspace() {
     setHistory(r.history);
     setDraft(r.draft);
     setAiReady(r.aiReady);
+    setMailReady(!!r.mailReady);
     setOnline(true);
     setChecking(false);
     setActiveProjectId((current) =>
@@ -52,6 +54,7 @@ export default function useWorkspace() {
     draft,
     setDraft,
     aiReady,
+    mailReady,
     online,
     catalog,
     checking,

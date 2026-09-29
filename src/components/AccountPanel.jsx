@@ -1,8 +1,10 @@
 import React, { useState } from "react";
 import { api, errorText } from "../services/api";
 import { LogIn, Cloud, Plus, LogOut } from "lucide-react";
+import { EmailVerification, PasswordResetRequest } from "./AccountSecurity";
 export default function AccountPanel({
   account,
+  mailReady = false,
   projects,
   localHistory,
   t,
@@ -13,6 +15,7 @@ export default function AccountPanel({
   registerFirst = false,
 }) {
   const [register, setRegister] = useState(registerFirst),
+    [forgot, setForgot] = useState(false),
     [busy, setBusy] = useState(false),
     [error, setError] = useState(""),
     [email, setEmail] = useState(""),
@@ -43,13 +46,16 @@ export default function AccountPanel({
       <h2>
         {account
           ? t("Мои проекты", "My projects")
-          : register
-            ? t("Создать аккаунт", "Create account")
-            : t("Войти в игру", "Sign in")}
+          : forgot
+            ? t("Восстановить доступ", "Recover your account")
+            : register
+              ? t("Создать аккаунт", "Create account")
+              : t("Войти в игру", "Sign in")}
       </h2>
       {account ? (
         <>
           <p className="modal-subtitle">{account.email}</p>
+          <EmailVerification {...{ account, mailReady, t, onRefresh }} />
           <div className="account-projects">
             {projects.map((p) => (
               <button
@@ -141,6 +147,15 @@ export default function AccountPanel({
             {t("Выйти из аккаунта", "Sign out")}
           </button>
         </>
+      ) : forgot ? (
+        <PasswordResetRequest
+          {...{ t, mailReady }}
+          initialEmail={email}
+          onBack={() => {
+            setForgot(false);
+            setError("");
+          }}
+        />
       ) : (
         <>
           <p className="modal-subtitle">
@@ -156,7 +171,12 @@ export default function AccountPanel({
               run(async () => {
                 await api(`/auth/${register ? "register" : "login"}`, {
                   method: "POST",
-                  data: { email, password, ...(register ? { name } : {}) },
+                  data: {
+                    email,
+                    password,
+                    language: t("ru", "en"),
+                    ...(register ? { name } : {}),
+                  },
                 });
                 setPassword("");
                 await onRefresh();
@@ -209,6 +229,18 @@ export default function AccountPanel({
                   : t("Войти", "Sign in")}
             </button>
           </form>
+          {!register && (
+            <button
+              className="ready-text-button"
+              onClick={() => {
+                setForgot(true);
+                setPassword("");
+                setError("");
+              }}
+            >
+              {t("Забыли пароль?", "Forgot password?")}
+            </button>
+          )}
           <button
             className="ready-text-button"
             onClick={() => {

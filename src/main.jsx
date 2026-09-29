@@ -67,6 +67,8 @@ import PitchRoom from "./PitchRoom";
 import Results from "./components/Results";
 import BackgroundMusic from "./components/BackgroundMusic";
 import AccountPanel from "./components/AccountPanel";
+import AccountSecurity from "./components/AccountSecurity";
+import AuthLinkPage from "./components/AuthLinkPage";
 import AdminPanel from "./components/AdminPanel";
 import useGuide from "./guide/useGuide";
 import { GuideIntro, GuideMessage } from "./guide/Guide";
@@ -612,6 +614,7 @@ function App() {
   const accountDialog = accountOpen && (
     <AccountPanel
       account={workspace.account}
+      mailReady={workspace.mailReady}
       projects={workspace.projects}
       localHistory={guestHistory}
       {...{ t, Modal, registerFirst }}
@@ -619,6 +622,10 @@ function App() {
       onRefresh={async () => {
         const data = await workspace.refresh();
         if (data.user && route === "/") navigate("/play");
+        if (data.user && route.startsWith("/auth/")) {
+          setAccountOpen(false);
+          if (route === "/auth/reset-password") navigate("/play");
+        }
         return data;
       }}
       onProject={(project) => workspace.setActiveProjectId(project.id)}
@@ -629,6 +636,22 @@ function App() {
     go("community");
     if (!workspace.account) openAuth(true);
   };
+  if (["/auth/verify-email", "/auth/reset-password"].includes(route))
+    return (
+      <>
+        <AuthLinkPage
+          key={route}
+          mode={route.split("/")[2]}
+          account={workspace.account}
+          checking={workspace.checking}
+          {...{ t, lang, setLang, Brand }}
+          onLogin={() => openAuth(false)}
+          onRefresh={workspace.refresh}
+          onContinue={() => navigate("/play")}
+        />
+        {accountDialog}
+      </>
+    );
   if (route !== "/play" && route !== "/play/")
     return (
       <>
@@ -1562,6 +1585,15 @@ function App() {
                 {...{ profile, setProfile, t }}
                 onSave={() => setToast(t("Профиль сохранён", "Profile saved"))}
               />
+              {workspace.account && (
+                <AccountSecurity
+                  key={workspace.account.id}
+                  account={workspace.account}
+                  mailReady={workspace.mailReady}
+                  onRefresh={workspace.refresh}
+                  t={t}
+                />
+              )}
             </>
           )}
         </main>
