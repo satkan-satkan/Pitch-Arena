@@ -2,14 +2,12 @@ import React from "react";
 import {
   ArrowRight,
   ArrowUpRight,
-  Mic,
-  Sparkles,
-  Trophy,
   Globe2,
+  Play,
+  Mic,
   Layers,
   MessageCircle,
-  Play,
-  Check,
+  Users,
 } from "lucide-react";
 import "./landing.css";
 import LandingExperience from "./LandingExperience";
@@ -19,7 +17,6 @@ export default function Landing({
   lang,
   setLang,
   Brand,
-  ArenaArt,
   onPlay,
   onAuth,
   onDirectory,
@@ -27,7 +24,7 @@ export default function Landing({
   onGuide,
 }) {
   return (
-    <div className="landing">
+    <div className="landing garage-landing">
       <header className="landing-nav">
         <a href="/" aria-label="Pitch Arena">
           <Brand />
@@ -45,7 +42,7 @@ export default function Landing({
             }
             onClick={() => setLang(lang === "ru" ? "en" : "ru")}
           >
-            <Globe2 size={16} />
+            <Globe2 size={15} />
             {lang.toUpperCase()}
           </button>
           <button
@@ -57,26 +54,30 @@ export default function Landing({
         </div>
       </header>
       <main>
-        <section className="landing-hero">
+        <section className="landing-hero garage-hero">
+          <Tilt className="garage-scene">
+            <img
+              className="garage-image"
+              src="/scenes/garage-night.png"
+              alt=""
+              fetchPriority="high"
+            />
+            <div className="garage-shade" />
+          </Tilt>
           <Reveal className="landing-copy">
             <span className="landing-eyebrow">
-              <span />
-              {t(
-                "ТРЕНИРОВКА ПЕРЕД НЕУДОБНЫМИ ВОПРОСАМИ",
-                "REHEARSE THE UNCOMFORTABLE QUESTIONS",
-              )}
+              <i />
+              {t("СИМУЛЯТОР ЖИЗНИ ОСНОВАТЕЛЯ", "THE FOUNDER SIMULATOR")}
             </span>
             <h1>
-              {t("У тебя идея.", "You have an idea.")}
+              {t("Сначала гараж.", "First, the garage.")}
               <br />
-              {t("У них —", "They have")}
-              <br />
-              <em>{t("вопросы.", "questions.")}</em>
+              <em>{t("Потом — раунд.", "Then, the round.")}</em>
             </h1>
             <p>
               {t(
-                "Две минуты на питч. Потом — рынок, деньги и «почему именно вы?». Проверь свою историю до встречи, на которой ставки будут настоящими.",
-                "Two minutes to pitch. Then it’s market, money and “why you?”. Test your story before the meeting where the stakes are real.",
+                "Собери команду. Объясни, зачем миру твой продукт. Выдержи вопросы людей, которые уже слышали «следующий миллиардный стартап».",
+                "Build your team. Explain why your product should exist. Face people who have heard “the next billion-dollar startup” before.",
               )}
             </p>
             <div className="landing-cta">
@@ -87,100 +88,46 @@ export default function Landing({
                 {account
                   ? t("Вернуться на сцену", "Back to the stage")
                   : t("Занять сцену", "Take the stage")}
-                <ArrowRight size={18} />
+                <ArrowRight size={17} />
               </button>
               <button className="landing-guest" onClick={onPlay}>
-                <Play size={16} />
+                <Play size={14} />
                 {t("Попробовать без регистрации", "Try without an account")}
               </button>
             </div>
-            <div className="landing-points">
+            <div className="garage-caption">
+              <span>01 / THE GARAGE</span>
               <span>
-                <Check size={13} />
-                {t("Твой проект и слайды", "Your project & slides")}
-              </span>
-              <span>
-                <Check size={13} />
-                RU / EN
-              </span>
-              <span>
-                <Check size={13} />
-                {t("Вопросы после питча", "Questions after your pitch")}
+                {t(
+                  "Дальше всё зависит от твоего питча.",
+                  "What happens next depends on your pitch.",
+                )}
               </span>
             </div>
           </Reveal>
-          <Tilt className="landing-scene">
-            <div className="scene-orbit orbit-one" />
-            <div className="scene-orbit orbit-two" />
-            <span className="scene-star star-one">✦</span>
-            <span className="scene-star star-two">✧</span>
-            <div className="scene-top-label">
-              <span />
-              {t("ТВОЯ СЛЕДУЮЩАЯ АРЕНА", "YOUR NEXT ARENA")}
-            </div>
-            <ArenaArt />
-            <div className="scene-timer">
-              <Mic size={20} />
-              <div>
-                <small>{t("ТВОЙ МОМЕНТ", "YOUR MOMENT")}</small>
-                <strong>02:00</strong>
-              </div>
-              <div className="scene-wave">
-                {[12, 23, 15, 31, 22, 37, 18, 28, 12].map((v, i) => (
-                  <i key={i} style={{ height: v }} />
-                ))}
-              </div>
-            </div>
-            <div className="scene-feedback">
-              <span>
-                <Sparkles size={17} />
-              </span>
-              <div>
-                <strong>
-                  {t(
-                    "Уверенность начинается с репетиции",
-                    "Confidence starts with rehearsal",
-                  )}
-                </strong>
-                <small>
-                  {t(
-                    "Начни с первой репетиции",
-                    "Start with your first rehearsal",
-                  )}
-                </small>
-              </div>
-            </div>
-            <div className="scene-level">
-              <Trophy size={15} />
-              {t("От идеи к единорогу", "From idea to unicorn")}
-            </div>
-          </Tilt>
+          <div className="garage-time">
+            <span>{t("ВРЕМЯ НА ПИТЧ", "TIME TO PITCH")}</span>
+            <strong>02:00</strong>
+            <small>
+              {t("Потом слушаешь ты.", "Then it’s your turn to listen.")}
+            </small>
+          </div>
         </section>
-        <section className="landing-path">
-          <p>
-            {t(
-              "ОДНА ИДЕЯ. РАЗНЫЕ УРОВНИ СКЕПСИСА.",
-              "ONE IDEA. DIFFERENT LEVELS OF SKEPTICISM.",
-            )}
-          </p>
+        <section className="landing-path garage-route">
           <div>
             {[
-              "Свои люди",
+              t("Свои люди", "Friends & family"),
               "nFactorial",
-              "Арена Единорогов",
+              t("Арена Единорогов", "Unicorn Arena"),
               "Y Combinator",
               "a16z",
             ].map((v, i) => (
               <React.Fragment key={v}>
-                <span className={i === 0 ? "first" : ""}>
+                <span>
                   <small>0{i + 1}</small>
-                  {i === 0
-                    ? t(v, "Friends & family")
-                    : i === 2
-                      ? t(v, "Unicorn Arena")
-                      : v}
+                  {v}
                 </span>
-                {i < 4 && <ArrowRight size={16} />}
+                {i < 4 && <ArrowRight size={14} />}
               </React.Fragment>
             ))}
           </div>
@@ -195,18 +142,18 @@ export default function Landing({
         <Reveal as="section" id="how" className="landing-how">
           <div className="landing-section-heading">
             <span className="landing-eyebrow">
-              {t("КАК ПРОХОДИТ РАУНД", "HOW THE ROUND WORKS")}
+              {t(
+                "ОТКРЫТЬ ДЕК. СОБРАТЬСЯ. НАЧАТЬ.",
+                "OPEN THE DECK. TAKE A BREATH. BEGIN.",
+              )}
             </span>
             <h2>
-              {t(
-                "Питч. Вопросы. Работа над ошибками.",
-                "Pitch. Questions. Revision.",
-              )}
+              {t("Здесь можно переснять дубль.", "You get another take here.")}
             </h2>
             <p>
               {t(
-                "Слайды могут быть красивыми. Ответы тоже придётся подготовить.",
-                "The deck can look great. You still need answers.",
+                "На настоящей встрече этой кнопки не будет.",
+                "The real meeting won’t have that button.",
               )}
             </p>
           </div>
@@ -214,61 +161,54 @@ export default function Landing({
             {[
               [
                 Layers,
-                "01",
-                t("Принеси свою идею", "Bring your idea"),
+                t("Твой проект", "Your project"),
                 t(
-                  "Выбери арену, загрузи слайды и задай цель. От тёплого разговора до сложной панели.",
-                  "Choose an arena, upload your slides and set your goal. From a friendly conversation to a challenging panel.",
+                  "Слайды, запрос и арена. Начни с того, что уже есть.",
+                  "Your deck, ask and arena. Start with what you have.",
                 ),
               ],
               [
                 Mic,
-                "02",
-                t("Займи сцену", "Take the stage"),
+                t("Твой питч", "Your pitch"),
                 t(
-                  "Твоё время говорить. Питчь голосом или текстом — вопросы начнутся после выступления.",
-                  "Your time to speak. Pitch by voice or text. Questions begin after your presentation.",
+                  "Говори или печатай. Сначала выступление, затем вопросы.",
+                  "Speak or type. Your pitch first, questions afterwards.",
                 ),
               ],
               [
                 MessageCircle,
-                "03",
-                t("Стань убедительнее", "Become more compelling"),
+                t("Твои ответы", "Your answers"),
                 t(
-                  "Разбери ответы, найди слабые места и получи конкретную задачу для следующей попытки.",
-                  "Review your answers, find gaps and get a concrete goal for your next attempt.",
+                  "Рынок, спрос, экономика. Найди слабый аргумент и попробуй ещё раз.",
+                  "Market, demand, economics. Find the weak argument and try again.",
                 ),
               ],
-            ].map(([Icon, n, title, text]) => (
-              <article key={n}>
+            ].map(([Icon, title, copy], i) => (
+              <article key={title}>
                 <div>
-                  <Icon size={23} />
-                  <span>{n}</span>
+                  <Icon size={21} />
+                  <span>0{i + 1}</span>
                 </div>
                 <h3>{title}</h3>
-                <p>{text}</p>
+                <p>{copy}</p>
               </article>
             ))}
           </div>
         </Reveal>
-        <Reveal as="section" className="landing-community">
+        <Reveal as="section" className="landing-community garage-community">
           <div>
             <span className="landing-eyebrow">
-              {t(
-                "КОМАНДЫ / ПРОДУКТЫ / ПЕРВЫЕ КЛИЕНТЫ",
-                "TEAMS / PRODUCTS / FIRST CUSTOMERS",
-              )}
+              {t("СОБИРАЕМ КОМАНДУ", "ASSEMBLE THE TEAM")}
             </span>
             <h2>
-              {t(
-                "За питчем должен быть продукт.",
-                "There should be a product behind the pitch.",
-              )}
+              {t("Одному можно начать.", "You can start alone.")}
+              <br />
+              {t("Вместе — построить.", "Build it together.")}
             </h2>
             <p>
               {t(
-                "Собери команду, расскажи о своём продукте и стань частью каталога стартапов. От первых набросков до работающего бизнеса.",
-                "Build a team, share your product and join the startup directory. From early sketches to a working business.",
+                "Создай команду, пригласи участников и собери общую карточку стартапа. Личные тренировки остаются твоими.",
+                "Create a team, invite members and build a shared startup profile. Personal practices stay yours.",
               )}
             </p>
             <button className="button white" onClick={onDirectory}>
@@ -276,45 +216,33 @@ export default function Landing({
               <ArrowUpRight size={17} />
             </button>
           </div>
-          <div className="community-orbit" aria-hidden="true">
-            <span className="orbit-avatar a-one">✦</span>
-            <span className="orbit-avatar a-two">↗</span>
-            <span className="orbit-avatar a-three">◒</span>
-            <div>
-              <Globe2 size={34} />
-              <strong>
-                {t("Твой продукт.", "Your product.")}
-                <br />
-                {t("Твоя команда.", "Your team.")}
-              </strong>
+          <div className="crew-visual" aria-hidden="true">
+            <div className="crew-chair">
+              <Users size={54} strokeWidth={1} />
             </div>
+            <span>CO-FOUNDERS WANTED.</span>
+            <div className="crew-line" />
+            <small>BUILD SOMETHING PEOPLE WANT.</small>
           </div>
         </Reveal>
         <Reveal as="section" className="landing-end">
-          <span>✦</span>
-          <h2>
-            {t(
-              "Лучше сложный вопрос здесь.",
-              "Better to hear the hard question here.",
-            )}
-          </h2>
+          <span className="landing-eyebrow">TAKE 01</span>
+          <h2>{t("Итак. Что ты строишь?", "So. What are you building?")}</h2>
           <p>
             {t(
-              "Чем неловкое молчание на настоящей встрече.",
-              "Than sit in awkward silence at the real meeting.",
+              "Первый питч может быть неловким. Для этого мы здесь.",
+              "The first pitch might be awkward. That’s why we’re here.",
             )}
           </p>
           <button className="button dark" onClick={onPlay}>
             {t("Попробовать первую арену", "Try your first arena")}
-            <ArrowRight size={18} />
+            <ArrowRight size={17} />
           </button>
         </Reveal>
       </main>
       <footer className="landing-footer">
         <Brand small />
-        <p>
-          {t("Меньше хайпа. Больше аргументов.", "Less hype. More substance.")}
-        </p>
+        <p>{t("Репетиция перед реальностью.", "Rehearsal before reality.")}</p>
         <button onClick={() => onAuth(false)}>{t("Аккаунт", "Account")}</button>
         <span>© {new Date().getFullYear()} Pitch Arena</span>
       </footer>

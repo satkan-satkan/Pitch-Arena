@@ -50,7 +50,7 @@ try {
   );
   mkdirSync("artifacts", { recursive: true });
   await page.screenshot({
-    path: "artifacts/v9-community-landing.png",
+    path: "artifacts/v10-community-landing.png",
     fullPage: true,
   });
   await button("Попробовать без регистрации").click();
@@ -86,6 +86,51 @@ try {
   await field("Telegram").fill("https://t.me/example");
   await button("Сохранить команду").click();
   await page.getByRole("dialog").waitFor({ state: "hidden" });
+  check(
+    "Created team is selected in the profile selector",
+    (await page
+      .getByRole("button", {
+        name: "Выбрать команду: Orbit Founders",
+        exact: true,
+      })
+      .getAttribute("aria-pressed")) === "true",
+  );
+  await button("Создать команду").click();
+  await field("Название команды").fill("Side Project");
+  await button("Сохранить команду").click();
+  await page.getByRole("dialog").waitFor({ state: "hidden" });
+  check(
+    "New team opens its own room",
+    (await page.locator(".team-card h2").innerText()) === "Side Project",
+  );
+  await button("Выбрать команду: Orbit Founders").click();
+  check(
+    "Selector switches real team context",
+    (await page.locator(".team-card h2").innerText()) === "Orbit Founders",
+  );
+  await page
+    .locator(".team-selection-shell")
+    .screenshot({ path: "artifacts/v10-team-selector.png" });
+  await page.setViewportSize({ width: 390, height: 844 });
+  check(
+    "Team selector fits mobile width",
+    await page.evaluate(
+      () => document.documentElement.scrollWidth <= innerWidth,
+    ),
+  );
+  await page
+    .locator(".team-selection-shell")
+    .screenshot({ path: "artifacts/v10-team-selector-mobile.png" });
+  await page.setViewportSize({ width: 1440, height: 1100 });
+  await button("Switch to English").click();
+  await button("Select team: Side Project").focus();
+  await page.keyboard.press("Enter");
+  check(
+    "English selector supports keyboard activation",
+    (await page.locator(".team-card h2").innerText()) === "Side Project",
+  );
+  await button("Переключить на русский").click();
+  await button("Выбрать команду: Orbit Founders").click();
   await field("Email участника").fill("teammate@example.com");
   await button("Пригласить").click();
   await page.locator(".pending-invite").waitFor();
@@ -114,7 +159,7 @@ try {
   );
   await button("На проверку").click();
   await page.getByText("На проверке", { exact: true }).waitFor();
-  const memberContext = await browser.newContext(),
+  const memberContext = await browser.newContext({ reducedMotion: "reduce" }),
     member = await memberContext.newPage();
   member.on("pageerror", (e) => errors.push(e.message));
   await login(member, "teammate@example.com");
@@ -123,7 +168,26 @@ try {
     .filter({ hasText: "Стартапы и команды" })
     .click();
   await member.locator(".team-inbox").waitFor();
+  await member
+    .getByRole("button", { name: /Открыть приглашение: Orbit Founders/ })
+    .click();
+  await member.getByRole("dialog", { name: "Приглашение в команду" }).waitFor();
+  check(
+    "Opening an invitation does not join the team",
+    !(await member.getByText("Orbit Studio", { exact: true }).isVisible()),
+  );
+  await member.screenshot({ path: "artifacts/v10-team-invitation.png" });
   await button("Принять", member).click();
+  await member.getByRole("dialog").waitFor({ state: "hidden" });
+  check(
+    "Accepted invitation selects the joined team",
+    (await member
+      .getByRole("button", {
+        name: "Выбрать команду: Orbit Founders",
+        exact: true,
+      })
+      .getAttribute("aria-pressed")) === "true",
+  );
   await member.getByText("Orbit Studio", { exact: true }).waitFor();
   check(
     "Accepted editor sees the shared listing",
@@ -165,7 +229,7 @@ try {
       .isVisible(),
   );
   await visitor.screenshot({
-    path: "artifacts/v9-community-directory.png",
+    path: "artifacts/v10-community-directory.png",
     fullPage: true,
   });
   await visitor
@@ -205,7 +269,7 @@ try {
     (await f.request("/startups")).data.total === 0,
   );
   await page.screenshot({
-    path: "artifacts/v9-community-workspace.png",
+    path: "artifacts/v10-community-workspace.png",
     fullPage: true,
   });
   await visitor.emulateMedia({ reducedMotion: "reduce" });
@@ -219,7 +283,7 @@ try {
     ),
   );
   await visitor.screenshot({
-    path: "artifacts/v9-community-landing-mobile.png",
+    path: "artifacts/v10-community-landing-mobile.png",
     fullPage: true,
   });
   await button("Switch to English", visitor).click();
@@ -227,7 +291,7 @@ try {
     "Landing supports English",
     await visitor
       .getByRole("heading", {
-        name: /You have an idea\.\s*They have\s*questions\./,
+        name: /First, the garage\.\s*Then, the round\./,
       })
       .isVisible(),
   );
@@ -243,7 +307,7 @@ try {
   );
   check("No browser runtime errors", errors.length === 0);
   writeFileSync(
-    "artifacts/v9-community-verification.json",
+    "artifacts/v10-community-verification.json",
     JSON.stringify(
       { passed: checks.length, checks, errors, liveAI: false },
       null,

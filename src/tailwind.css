@@ -1,0 +1,20 @@
+/* Existing app owns its reset. Import utilities without global Preflight. */
+@layer theme, base, components, utilities;
+@import "tailwindcss/theme.css" layer(theme);
+@import "tailwindcss/utilities.css" layer(utilities);
+@source "./components/ui";
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-muted: var(--surface-raised);
+  --color-muted-foreground: var(--text-secondary);
+  --color-primary: var(--accent);
+  --color-ring: var(--accent);
+}
+:root {
+  --background: #111214;
+  --foreground: #eeeae2;
+  --surface-raised: #252628;
+  --text-secondary: #a6a6a3;
+  --accent: #d4a45c;
+}

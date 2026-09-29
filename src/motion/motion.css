@@ -6,13 +6,13 @@
   width: 30px;
   height: 30px;
   border-radius: 50%;
-  color: #877897;
-  background: #f3edf9;
-  border: 1px solid #e9dff3;
+  color: #7e7c78;
+  background: #1e1e1d;
+  border: 1px solid #272725;
 }
 .motion-control:hover {
-  color: #614c80;
-  background: #e9def6;
+  color: #9b9996;
+  background: #262624;
 }
 .landing-controls {
   gap: 15px;
@@ -52,8 +52,8 @@
 .experience-tabs .tab-active-background {
   position: absolute;
   inset: 3px 0 0;
-  background: #f1e8fc;
-  border-bottom: 2px solid #a17cd4;
+  background: #1f1f1e;
+  border-bottom: 2px solid #cba466;
   border-radius: 9px 9px 0 0;
   z-index: -1;
   pointer-events: none;
@@ -81,11 +81,11 @@
 @media (hover: hover) and (pointer: fine) {
   html[data-motion="on"] .landing .button:hover {
     transform: translateY(-3px);
-    box-shadow: 0 10px 25px #81629b24;
+    box-shadow: 0 10px 25px #86848024;
   }
   html[data-motion="on"] .landing-steps article:hover {
     transform: translateY(-5px);
-    box-shadow: 0 14px 40px #81629b12;
+    box-shadow: 0 14px 40px #86848012;
   }
   html[data-motion="on"] .emotion-picker button:hover {
     transform: translateY(-2px);

@@ -28,7 +28,7 @@ try {
     () => document.documentElement.dataset.motion === "on",
   );
   const scene = page.locator('[data-tilt="scene"]');
-  await scene.hover({ position: { x: 70, y: 80 } });
+  await scene.hover({ position: { x: 1120, y: 420 } });
   await page.waitForFunction(
     () =>
       document
@@ -42,8 +42,10 @@ try {
   check(
     "Scene has a live breathing animation",
     await page
-      .locator(".landing-scene .arena-art")
-      .evaluate((el) => getComputedStyle(el).animationName === "scene-breathe"),
+      .locator(".garage-image")
+      .evaluate(
+        (el) => getComputedStyle(el).animationName === "garage-breathe",
+      ),
   );
   await page
     .getByRole("button", { name: "Приостановить анимации", exact: true })
@@ -56,7 +58,7 @@ try {
     await scene.evaluate(
       (el) =>
         getComputedStyle(el).transform === "none" &&
-        getComputedStyle(el.querySelector(".arena-art")).animationName ===
+        getComputedStyle(el.querySelector(".garage-image")).animationName ===
           "none",
     ),
   );
@@ -102,24 +104,6 @@ try {
       .locator(".tab-active-background")
       .count()) === 1,
   );
-  for (const [label, mood] of [
-    ["Радость", "celebrate"],
-    ["Размышление", "thinking"],
-  ]) {
-    await page.getByRole("button", { name: label, exact: true }).click();
-    await page.waitForFunction(
-      (m) =>
-        document.querySelector(".bento-guide .guide-portrait")?.dataset
-          .emotion === m,
-      mood,
-    );
-    check(
-      `Iskra swaps the actual ${mood} pose`,
-      await page
-        .locator(`.bento-guide img[src$="iskra-${mood}.png"]`)
-        .evaluate((el) => el.complete && el.naturalWidth > 0),
-    );
-  }
   await page.emulateMedia({ reducedMotion: "reduce" });
   await page.waitForFunction(
     () => document.documentElement.dataset.motion === "off",
@@ -127,7 +111,7 @@ try {
   check(
     "System reduced motion stops all decorative loops",
     await page
-      .locator(".scene-wave i")
+      .locator(".garage-image")
       .first()
       .evaluate((el) => getComputedStyle(el).animationName === "none"),
   );
@@ -141,11 +125,8 @@ try {
       .isDisabled(),
   );
   await page.setViewportSize({ width: 390, height: 844 });
-  await page.waitForFunction(
-    () => document.querySelectorAll(".bento-guide img").length === 1,
-  );
   await page.screenshot({
-    path: "artifacts/v9-motion-mobile.png",
+    path: "artifacts/v10-motion-mobile.png",
     fullPage: true,
   });
   check(
@@ -156,7 +137,7 @@ try {
   );
   check("No animation runtime errors", errors.length === 0);
   writeFileSync(
-    "artifacts/v9-motion-verification.json",
+    "artifacts/v10-motion-verification.json",
     JSON.stringify({ passed: checks.length, checks, errors }, null, 2),
   );
 } finally {

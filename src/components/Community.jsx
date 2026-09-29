@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 import { api, errorText } from "../services/api";
 import "./community.css";
+import { ProfileSelector, ProfileIcon } from "@/components/ui/profile-selector";
 export const socialNames = {
   website: "Website",
   telegram: "Telegram",
@@ -556,14 +557,14 @@ function TeamEditor({ team, t, Modal, onSave, onClose }) {
           e.preventDefault();
           setBusy(true);
           try {
-            await api(
+            const saved = await api(
               team ? `/workspace/teams/${team.id}` : "/workspace/teams",
               {
                 method: team ? "PUT" : "POST",
                 data: team ? { revision: team.revision, data } : data,
               },
             );
-            await onSave();
+            await onSave(saved.id || team?.id);
             onClose();
           } catch (e) {
             setError(errorText(e, t));
@@ -622,7 +623,9 @@ export function FounderWorkspace({ account, t, Modal, onSignIn, onPublic }) {
     [busy, setBusy] = useState(false),
     [editing, setEditing] = useState(null),
     [teamEdit, setTeamEdit] = useState(null),
-    [notice, setNotice] = useState("");
+    [notice, setNotice] = useState(""),
+    [selectedTeamId, setSelectedTeamId] = useState(null),
+    [selectedInvite, setSelectedInvite] = useState(null);
   const refresh = async () => {
     const [s, teams, invites] = await Promise.all([
       api("/workspace/startups"),
@@ -633,6 +636,8 @@ export function FounderWorkspace({ account, t, Modal, onSignIn, onPublic }) {
   };
   useEffect(() => {
     setData(null);
+    setSelectedTeamId(null);
+    setSelectedInvite(null);
     setError("");
     if (!account) return;
     let active = true;
@@ -738,33 +743,152 @@ export function FounderWorkspace({ account, t, Modal, onSignIn, onPublic }) {
         </div>
       ) : (
         <>
-          {data.invites.length > 0 && (
-            <section className="team-inbox">
-              <h2>{t("Тебя приглашают", "You are invited")}</h2>
-              {data.invites.map((i) => (
-                <div key={i.id}>
-                  <span>
-                    <strong>{i.teamName}</strong> · {roleName(i.role, t)}
-                  </span>
+          <div className="team-selection-shell">
+            <span className="team-selection-eyebrow">
+              {t("РАБОЧАЯ КОМНАТА", "THE WORKROOM")}
+            </span>
+            <ProfileSelector
+              title={t("С кем строим?", "Who are we building with?")}
+              className="min-h-0 bg-transparent py-10"
+              disabled={busy}
+              selectedId={`team:${selectedTeamId || data.teams[0]?.id}`}
+              profiles={[
+                ...data.teams.map((team, index) => ({
+                  id: `team:${team.id}`,
+                  label: team.data.name,
+                  icon: (
+                    <ProfileIcon
+                      className={`team-avatar team-avatar-${index % 4}`}
+                    >
+                      <span>
+                        {team.data.name.trim().slice(0, 2).toUpperCase()}
+                      </span>
+                    </ProfileIcon>
+                  ),
+                })),
+                ...data.invites.map((invite) => ({
+                  id: `invite:${invite.id}`,
+                  label: `${invite.teamName} · ${t("Приглашение", "Invitation")}`,
+                  icon: (
+                    <ProfileIcon className="team-avatar invitation-avatar">
+                      <Users size={42} />
+                      <span className="invitation-dot" />
+                    </ProfileIcon>
+                  ),
+                })),
+                {
+                  id: "add",
+                  label: t("Создать команду", "Create team"),
+                  icon: (
+                    <ProfileIcon className="team-add-avatar">
+                      <Plus size={40} strokeWidth={1} />
+                    </ProfileIcon>
+                  ),
+                },
+              ]}
+              selectionLabel={(profile) =>
+                profile.id === "add"
+                  ? t("Создать команду", "Create team")
+                  : profile.id.startsWith("invite:")
+                    ? t(
+                        `Открыть приглашение: ${profile.label}`,
+                        `Open invitation: ${profile.label}`,
+                      )
+                    : t(
+                        `Выбрать команду: ${profile.label}`,
+                        `Select team: ${profile.label}`,
+                      )
+              }
+              onProfileSelect={(id) => {
+                setError("");
+                if (id === "add") setTeamEdit({});
+                else if (id.startsWith("invite:"))
+                  setSelectedInvite(
+                    data.invites.find((i) => i.id === id.slice(7)),
+                  );
+                else setSelectedTeamId(id.slice(5));
+              }}
+            />
+            <p className="team-selection-note">
+              {t(
+                "Выбери команду или собери свою. Приглашение нужно принять отдельно.",
+                "Choose a team or build your own. Invitations need your acceptance.",
+              )}
+            </p>
+            {data.invites.length > 0 && (
+              <p className="team-inbox">
+                {t(
+                  `Новых приглашений: ${data.invites.length}`,
+                  `New invitations: ${data.invites.length}`,
+                )}
+              </p>
+            )}
+          </div>
+          {selectedInvite && (
+            <Modal
+              wide
+              label={t("Приглашение в команду", "Team invitation")}
+              onClose={() => !busy && setSelectedInvite(null)}
+            >
+              <div className="invite-preview">
+                <div className="invite-preview-icon">
+                  <Users size={34} />
+                </div>
+                <span className="eyebrow">
+                  {t("ТЕБЯ ПРИГЛАШАЮТ", "YOU ARE INVITED")}
+                </span>
+                <h2>{selectedInvite.teamName}</h2>
+                <p>
+                  {t("Твоя роль", "Your role")}:{" "}
+                  {roleName(selectedInvite.role, t)}.
+                </p>
+                <p>
+                  {t(
+                    "После принятия ты получишь доступ к общим карточкам команды. Личные тренировки останутся приватными.",
+                    "Accept to access the team's shared listings. Your personal practices stay private.",
+                  )}
+                </p>
+                {error && (
+                  <p role="alert" className="error-message">
+                    {error}
+                  </p>
+                )}
+                <div className="modal-actions">
                   <button
                     className="button dark"
                     disabled={busy}
-                    onClick={() => act(`/workspace/invitations/${i.id}/accept`)}
+                    onClick={async () => {
+                      if (
+                        await act(
+                          `/workspace/invitations/${selectedInvite.id}/accept`,
+                        )
+                      ) {
+                        setSelectedTeamId(selectedInvite.teamId);
+                        setSelectedInvite(null);
+                      }
+                    }}
                   >
-                    {t("Принять", "Accept")}
+                    {busy
+                      ? t("Подключаем…", "Joining…")
+                      : t("Принять", "Accept")}
                   </button>
                   <button
                     className="button white"
                     disabled={busy}
-                    onClick={() =>
-                      act(`/workspace/invitations/${i.id}/decline`)
-                    }
+                    onClick={async () => {
+                      if (
+                        await act(
+                          `/workspace/invitations/${selectedInvite.id}/decline`,
+                        )
+                      )
+                        setSelectedInvite(null);
+                    }}
                   >
                     {t("Отклонить", "Decline")}
                   </button>
                 </div>
-              ))}
-            </section>
+              </div>
+            </Modal>
           )}
           <div className="community-section-title">
             <h2>{t("Мои карточки", "My listings")}</h2>
@@ -865,19 +989,10 @@ export function FounderWorkspace({ account, t, Modal, onSignIn, onPublic }) {
             </div>
           )}
           <div className="community-section-title">
-            <div>
-              <h2>{t("Мои команды", "My teams")}</h2>
-              <p>
-                {t(
-                  "Общие карточки, участники и социальные сети.",
-                  "Shared listings, members and social links.",
-                )}
-              </p>
-            </div>
-            <button className="button white" onClick={() => setTeamEdit({})}>
-              <Plus size={15} />
-              {t("Создать команду", "Create team")}
-            </button>
+            <h2>{t("Комната команды", "Team room")}</h2>
+            <span className="eyebrow">
+              {t("УЧАСТНИКИ И ДОСТУП", "PEOPLE & ACCESS")}
+            </span>
           </div>
           {!data.teams.length && (
             <div className="community-empty compact">
@@ -890,120 +1005,129 @@ export function FounderWorkspace({ account, t, Modal, onSignIn, onPublic }) {
             </div>
           )}
           <div className="team-grid">
-            {data.teams.map((team) => (
-              <article className="team-card" key={team.id}>
-                <div className="community-section-title">
-                  <h2>{team.data.name}</h2>
-                  <span className="community-badge">
-                    {roleName(team.role, t)}
-                  </span>
-                </div>
-                <p>{team.data.description}</p>
-                <SocialLinks links={team.data.links} />
-                <ul className="team-members">
-                  {team.members.map((m) => (
-                    <li key={m.id}>
-                      <span>
-                        {m.name} <small>· {roleName(m.role, t)}</small>
-                      </span>
-                      {team.role === "owner" && m.role !== "owner" && (
-                        <button
-                          disabled={busy}
-                          onClick={() =>
-                            act(
-                              `/workspace/teams/${team.id}/members/${m.id}`,
-                              "DELETE",
-                            )
-                          }
-                        >
-                          {t("Убрать", "Remove")}
-                        </button>
-                      )}
-                    </li>
-                  ))}
-                </ul>
-                {team.role === "owner" && (
-                  <>
-                    <button
-                      className="ready-text-button"
-                      onClick={() => setTeamEdit(team)}
-                    >
-                      {t("Настройки команды", "Team settings")}
-                    </button>
-                    <form
-                      className="team-invite"
-                      onSubmit={async (e) => {
-                        e.preventDefault();
-                        const form = e.currentTarget,
-                          f = new FormData(form);
-                        if (
-                          await act(
-                            `/workspace/teams/${team.id}/invitations`,
-                            "POST",
-                            { email: f.get("email"), role: f.get("role") },
-                          )
-                        )
-                          form.reset();
-                      }}
-                    >
-                      <label>
-                        {t("Email участника", "Member email")}
-                        <input
-                          name="email"
-                          type="email"
-                          required
-                          maxLength={254}
-                        />
-                      </label>
-                      <label>
-                        {t("Права участника", "Member permissions")}
-                        <select
-                          name="role"
-                          aria-label={t(
-                            "Права участника",
-                            "Member permissions",
-                          )}
-                        >
-                          <option value="editor">
-                            {t("Редактор карточек", "Listing editor")}
-                          </option>
-                          <option value="member">
-                            {t("Только просмотр", "Read only")}
-                          </option>
-                        </select>
-                      </label>
-                      <button className="button dark" disabled={busy}>
-                        {t("Пригласить", "Invite")}
-                      </button>
-                      <small>
-                        {t(
-                          "Приглашение появится в аккаунте с этим email. Письмо не отправляется.",
-                          "The invitation appears in the account with this email. No email is sent.",
-                        )}
-                      </small>
-                    </form>
-                    {team.invitations.map((i) => (
-                      <div className="pending-invite" key={i.id}>
+            {data.teams
+              .filter(
+                (team) =>
+                  team.id ===
+                  (selectedTeamId &&
+                  data.teams.some((v) => v.id === selectedTeamId)
+                    ? selectedTeamId
+                    : data.teams[0]?.id),
+              )
+              .map((team) => (
+                <article className="team-card" key={team.id}>
+                  <div className="community-section-title">
+                    <h2>{team.data.name}</h2>
+                    <span className="community-badge">
+                      {roleName(team.role, t)}
+                    </span>
+                  </div>
+                  <p>{team.data.description}</p>
+                  <SocialLinks links={team.data.links} />
+                  <ul className="team-members">
+                    {team.members.map((m) => (
+                      <li key={m.id}>
                         <span>
-                          {i.email} · {t("ожидает ответа", "pending")}
+                          {m.name} <small>· {roleName(m.role, t)}</small>
                         </span>
-                        <button
-                          disabled={busy}
-                          onClick={() =>
-                            act(
-                              `/workspace/teams/${team.id}/invitations/${i.id}`,
-                              "DELETE",
-                            )
-                          }
-                        >
-                          {t("Отменить", "Cancel")}
-                        </button>
-                      </div>
+                        {team.role === "owner" && m.role !== "owner" && (
+                          <button
+                            disabled={busy}
+                            onClick={() =>
+                              act(
+                                `/workspace/teams/${team.id}/members/${m.id}`,
+                                "DELETE",
+                              )
+                            }
+                          >
+                            {t("Убрать", "Remove")}
+                          </button>
+                        )}
+                      </li>
                     ))}
-                  </>
-                )}
-              </article>
-            ))}
+                  </ul>
+                  {team.role === "owner" && (
+                    <>
+                      <button
+                        className="ready-text-button"
+                        onClick={() => setTeamEdit(team)}
+                      >
+                        {t("Настройки команды", "Team settings")}
+                      </button>
+                      <form
+                        className="team-invite"
+                        onSubmit={async (e) => {
+                          e.preventDefault();
+                          const form = e.currentTarget,
+                            f = new FormData(form);
+                          if (
+                            await act(
+                              `/workspace/teams/${team.id}/invitations`,
+                              "POST",
+                              { email: f.get("email"), role: f.get("role") },
+                            )
+                          )
+                            form.reset();
+                        }}
+                      >
+                        <label>
+                          {t("Email участника", "Member email")}
+                          <input
+                            name="email"
+                            type="email"
+                            required
+                            maxLength={254}
+                          />
+                        </label>
+                        <label>
+                          {t("Права участника", "Member permissions")}
+                          <select
+                            name="role"
+                            aria-label={t(
+                              "Права участника",
+                              "Member permissions",
+                            )}
+                          >
+                            <option value="editor">
+                              {t("Редактор карточек", "Listing editor")}
+                            </option>
+                            <option value="member">
+                              {t("Только просмотр", "Read only")}
+                            </option>
+                          </select>
+                        </label>
+                        <button className="button dark" disabled={busy}>
+                          {t("Пригласить", "Invite")}
+                        </button>
+                        <small>
+                          {t(
+                            "Приглашение появится в аккаунте с этим email. Письмо не отправляется.",
+                            "The invitation appears in the account with this email. No email is sent.",
+                          )}
+                        </small>
+                      </form>
+                      {team.invitations.map((i) => (
+                        <div className="pending-invite" key={i.id}>
+                          <span>
+                            {i.email} · {t("ожидает ответа", "pending")}
+                          </span>
+                          <button
+                            disabled={busy}
+                            onClick={() =>
+                              act(
+                                `/workspace/teams/${team.id}/invitations/${i.id}`,
+                                "DELETE",
+                              )
+                            }
+                          >
+                            {t("Отменить", "Cancel")}
+                          </button>
+                        </div>
+                      ))}
+                    </>
+                  )}
+                </article>
+              ))}
           </div>
           {editing && (
             <StartupEditor
@@ -1018,7 +1142,10 @@ export function FounderWorkspace({ account, t, Modal, onSignIn, onPublic }) {
             <TeamEditor
               team={teamEdit.id ? teamEdit : null}
               {...{ t, Modal }}
-              onSave={refresh}
+              onSave={async (id) => {
+                await refresh();
+                if (id) setSelectedTeamId(id);
+              }}
               onClose={() => setTeamEdit(null)}
             />
           )}

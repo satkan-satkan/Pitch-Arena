@@ -1,6 +1,6 @@
 import React, { useState, useRef, useId } from "react";
-import { ArrowRight, Check, Mic, Sparkles, Globe2, Route } from "lucide-react";
-import { GuidePortrait } from "../guide/Guide";
+import { ArrowRight, Check, Mic, Sparkles } from "lucide-react";
+
 import "./landing-experience.css";
 import { motion } from "framer-motion";
 import { Reveal, useArenaMotion } from "../motion/Motion";
@@ -9,16 +9,8 @@ const steps = [
   ["Разбор", "Review"],
   ["Следующий шаг", "Next step"],
 ];
-const moods = [
-  ["welcome", "Приветствие", "Welcome"],
-  ["thinking", "Размышление", "Thinking"],
-  ["listening", "Внимание", "Listening"],
-  ["support", "Поддержка", "Support"],
-  ["celebrate", "Радость", "Celebration"],
-];
 export default function LandingExperience({ t, onGuide }) {
-  const [step, setStep] = useState(0),
-    [mood, setMood] = useState("welcome");
+  const [step, setStep] = useState(0);
   const refs = useRef([]);
   const tabGroup = useId();
   const { enabled } = useArenaMotion();
@@ -203,12 +195,13 @@ export default function LandingExperience({ t, onGuide }) {
             )}
           </motion.div>
           <aside className="experience-coach">
-            <GuidePortrait
-              t={t}
-              emotion={["listening", "thinking", "support"][step]}
-            />
+            <div className="room-cue" aria-hidden="true">
+              <span>0{step + 1}</span>
+              <i />
+              <small>{["ON AIR", "THE DEBRIEF", "NEXT TAKE"][step]}</small>
+            </div>
             <div>
-              <span>{t("ИСКРА / ЗАМЕТКА", "ISKRA / NOTE")}</span>
+              <span>{t("ЗАМЕТКА РЕДАКТОРА", "EDITOR’S NOTE")}</span>
               <p>
                 {step === 0
                   ? t(
@@ -229,82 +222,18 @@ export default function LandingExperience({ t, onGuide }) {
           </aside>
         </div>
       </div>
-      <div className="experience-bento">
-        <article className="bento-guide">
-          <div>
-            <span className="landing-eyebrow">
-              {t("НА СВЯЗИ / ИСКРА", "ON COMMS / ISKRA")}
-            </span>
-            <h3>
-              {t("Искра на твоей стороне.", "Iskra is in your corner.")}
-              <br />
-              {t(
-                "Даже после трудного вопроса.",
-                "Even after a tough question.",
-              )}
-            </h3>
-            <p>
-              {t(
-                "Следит за этапом, напоминает про факты и помогает разобрать попытку. Во время питча не перебивает.",
-                "Tracks the stage, asks for evidence and helps review your attempt. Stays quiet while you pitch.",
-              )}
-            </p>
-            <div
-              className="emotion-picker"
-              aria-label={t("Эмоции Искры", "Iskra’s emotions")}
-            >
-              {moods.map(([id, ru, en]) => (
-                <button
-                  key={id}
-                  aria-pressed={mood === id}
-                  onClick={() => setMood(id)}
-                >
-                  {t(ru, en)}
-                </button>
-              ))}
-            </div>
-            <button className="ready-text-button" onClick={onGuide}>
-              {t("Познакомиться с Искрой", "Meet Iskra")}
-              <ArrowRight size={15} />
-            </button>
-          </div>
-          <GuidePortrait t={t} emotion={mood} />
-        </article>
-        <article className="bento-language">
-          <Globe2 size={26} />
-          <strong>
-            RU <span>/</span> EN
-          </strong>
-          <h3>
-            {t(
-              "Суть должна работать на обоих.",
-              "The substance needs to work in both.",
-            )}
-          </h3>
-          <p>
-            {t(
-              "Говори или печатай. Начни без слайдов. Включай подсказки, когда они нужны.",
-              "Speak or type. Start without slides. Bring up tips whenever you need them.",
-            )}
-          </p>
-        </article>
-        <article className="bento-path">
-          <Route size={27} />
-          <h3>
-            {t("Сначала — перед своими.", "First, friends & family.")}
-            <br />
-            {t("Потом вопросы сложнее.", "Then the questions get harder.")}
-          </h3>
-          <p>
-            {t(
-              "Выбирай арену и тренируй разные стороны своей истории. Каждый результат — точка для нового старта.",
-              "Choose an arena and practice different sides of your story. Every result is a new starting point.",
-            )}
-          </p>
-          <span>
-            01 <i /> 02 <i /> 03 <i /> ✦
-          </span>
-        </article>
+      <div className="studio-briefing">
+        <span>{t("ПЕРЕД ПЕРВЫМ ВЫХОДОМ", "BEFORE YOUR FIRST PITCH")}</span>
+        <p>
+          {t(
+            "Нужен короткий брифинг? Искра проведёт через первую тренировку.",
+            "Need a quick briefing? Iskra will guide your first practice.",
+          )}
+        </p>
+        <button className="ready-text-button" onClick={onGuide}>
+          {t("Познакомиться с Искрой", "Meet Iskra")}
+          <ArrowRight size={15} />
+        </button>
       </div>
     </Reveal>
   );

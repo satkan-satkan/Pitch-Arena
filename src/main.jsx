@@ -50,6 +50,7 @@ import {
   Home,
   BarChart3,
 } from "lucide-react";
+import "./tailwind.css";
 import "./styles.css";
 
 import {
@@ -68,7 +69,7 @@ import BackgroundMusic from "./components/BackgroundMusic";
 import AccountPanel from "./components/AccountPanel";
 import AdminPanel from "./components/AdminPanel";
 import useGuide from "./guide/useGuide";
-import { GuideHome, GuideIntro, GuideMessage } from "./guide/Guide";
+import { GuideIntro, GuideMessage } from "./guide/Guide";
 import Landing from "./components/Landing";
 import { PublicDirectory, FounderWorkspace } from "./components/Community";
 import useWorkspace from "./hooks/useWorkspace";
@@ -77,6 +78,7 @@ import { api, hydrateSession, sessionClient, errorText } from "./services/api";
 import { summarizeScores } from "./practice/engine";
 import { PracticeGoal } from "./components/PracticeFeedback";
 import "./motion/motion.css";
+import "./studio.css";
 import { ArenaMotionProvider, MotionControls } from "./motion/Motion";
 
 const seedRanking = [
@@ -140,236 +142,6 @@ function Brand({ small = false }) {
         <sup>✦</sup>
       </span>
     </div>
-  );
-}
-function ArenaArt() {
-  return (
-    <svg
-      className="arena-art"
-      viewBox="0 0 620 400"
-      fill="none"
-      aria-hidden="true"
-    >
-      <defs>
-        <linearGradient
-          id="base"
-          x1="150"
-          y1="160"
-          x2="450"
-          y2="360"
-          gradientUnits="userSpaceOnUse"
-        >
-          <stop stopColor="#eee8ff" />
-          <stop offset="1" stopColor="#a895d9" />
-        </linearGradient>
-        <linearGradient
-          id="screen"
-          x1="244"
-          y1="59"
-          x2="458"
-          y2="240"
-          gradientUnits="userSpaceOnUse"
-        >
-          <stop stopColor="#fcfaff" />
-          <stop offset="1" stopColor="#d8cef0" />
-        </linearGradient>
-        <linearGradient
-          id="floor"
-          x1="50"
-          y1="190"
-          x2="520"
-          y2="330"
-          gradientUnits="userSpaceOnUse"
-        >
-          <stop stopColor="#f7f3ff" />
-          <stop offset="1" stopColor="#c9bae7" />
-        </linearGradient>
-        <linearGradient id="front" x1="0" y1="0" x2="0" y2="1">
-          <stop stopColor="#a28acc" />
-          <stop offset="1" stopColor="#b9a6dc" />
-        </linearGradient>
-        <filter id="shadow">
-          <feGaussianBlur stdDeviation="13" />
-        </filter>
-        <filter id="softshadow" x="-30%" y="-30%" width="170%" height="170%">
-          <feDropShadow
-            dx="0"
-            dy="9"
-            stdDeviation="9"
-            floodColor="#705898"
-            floodOpacity=".14"
-          />
-        </filter>
-        <pattern
-          id="grid"
-          width="45"
-          height="26"
-          patternUnits="userSpaceOnUse"
-          patternTransform="matrix(1 .52 -1 .52 340 -30)"
-        >
-          <path d="M45 0H0V26" stroke="#ab9bc9" strokeWidth=".55" />
-        </pattern>
-      </defs>
-      <path fill="url(#grid)" opacity=".28" d="M0 0h620v400H0z" />
-      <ellipse
-        cx="337"
-        cy="332"
-        rx="202"
-        ry="35"
-        fill="#8b72b1"
-        opacity=".15"
-        filter="url(#shadow)"
-      />
-      <path d="M92 258L322 138L554 258V282L323 403L92 282Z" fill="url(#base)" />
-      <path d="M92 258L322 138L554 258L323 379Z" fill="url(#floor)" />
-      <path d="M92 258L323 379V403L92 282Z" fill="#c4b3df" />
-      <path d="M323 379L554 258V282L323 403Z" fill="#b7a4d6" />
-      <path
-        d="M113 244L319 137L528 245L320 354Z"
-        fill="#e7def7"
-        stroke="#f5efff"
-      />
-      <path
-        d="M136 231L319 137L506 233L321 330Z"
-        fill="#eae2f8"
-        stroke="#f9f5ff"
-      />
-      <path
-        d="M159 219L319 136L483 221L321 306Z"
-        fill="#f3edfc"
-        stroke="#fff"
-      />
-      <path
-        d="M229 189V58Q229 50 237 54L435 157Q443 161 443 170V296L229 189Z"
-        fill="#a78eca"
-      />
-      <path d="M239 184V67L431 166V283L239 184Z" fill="url(#screen)" />
-      <path d="M258 174V91L409 169V252L258 174Z" fill="#f6f2ff" />
-      <path d="M278 162L294 170V151L278 143Z" fill="#cbbbef" />
-      <path d="M303 175L319 183V146L303 138Z" fill="#b29ade" />
-      <path d="M328 188L344 196V139L328 131Z" fill="#9374d0" />
-      <path d="M353 201L369 209V124L353 116Z" fill="#7852b7" />
-      <path
-        d="M278 123L306 123L332 115L369 112"
-        stroke="#8062bf"
-        strokeWidth="2.5"
-      />
-      <path d="M361 104L372 111L367 120" stroke="#8062bf" strokeWidth="2.5" />
-      <path d="M172 235L230 205L288 235V254L230 284L172 254Z" fill="#bca6d9" />
-      <path d="M172 235L230 205L288 235L230 265Z" fill="#faf7ff" />
-      <path d="M230 265L288 235V254L230 284Z" fill="#a58bc8" />
-      <path
-        d="M222 223V179Q217 175 219 170L228 162L240 168L242 203L250 224L242 229L229 204L231 227Z"
-        fill="#473552"
-      />
-      <path
-        d="M225 227L218 232L224 235L235 230M243 229L249 234L257 230L250 225"
-        fill="#2d243a"
-      />
-      <path
-        d="M218 175Q213 181 216 190L204 184L201 189L220 200Q226 196 227 186L234 174"
-        fill="#716185"
-      />
-      <ellipse cx="231" cy="155" rx="9" ry="12" fill="#c58fa1" />
-      <path
-        d="M222 155Q218 137 232 142Q244 144 239 155L235 150L222 155Z"
-        fill="#3e304d"
-      />
-      <g filter="url(#softshadow)">
-        <path
-          d="M300 264L323 252L346 264V290L323 302L300 290Z"
-          fill="#8f76b6"
-        />
-        <path d="M300 264L323 252L346 264L323 276Z" fill="#bdabd9" />
-        <path
-          d="M313 252V239Q312 224 322 220Q333 218 336 231L337 253L324 261Z"
-          fill="#463753"
-        />
-        <ellipse cx="324" cy="214" rx="8" ry="10" fill="#d5a9a0" />
-        <path
-          d="M316 214Q312 202 322 203Q335 201 332 214L326 209Z"
-          fill="#5a4259"
-        />
-      </g>
-      <g transform="translate(65 -35)">
-        <path
-          d="M300 264L323 252L346 264V290L323 302L300 290Z"
-          fill="#9a81bf"
-        />
-        <path d="M300 264L323 252L346 264L323 276Z" fill="#c5b3e0" />
-        <path
-          d="M313 252V239Q312 224 322 220Q333 218 336 231L337 253L324 261Z"
-          fill="#8c739c"
-        />
-        <ellipse cx="324" cy="214" rx="8" ry="10" fill="#e5bca8" />
-        <path
-          d="M316 215Q309 199 323 201Q338 201 333 224L329 218L326 210Z"
-          fill="#4c394a"
-        />
-      </g>
-      <g transform="translate(59 32)">
-        <path
-          d="M300 264L323 252L346 264V290L323 302L300 290Z"
-          fill="#9e85c3"
-        />
-        <path d="M300 264L323 252L346 264L323 276Z" fill="#cdbde3" />
-        <path
-          d="M313 252V239Q312 224 322 220Q333 218 336 231L337 253L324 261Z"
-          fill="#d4c5e6"
-        />
-        <ellipse cx="324" cy="214" rx="8" ry="10" fill="#af7982" />
-        <path
-          d="M316 214Q312 202 322 202Q335 201 332 214L326 209Z"
-          fill="#342d42"
-        />
-      </g>
-      <g filter="url(#softshadow)">
-        <rect
-          x="422"
-          y="75"
-          width="125"
-          height="58"
-          rx="14"
-          fill="white"
-          transform="rotate(8 422 75)"
-        />
-        <circle cx="446" cy="106" r="13" fill="#e9f3db" />
-        <path
-          d="M439 107L444 112L451 101"
-          stroke="#709944"
-          strokeWidth="2.4"
-          strokeLinecap="round"
-        />
-        <path
-          d="M469 103L524 111M468 113L506 119"
-          stroke="#c8bddb"
-          strokeWidth="5"
-          strokeLinecap="round"
-        />
-      </g>
-      <g filter="url(#softshadow)" transform="rotate(-9 151 104)">
-        <rect x="104" y="73" width="94" height="52" rx="14" fill="white" />
-        <path
-          d="M123 103L131 92L139 103L149 86"
-          stroke="#8e72cb"
-          strokeWidth="2.5"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        />
-        <text x="157" y="105" fontSize="17" fontWeight="700" fill="#594676">
-          +24
-        </text>
-      </g>
-      <path
-        d="M487 183L489 173L492 182L502 185L492 188L489 197L487 188L478 185Z"
-        fill="#a98cd8"
-      />
-      <path
-        d="M169 161L171 154L173 161L180 163L173 165L171 172L169 165L162 163Z"
-        fill="#a88bcc"
-      />
-      <circle cx="516" cy="311" r="3" fill="#b9a3d7" />
-    </svg>
   );
 }
 function FamilyArt() {
@@ -924,7 +696,7 @@ function App() {
           </div>
         ) : (
           <Landing
-            {...{ t, lang, setLang, Brand, ArenaArt }}
+            {...{ t, lang, setLang, Brand }}
             account={workspace.account}
             onPlay={() => navigate("/play")}
             onAuth={openAuth}
@@ -970,7 +742,7 @@ function App() {
           <ChevronDown size={14} />
         </div>
         <div className="nav-label">
-          {t("ТВОЁ ПРИКЛЮЧЕНИЕ", "YOUR ADVENTURE")}
+          {t("РАБОЧЕЕ ПРОСТРАНСТВО", "WORKSPACE")}
         </div>
         <nav>
           {nav.map((n) => (
@@ -1214,14 +986,14 @@ function App() {
                   {t("Мои выступления", "My pitches")}
                 </button>
               </div>
-              {!workspace.checking && (
-                <GuideHome
-                  {...{ guide, t }}
-                  onOpen={openGuide}
-                  hasDraft={!!savedDraft}
-                  onResume={resumeDraft}
-                />
-              )}
+              <button className="studio-guide-link" onClick={openGuide}>
+                <CircleHelp size={15} />
+                {t(
+                  "Первый раз? Разберёмся за минуту",
+                  "First time? A one-minute introduction",
+                )}
+                <ArrowRight size={14} />
+              </button>
               <section className="hero-grid">
                 <div className="hero">
                   <div className="hero-content">
@@ -1266,8 +1038,7 @@ function App() {
                       </span>
                     </div>
                   </div>
-                  <ArenaArt />
-                  <div className="hero-corner">PRACTICE MAKES PROGRESS ↗</div>
+                  <div className="hero-corner">01 / THE GARAGE</div>
                 </div>
                 <div className="progress-card">
                   <div className="card-topline">

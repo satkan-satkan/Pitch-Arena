@@ -1,6 +1,6 @@
 .landing {
-  background: #fcfbfe;
-  color: #2d293b;
+  background: #161515;
+  color: #c7c6c4;
   min-height: 100vh;
 }
 .landing-nav {
@@ -26,7 +26,7 @@
 .landing-nav nav button,
 .landing-footer button {
   font: inherit;
-  color: #82758e;
+  color: #83817d;
   text-decoration: none;
   background: none;
   border: 0;
@@ -44,7 +44,7 @@
   align-items: center;
   background: none;
   border: 0;
-  color: #716480;
+  color: #918f8b;
   cursor: pointer;
   font-size: 12px;
 }
@@ -65,14 +65,14 @@
   font-size: 10px;
   font-weight: 600;
   letter-spacing: 1.8px;
-  color: #9279b1;
+  color: #72706d;
   line-height: 1.8;
 }
 .landing-eyebrow > span {
   width: 6px;
   height: 6px;
-  background: #a384db;
-  box-shadow: 0 0 0 4px #f1eafa;
+  background: #cba466;
+  box-shadow: 0 0 0 4px #1f1f1e;
   border-radius: 50%;
   flex-shrink: 0;
 }
@@ -85,11 +85,11 @@
 }
 .landing-copy h1 em {
   font-style: normal;
-  color: #9a78d5;
+  color: #cba466;
 }
 .landing-copy > p {
   font-size: 16px;
-  color: #8b8197;
+  color: #7a7874;
   line-height: 1.85;
   max-width: 460px;
   margin: 24px 0 32px;
@@ -109,7 +109,7 @@
   align-items: center;
   background: none;
   border: 0;
-  color: #7c6c8a;
+  color: #898783;
   font: inherit;
   font-size: 12px;
   cursor: pointer;
@@ -120,7 +120,7 @@
   flex-wrap: wrap;
   gap: 18px;
   margin-top: 25px;
-  color: #a296ac;
+  color: #676662;
   font-size: 10px;
 }
 .landing-points span {
@@ -129,7 +129,7 @@
   align-items: center;
 }
 .landing-points svg {
-  color: #a895c1;
+  color: #5f5d5a;
 }
 .landing-scene {
   position: relative;
@@ -138,7 +138,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: radial-gradient(ellipse at 50% 50%, #e9def780, transparent 65%);
+  background: radial-gradient(ellipse at 50% 50%, #26252480, transparent 65%);
 }
 .landing-scene .arena-art {
   inset: auto;
@@ -154,7 +154,7 @@
 }
 .scene-orbit {
   position: absolute;
-  border: 1px solid #e9e1f2;
+  border: 1px solid #272625;
   border-radius: 50%;
   width: 90%;
   height: 90%;
@@ -168,7 +168,7 @@
 }
 .scene-star {
   position: absolute;
-  color: #bea3e7;
+  color: #474644;
   font-size: 38px;
 }
 .star-one {
@@ -185,13 +185,13 @@
   top: 7px;
   font-size: 9px;
   letter-spacing: 2.2px;
-  color: #a28bae;
+  color: #6b6a66;
   display: flex;
   gap: 8px;
   align-items: center;
 }
 .scene-top-label > span {
-  background: #b1cca8;
+  background: #45643b;
   width: 5px;
   height: 5px;
   border-radius: 50%;
@@ -201,27 +201,27 @@
   z-index: 2;
   left: 4%;
   top: 55px;
-  background: #fff;
-  border: 1px solid #e7dff1;
+  background: #141313;
+  border: 1px solid #282726;
   border-radius: 16px;
   display: flex;
   align-items: center;
   gap: 12px;
   padding: 16px 20px;
-  box-shadow: 0 12px 40px #63468d0a;
+  box-shadow: 0 12px 40px #cba4660a;
   transform: rotate(-5deg);
-  color: #9b7cce;
+  color: #cba466;
 }
 .scene-timer small {
   font-size: 8px;
   letter-spacing: 1.6px;
   display: block;
-  color: #a69ab2;
+  color: #63615e;
 }
 .scene-timer strong {
   font-size: 27px;
   font-weight: 500;
-  color: #57426e;
+  color: #a7a5a2;
   display: block;
   margin-top: 4px;
 }
@@ -235,28 +235,28 @@
   display: block;
   width: 3px;
   border-radius: 4px;
-  background: #c4b1e3;
+  background: #434240;
 }
 .scene-feedback {
   position: absolute;
   right: -5px;
   bottom: 45px;
   z-index: 2;
-  background: white;
-  border: 1px solid #e7dff1;
+  background: #17181a;
+  border: 1px solid #282726;
   border-radius: 15px;
   display: flex;
   align-items: center;
   gap: 12px;
   padding: 17px 20px;
-  box-shadow: 0 14px 35px #74568e0d;
+  box-shadow: 0 14px 35px #918f8b0d;
   transform: rotate(3deg);
 }
 .scene-feedback > span {
   padding: 11px;
-  background: #f4edff;
+  background: #1c1b1a;
   border-radius: 12px;
-  color: #9e7bd4;
+  color: #cba466;
   display: grid;
   place-items: center;
 }
@@ -268,7 +268,7 @@
 .scene-feedback small {
   font-size: 10px;
   display: block;
-  color: #a798b4;
+  color: #63615e;
   margin-top: 7px;
 }
 .scene-level {
@@ -277,7 +277,7 @@
   gap: 7px;
   position: absolute;
   bottom: -15px;
-  color: #af9abc;
+  color: #5f5d5a;
   font-size: 10px;
 }
 .landing-path {
@@ -285,12 +285,12 @@
   margin: 0 auto;
   padding: 32px 10px 40px;
   text-align: center;
-  border-top: 1px solid #eae4f1;
-  border-bottom: 1px solid #eae4f1;
+  border-top: 1px solid #262524;
+  border-bottom: 1px solid #262524;
 }
 .landing-path > p {
   font-size: 9px;
-  color: #b0a2ba;
+  color: #5c5a57;
   letter-spacing: 2px;
   margin: 0 0 26px;
 }
@@ -305,20 +305,20 @@
   display: flex;
   align-items: center;
   gap: 9px;
-  color: #746481;
+  color: #908e8b;
   font-size: 15px;
   font-weight: 500;
 }
 .landing-path > div > span small {
   font-size: 9px;
-  color: #b9a9c8;
+  color: #52514e;
   letter-spacing: 1px;
 }
 .landing-path > div > svg {
-  color: #d2c4df;
+  color: #3c3b39;
 }
 .landing-path > small {
-  color: #b6a9c0;
+  color: #565552;
   font-size: 10px;
   display: block;
   margin-top: 25px;
@@ -342,7 +342,7 @@
 }
 .landing-section-heading p {
   font-size: 14px;
-  color: #9c8da6;
+  color: #6e6c69;
   line-height: 1.7;
 }
 .landing-steps {
@@ -353,26 +353,26 @@
 }
 .landing-steps article {
   padding: 32px;
-  border: 1px solid #e9e1f1;
+  border: 1px solid #272725;
   border-radius: 20px;
-  background: white;
+  background: #17181a;
 }
 .landing-steps article > div {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  color: #b8a0d5;
+  color: #514f4d;
 }
 .landing-steps article > div > svg {
   box-sizing: content-box;
   padding: 12px;
-  background: #f7f1fd;
+  background: #1b1a19;
   border-radius: 12px;
 }
 .landing-steps article > div > span {
   font-size: 11px;
   letter-spacing: 2px;
-  color: #d3c6de;
+  color: #3c3b39;
 }
 .landing-steps h3 {
   font-size: 20px;
@@ -382,7 +382,7 @@
 .landing-steps p {
   font-size: 13px;
   line-height: 1.9;
-  color: #94869f;
+  color: #74726f;
   margin: 0;
 }
 .landing-community {
@@ -393,14 +393,14 @@
   grid-template-columns: 1.2fr 1fr;
   gap: 60px;
   align-items: center;
-  background: #f3edf9;
+  background: #1e1e1d;
   border-radius: 28px;
-  border: 1px solid #eae0f4;
+  border: 1px solid #262624;
 }
 .landing-community p {
   font-size: 14px;
   line-height: 1.9;
-  color: #9984a9;
+  color: #716f6b;
   max-width: 470px;
   margin-bottom: 25px;
 }
@@ -414,7 +414,7 @@
 .community-orbit:after {
   content: "";
   position: absolute;
-  border: 1px dashed #d8c8e7;
+  border: 1px dashed #373634;
   border-radius: 50%;
   width: 260px;
   height: 260px;
@@ -429,7 +429,7 @@
   align-items: center;
   flex-direction: column;
   gap: 14px;
-  color: #a886c4;
+  color: #cba466;
   z-index: 1;
 }
 .community-orbit strong {
@@ -437,21 +437,21 @@
   font-size: 20px;
   font-weight: 500;
   line-height: 1.5;
-  color: #80618f;
+  color: #8c8a86;
 }
 .orbit-avatar {
   display: grid;
   place-items: center;
-  background: white;
-  border: 1px solid #e6d8ef;
-  box-shadow: 0 8px 15px #7a579611;
+  background: #17181a;
+  border: 1px solid #2c2b2a;
+  box-shadow: 0 8px 15px #8d8b8711;
   border-radius: 18px;
   width: 58px;
   height: 58px;
   position: absolute;
   z-index: 2;
   font-size: 28px;
-  color: #b297cd;
+  color: #cba466;
 }
 .a-one {
   top: 25px;
@@ -467,7 +467,7 @@
   top: 4px;
   right: 25px;
   transform: rotate(8deg);
-  background: #e4d6f2;
+  background: #2c2b2a;
 }
 .landing-end {
   text-align: center;
@@ -475,10 +475,10 @@
 }
 .landing-end > span {
   font-size: 34px;
-  color: #b19bd1;
+  color: #cba466;
 }
 .landing-end p {
-  color: #a192ac;
+  color: #696764;
   font-size: 14px;
   margin: 20px 0 30px;
 }
@@ -492,28 +492,28 @@
   max-width: 1260px;
   padding: 32px 40px;
   margin: auto;
-  border-top: 1px solid #eae4f1;
+  border-top: 1px solid #262524;
 }
 .landing-footer p {
-  color: #b1a5bc;
+  color: #5a5855;
   font-size: 11px;
 }
 .landing-footer button {
   margin-left: auto;
 }
 .landing-footer > span {
-  color: #b1a5bc;
+  color: #5a5855;
   font-size: 10px;
 }
 .public-site {
   min-height: 100vh;
-  background: #faf9fc;
+  background: #181716;
 }
 .public-site .public-directory {
   padding: 50px 40px 80px;
 }
 .public-site .landing-nav {
-  border-bottom: 1px solid #eae4f1;
+  border-bottom: 1px solid #262524;
 }
 @media (max-width: 1000px) {
   .landing-hero {

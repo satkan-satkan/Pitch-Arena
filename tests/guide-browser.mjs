@@ -51,29 +51,8 @@ try {
     (await tabs.getByRole("tab").nth(1).getAttribute("aria-selected")) ===
       "true",
   );
-  for (const [label, id] of [
-    ["Радость", "celebrate"],
-    ["Внимание", "listening"],
-    ["Поддержка", "support"],
-    ["Размышление", "thinking"],
-    ["Приветствие", "welcome"],
-  ]) {
-    await button(label).click();
-    await page.waitForFunction(
-      (emotion) =>
-        document.querySelector(".bento-guide .guide-portrait")?.dataset
-          .emotion === emotion,
-      id,
-    );
-    check(
-      `Guide character reflects ${id} context`,
-      (await page
-        .locator(".bento-guide .guide-portrait")
-        .getAttribute("data-emotion")) === id,
-    );
-  }
   mkdirSync("artifacts", { recursive: true });
-  await page.screenshot({ path: "artifacts/v9-landing.png", fullPage: true });
+  await page.screenshot({ path: "artifacts/v10-landing.png", fullPage: true });
   await button("Познакомиться с Искрой").click();
   await page.getByRole("dialog", { name: "Знакомство с Искрой" }).waitFor();
   check(
@@ -81,7 +60,7 @@ try {
     (await state()).status === "learning" &&
       (await page.evaluate(() => window.micRequests)) === 0,
   );
-  await page.screenshot({ path: "artifacts/v9-guide-intro.png" });
+  await page.screenshot({ path: "artifacts/v10-guide-intro.png" });
   await button("Дальше").click();
   await button("Дальше").click();
   check(
@@ -168,13 +147,15 @@ try {
     "Guide never requests microphone access in text mode",
     await page.evaluate(() => window.micRequests === 0),
   );
-  await page.screenshot({ path: "artifacts/v9-guide-result.png" });
+  await page.screenshot({ path: "artifacts/v10-guide-result.png" });
   await button("Close").click();
   await page
     .locator(".nav-item")
     .filter({ hasText: "Комната основателя" })
     .click();
-  await button("Скрыть подсказки Искры").click();
+  await button("Гид Искра").click();
+  await button("Отключить подсказки").click();
+  await button("Close").click();
   await page.reload();
   check(
     "Guide opt-out survives reload",
@@ -193,11 +174,11 @@ try {
     .getByRole("heading", { name: "Мои проекты", exact: true })
     .waitFor();
   await button("Close").click();
+  await button("Гид Искра").click();
   check(
     "New account has separate onboarding preferences",
-    (await page.locator(".guide-home").count()) === 1,
+    await button("Отключить подсказки").isVisible(),
   );
-  await button("Первый питч с Искрой").click();
   await button("Дальше").click();
   await button("Дальше").click();
   await button("Подготовить первый питч").click();
@@ -211,10 +192,10 @@ try {
     }),
   );
   await page.goto(f.origin + "/play");
-  await page.locator(".guide-home").waitFor();
+  await page.locator(".studio-guide-link").waitFor();
   await page.setViewportSize({ width: 390, height: 844 });
   await page.screenshot({
-    path: "artifacts/v9-guide-mobile.png",
+    path: "artifacts/v10-guide-mobile.png",
     fullPage: true,
   });
   check(
@@ -242,7 +223,7 @@ try {
   );
   check("No browser runtime errors", errors.length === 0);
   writeFileSync(
-    "artifacts/v9-verification.json",
+    "artifacts/v10-verification.json",
     JSON.stringify(
       { passed: checks.length, checks, errors, liveAI: false },
       null,

@@ -182,7 +182,7 @@ export async function handleCommunity({ req, url, user, store, body }) {
   }
   if (path === "/api/workspace/invitations" && req.method === "GET") {
     const rows = await store.all(
-      "SELECT i.id,i.role,t.data FROM team_invitations i JOIN teams t ON t.id=i.team_id WHERE i.email=? AND i.status='pending'",
+      "SELECT i.id,i.team_id,i.role,t.data FROM team_invitations i JOIN teams t ON t.id=i.team_id WHERE i.email=? AND i.status='pending'",
       user.email,
     );
     return {
@@ -190,6 +190,7 @@ export async function handleCommunity({ req, url, user, store, body }) {
         id: r.id,
         role: r.role,
         teamName: JSON.parse(r.data).name,
+        teamId: r.team_id,
       })),
     };
   }

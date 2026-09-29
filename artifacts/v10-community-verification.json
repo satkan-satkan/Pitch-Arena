@@ -1,0 +1,29 @@
+{
+  "passed": 22,
+  "checks": [
+    "Root opens the public landing without a game sidebar",
+    "Guest game has a separate URL",
+    "Landing registration creates an account and enters the game",
+    "Created team is selected in the profile selector",
+    "New team opens its own room",
+    "Selector switches real team context",
+    "Team selector fits mobile width",
+    "English selector supports keyboard activation",
+    "Team invitation is visibly pending rather than auto-joining",
+    "Startup remains private until moderation",
+    "Opening an invitation does not join the team",
+    "Accepted invitation selects the joined team",
+    "Accepted editor sees the shared listing",
+    "Admin approval makes a real listing public",
+    "Revenue is labelled founder reported",
+    "Public startup links survive direct navigation and refresh",
+    "Editing a published card preserves its approved public version",
+    "Owner can withdraw the public listing",
+    "Landing fits mobile width",
+    "Landing supports English",
+    "Public directory has an honest localized empty state",
+    "No browser runtime errors"
+  ],
+  "errors": [],
+  "liveAI": false
+}
