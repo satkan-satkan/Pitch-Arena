@@ -724,107 +724,114 @@ function App() {
         <div className="sidebar-scrim" onClick={() => setMobile(false)} />
       )}
       <aside className={`sidebar ${mobile ? "open" : ""}`}>
-        <a
-          className="brand-link"
-          href="#"
-          onClick={(e) => {
-            e.preventDefault();
-            navigate("/");
-          }}
-        >
-          <Brand />
-        </a>
-        <div className="workspace">
-          <div className="workspace-icon">
-            <Rocket size={18} />
-          </div>
-          <div>
-            <strong>{t("Путь основателя", "Founder journey")}</strong>
-            <span>
-              {t(
-                "Сезон 01 · До первого чека",
-                "Season 01 · Before the first check",
-              )}
-            </span>
-          </div>
-          <ChevronDown size={14} />
-        </div>
-        <div className="nav-label">
-          {t("РАБОЧЕЕ ПРОСТРАНСТВО", "WORKSPACE")}
-        </div>
-        <nav>
-          {nav.map((n) => (
-            <button
-              key={n.id}
-              className={`nav-item ${page === n.id ? "active" : ""}`}
-              onClick={() => go(n.id)}
-            >
-              <n.icon size={19} />
-              <span>{n.label}</span>
-              {n.id === "arenas" && (
-                <span className="nav-count">{arenas.length}</span>
-              )}
-              {n.id === "leaderboard" && <span className="live-dot" />}
-            </button>
-          ))}
-        </nav>
-        <div className="sidebar-bottom">
-          <div className="practice-tip">
-            <div className="tip-icon">
-              <Sparkles size={18} />
-            </div>
-            <strong>{t("Идеям нужен голос", "Give your ideas a voice")}</strong>
-            <p>
-              {t(
-                "Первый питч не обязан быть идеальным. Просто начни.",
-                "Your first pitch doesn’t have to be perfect. Just start.",
-              )}
-            </p>
-            <button onClick={() => setSelected(arenas[0])}>
-              {t("Попробовать питч", "Try a practice pitch")}
-              <ArrowUpRight size={15} />
-            </button>
-          </div>
-          <button className="nav-item help-link" onClick={() => setHelp(true)}>
-            <CircleHelp size={19} />
-            <span>{t("Как это работает", "How it works")}</span>
-            <ArrowUpRight size={15} />
-          </button>
-          <button className="nav-item guide-launcher" onClick={openGuide}>
-            <Sparkles size={19} />
-            <span>{t("Гид Искра", "Guide Iskra")}</span>
-          </button>
-          <button
-            className="profile-button"
-            disabled={workspace.checking}
-            onClick={() =>
-              workspace.account ? go("profile") : setAccountOpen(true)
-            }
+        <div className="sidebar-scroll">
+          <a
+            className="brand-link"
+            href="#"
+            onClick={(e) => {
+              e.preventDefault();
+              navigate("/");
+            }}
           >
-            <div className="user-avatar">
-              {workspace.account ? (
-                profile.name.slice(0, 1)
-              ) : (
-                <UserRound size={18} />
-              )}
+            <Brand />
+          </a>
+          <div className="workspace">
+            <div className="workspace-icon">
+              <Rocket size={18} />
             </div>
             <div>
-              <strong>
-                {workspace.checking
-                  ? t("Проверяем вход…", "Checking sign-in…")
-                  : workspace.account
-                    ? profile.name
-                    : t("Гостевой режим", "Guest mode")}
-              </strong>
+              <strong>{t("Путь основателя", "Founder journey")}</strong>
               <span>
-                {workspace.account
-                  ? t("Основатель", "Founder")
-                  : t("Прогресс в этом браузере", "Progress in this browser")}
+                {t(
+                  "Сезон 01 · До первого чека",
+                  "Season 01 · Before the first check",
+                )}
               </span>
             </div>
-            <MoreHorizontal size={18} />
-          </button>
+            <ChevronDown size={14} />
+          </div>
+          <div className="nav-label">
+            {t("РАБОЧЕЕ ПРОСТРАНСТВО", "WORKSPACE")}
+          </div>
+          <nav>
+            {nav.map((n) => (
+              <button
+                key={n.id}
+                className={`nav-item ${page === n.id ? "active" : ""}`}
+                onClick={() => go(n.id)}
+              >
+                <n.icon size={19} />
+                <span>{n.label}</span>
+                {n.id === "arenas" && (
+                  <span className="nav-count">{arenas.length}</span>
+                )}
+                {n.id === "leaderboard" && <span className="live-dot" />}
+              </button>
+            ))}
+          </nav>
+          <div className="sidebar-bottom">
+            <div className="practice-tip">
+              <div className="tip-icon">
+                <Sparkles size={18} />
+              </div>
+              <strong>
+                {t("Идеям нужен голос", "Give your ideas a voice")}
+              </strong>
+              <p>
+                {t(
+                  "Первый питч не обязан быть идеальным. Просто начни.",
+                  "Your first pitch doesn’t have to be perfect. Just start.",
+                )}
+              </p>
+              <button onClick={() => setSelected(arenas[0])}>
+                {t("Попробовать питч", "Try a practice pitch")}
+                <ArrowUpRight size={15} />
+              </button>
+            </div>
+            <button
+              className="nav-item help-link"
+              onClick={() => setHelp(true)}
+            >
+              <CircleHelp size={19} />
+              <span>{t("Как это работает", "How it works")}</span>
+              <ArrowUpRight size={15} />
+            </button>
+            <button className="nav-item guide-launcher" onClick={openGuide}>
+              <Sparkles size={19} />
+              <span>{t("Гид Искра", "Guide Iskra")}</span>
+            </button>
+          </div>
         </div>
+        <button
+          className="profile-button"
+          disabled={workspace.checking}
+          onClick={() =>
+            workspace.account ? go("profile") : setAccountOpen(true)
+          }
+        >
+          <div className="user-avatar">
+            {workspace.account ? (
+              profile.name.slice(0, 1)
+            ) : (
+              <UserRound size={18} />
+            )}
+          </div>
+          <div>
+            <strong>
+              {workspace.checking
+                ? t("Проверяем вход…", "Checking sign-in…")
+                : workspace.account
+                  ? profile.name
+                  : t("Гостевой режим", "Guest mode")}
+            </strong>
+            <span>
+              {workspace.account
+                ? t("Основатель", "Founder")
+                : t("Прогресс в этом браузере", "Progress in this browser")}
+            </span>
+          </div>
+          <MoreHorizontal size={18} />
+        </button>
       </aside>
       <div className="main-shell">
         <header className="topbar">

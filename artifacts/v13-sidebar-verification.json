@@ -1,0 +1,9 @@
+{
+  "checks": [
+    "1440x700: pinned account, scrollable menu, guide and sign-in reachable, no horizontal overflow",
+    "1280x540: pinned account, scrollable menu, guide and sign-in reachable, no horizontal overflow",
+    "390x640: pinned account, scrollable menu, guide and sign-in reachable, no horizontal overflow",
+    "740x360: pinned account, scrollable menu, guide and sign-in reachable, no horizontal overflow"
+  ],
+  "errors": []
+}
