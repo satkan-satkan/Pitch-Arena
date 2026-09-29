@@ -71,6 +71,7 @@ import AdminPanel from "./components/AdminPanel";
 import useGuide from "./guide/useGuide";
 import { GuideIntro, GuideMessage } from "./guide/Guide";
 import StartupBoard from "./components/StartupBoard";
+import ImagePicker, { Avatar } from "./components/ImagePicker";
 import { regions } from "./world-catalog";
 import Landing from "./components/Landing";
 import { PublicDirectory, FounderWorkspace } from "./components/Community";
@@ -332,8 +333,8 @@ function App() {
       return true;
     }
     try {
-      await api("/profile", { method: "PUT", data: next });
-      workspace.setAccount((user) => ({ ...user, profile: next }));
+      const saved = await api("/profile", { method: "PUT", data: next });
+      workspace.setAccount((user) => ({ ...user, profile: saved.profile }));
       return true;
     } catch (error) {
       setToast(errorText(error, t));
@@ -793,7 +794,7 @@ function App() {
         >
           <div className="user-avatar">
             {workspace.account ? (
-              profile.name.slice(0, 1)
+              <Avatar src={profile.avatar} name={profile.name} />
             ) : (
               <UserRound size={18} />
             )}
@@ -875,7 +876,7 @@ function App() {
                 onClick={() => go("profile")}
                 aria-label={t("Мой профиль", "My profile")}
               >
-                {profile.name.slice(0, 1)}
+                <Avatar src={profile.avatar} name={profile.name} />
               </button>
             )}
           </div>
@@ -1884,6 +1885,7 @@ function Modal({ children, onClose, label, wide = false }) {
 }
 function ProfileForm({ profile, setProfile, t, onSave, level, cloud }) {
   const [draft, setDraft] = useState(profile);
+  const [imageBusy, setImageBusy] = useState(false);
   const [saving, setSaving] = useState(false);
   return (
     <form
@@ -1896,7 +1898,9 @@ function ProfileForm({ profile, setProfile, t, onSave, level, cloud }) {
       }}
     >
       <div className="profile-form-top">
-        <div className="user-avatar large">{draft.name.slice(0, 1) || "?"}</div>
+        <div className="user-avatar large">
+          <Avatar src={draft.avatar} name={draft.name} />
+        </div>
         <div>
           <h2>{draft.name}</h2>
           <span>
@@ -1910,6 +1914,15 @@ function ProfileForm({ profile, setProfile, t, onSave, level, cloud }) {
             : t("Гостевой профиль", "Guest profile")}
         </span>
       </div>
+      <ImagePicker
+        value={draft.avatar}
+        onChange={(avatar) => setDraft((d) => ({ ...d, avatar }))}
+        onBusy={setImageBusy}
+        label={t("Аватар профиля", "Profile avatar")}
+        name={draft.name}
+        t={t}
+        round
+      />
       <div className="form-grid">
         <label>
           {t("Твоё имя", "Your name")}
@@ -1973,7 +1986,11 @@ function ProfileForm({ profile, setProfile, t, onSave, level, cloud }) {
               : "Your data is saved in this browser",
           )}
         </span>
-        <button className="button dark" type="submit" disabled={saving}>
+        <button
+          className="button dark"
+          type="submit"
+          disabled={saving || imageBusy}
+        >
           {t("Сохранить профиль", "Save profile")}
           <Check size={17} />
         </button>

@@ -72,7 +72,8 @@
 .startup-widget-body {
   min-height: 0;
   overflow: auto;
-  overscroll-behavior: contain;
+  /* Continue scrolling the page when a widget has no more content to scroll. */
+  overscroll-behavior: auto;
   scrollbar-width: thin;
   overflow-wrap: anywhere;
   flex: 1;

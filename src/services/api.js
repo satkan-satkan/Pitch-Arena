@@ -36,6 +36,10 @@ export async function api(
 }
 export function errorText(error, t) {
   const messages = {
+    INVALID_IMAGE: [
+      "Изображение не удалось прочитать. Загрузи JPG, PNG или WebP заново.",
+      "Could not read this image. Upload a JPG, PNG or WebP again.",
+    ],
     CATALOG_ID_EXISTS: [
       "Этот ID уже занят. Укажи другой.",
       "This ID already exists. Choose another.",

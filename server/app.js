@@ -2,6 +2,7 @@ import { seedCatalog, readCatalog } from "./catalog.js";
 import { handleAdmin } from "./admin.js";
 import { handleCommunity, handleStartupModeration } from "./community.js";
 import http from "node:http";
+import { normalizeImage } from "./images.js";
 import { randomUUID, createHash } from "node:crypto";
 import {
   mkdirSync,
@@ -346,6 +347,10 @@ export function createApp({
     if (!user) fail(401, "LOGIN_REQUIRED");
     if (path === "/api/profile" && req.method === "PUT") {
       const profile = profileSchema.parse(await body(req));
+      profile.avatar = await normalizeImage(
+        profile.avatar,
+        JSON.parse(user.profile).avatar,
+      );
       await store.run(
         "UPDATE users SET profile=? WHERE id=?",
         JSON.stringify(profile),

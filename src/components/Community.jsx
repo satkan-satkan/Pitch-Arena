@@ -14,6 +14,8 @@ import "./community.css";
 import { ProfileSelector, ProfileIcon } from "@/components/ui/profile-selector";
 import { GarageScene } from "./GarageWorld";
 import StartupWidgets from "./StartupWidgets";
+import ImagePicker, { Avatar } from "./ImagePicker";
+import StartupOverview from "./StartupOverview";
 export const socialNames = {
   website: "Website",
   telegram: "Telegram",
@@ -53,6 +55,12 @@ const emptyListing = () => ({
   stage: "building",
   region: "",
   links: blankLinks(),
+  logo: "",
+  founderAvatar: "",
+  founderName: "",
+  foundedMonth: "",
+  totalRevenue: null,
+  monthlyRecurringRevenue: null,
   monthlyRevenue: null,
   currency: "USD",
 });
@@ -119,13 +127,12 @@ function Revenue({ data, t }) {
 function ListingContent({ data, t, widgets = false }) {
   return (
     <>
+      <StartupOverview data={data} t={t} preview={!widgets} />
       <div className="community-tags">
         <span>{t(...categories[data.category])}</span>
         <span>{t(...stages[data.stage])}</span>
         {data.region && <span>{data.region}</span>}
       </div>
-      <h2>{data.name}</h2>
-      <p className="startup-tagline">{data.tagline}</p>
       {widgets ? (
         <StartupWidgets
           key={data.id}
@@ -176,31 +183,33 @@ export function PublicDirectory({
   }, [detailId, search, category, page, refresh]);
   return (
     <section className="community-page public-directory">
-      <GarageScene scene="campus" className="public-campus-header">
-        <div className="community-heading">
-          <div>
-            <span className="eyebrow">
-              <Globe2 size={15} />
-              {t("СОЗДАНО ОСНОВАТЕЛЯМИ", "BUILT BY FOUNDERS")}
-            </span>
-            <h1>
-              {detailId
-                ? t("История стартапа", "Startup story")
-                : t("Идеи становятся бизнесом.", "Ideas become businesses.")}
-            </h1>
-            <p>
-              {t(
-                "Открывай проекты, знакомься с продуктами и расскажи о своём.",
-                "Discover products, explore businesses and share what you are building.",
-              )}
-            </p>
+      {!detailId && (
+        <GarageScene scene="campus" className="public-campus-header">
+          <div className="community-heading">
+            <div>
+              <span className="eyebrow">
+                <Globe2 size={15} />
+                {t("СОЗДАНО ОСНОВАТЕЛЯМИ", "BUILT BY FOUNDERS")}
+              </span>
+              <h1>
+                {detailId
+                  ? t("История стартапа", "Startup story")
+                  : t("Идеи становятся бизнесом.", "Ideas become businesses.")}
+              </h1>
+              <p>
+                {t(
+                  "Открывай проекты, знакомься с продуктами и расскажи о своём.",
+                  "Discover products, explore businesses and share what you are building.",
+                )}
+              </p>
+            </div>
+            <button className="button dark" onClick={onJoin}>
+              <Plus size={16} />
+              {t("Добавить стартап", "Add a startup")}
+            </button>
           </div>
-          <button className="button dark" onClick={onJoin}>
-            <Plus size={16} />
-            {t("Добавить стартап", "Add a startup")}
-          </button>
-        </div>
-      </GarageScene>
+        </GarageScene>
+      )}
       {detailId ? (
         <button className="ready-text-button" onClick={onBack}>
           <ArrowLeft size={15} />
@@ -296,7 +305,7 @@ export function PublicDirectory({
                 <article className="startup-card" key={s.id}>
                   <div className="startup-card-top">
                     <span className="startup-monogram">
-                      {s.name.slice(0, 1)}
+                      <Avatar src={s.logo} name={s.name} />
                     </span>
                     <span className="community-badge">
                       {t(...stages[s.stage])}
@@ -350,6 +359,7 @@ export function PublicDirectory({
   );
 }
 function StartupEditor({ item, teams, t, Modal, onClose, onSave }) {
+  const [imageBusy, setImageBusy] = useState({});
   const [data, setData] = useState(item?.data || emptyListing),
     [teamId, setTeamId] = useState(item?.teamId || ""),
     [busy, setBusy] = useState(false),
@@ -400,6 +410,57 @@ function StartupEditor({ item, teams, t, Modal, onClose, onSave }) {
           }
         }}
       >
+        <ImagePicker
+          value={data.logo}
+          name={data.name}
+          label={t("Логотип стартапа", "Startup logo")}
+          t={t}
+          onChange={(v) => field("logo", v)}
+          onBusy={(v) => setImageBusy((p) => ({ ...p, logo: v }))}
+        />
+        <fieldset className="community-links">
+          <legend>
+            {t(
+              "Основатель и дата основания · публичные данные",
+              "Founder and founding date · public information",
+            )}
+          </legend>
+          <p>
+            {t(
+              "Эти данные и фото будут опубликованы после модерации. Личный аватар профиля не публикуется автоматически.",
+              "These details and photo will be published after review. Your private profile avatar is not published automatically.",
+            )}
+          </p>
+          <div className="community-form-grid">
+            <label>
+              {t("Имя основателя", "Founder name")}
+              <input
+                maxLength={80}
+                value={data.founderName || ""}
+                onChange={(e) => field("founderName", e.target.value)}
+              />
+            </label>
+            <label>
+              {t("Месяц основания", "Founding month")}
+              <input
+                type="month"
+                min="1900-01"
+                max={new Date().toISOString().slice(0, 7)}
+                value={data.foundedMonth || ""}
+                onChange={(e) => field("foundedMonth", e.target.value)}
+              />
+            </label>
+          </div>
+          <ImagePicker
+            value={data.founderAvatar}
+            name={data.founderName}
+            label={t("Фото основателя для каталога", "Public founder photo")}
+            t={t}
+            round
+            onChange={(v) => field("founderAvatar", v)}
+            onBusy={(v) => setImageBusy((p) => ({ ...p, founder: v }))}
+          />
+        </fieldset>
         <label>
           {t("Название стартапа", "Startup name")}
           <input
@@ -498,8 +559,8 @@ function StartupEditor({ item, teams, t, Modal, onClose, onSave }) {
           </legend>
           <p>
             {t(
-              "Укажи месячную выручку, если хочешь сделать её публичной. Она будет отмечена «со слов основателя». Пустое поле скроет показатель.",
-              "Share monthly revenue if you want it public. It will be labelled founder reported. Leave blank to hide it.",
+              "Показатели станут публичными с отметкой «со слов основателя». MRR — только повторяющийся доход от подписок, а не вся выручка за месяц. Пустое поле скроет показатель.",
+              "Metrics will be public and labelled founder reported. MRR is recurring subscription revenue, not all monthly revenue. Leave blank to hide a metric.",
             )}
           </p>
           <div className="community-form-grid">
@@ -519,6 +580,33 @@ function StartupEditor({ item, teams, t, Modal, onClose, onSave }) {
                 }
               />
             </label>
+            {[
+              ["totalRevenue", t("Выручка за всё время", "All-time revenue")],
+              [
+                "monthlyRecurringRevenue",
+                t(
+                  "MRR · доход от подписок в месяц",
+                  "MRR · monthly subscription revenue",
+                ),
+              ],
+            ].map(([key, label]) => (
+              <label key={key}>
+                {label}
+                <input
+                  type="number"
+                  min="0"
+                  max="1000000000000"
+                  step="0.01"
+                  value={data[key] ?? ""}
+                  onChange={(e) =>
+                    field(
+                      key,
+                      e.target.value === "" ? null : Number(e.target.value),
+                    )
+                  }
+                />
+              </label>
+            ))}
             <label>
               {t("Валюта", "Currency")}
               <select
@@ -546,7 +634,10 @@ function StartupEditor({ item, teams, t, Modal, onClose, onSave }) {
             {error}
           </p>
         )}
-        <button className="button dark" disabled={busy}>
+        <button
+          className="button dark"
+          disabled={busy || Object.values(imageBusy).some(Boolean)}
+        >
           {busy
             ? t("Сохраняем…", "Saving…")
             : t("Сохранить черновик", "Save draft")}
@@ -936,6 +1027,9 @@ export function FounderWorkspace({ account, t, Modal, onSignIn, onPublic }) {
                         {t("Есть публичная версия", "Public version available")}
                       </span>
                     )}
+                  </div>
+                  <div className="startup-monogram">
+                    <Avatar src={s.data.logo} name={s.data.name} />
                   </div>
                   <h2>{s.data.name}</h2>
                   <p>{s.data.tagline}</p>

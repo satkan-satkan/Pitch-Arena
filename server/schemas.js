@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { imageSchema } from "./images.js";
 export const credentials = z.object({
   email: z
     .email()
@@ -8,6 +9,7 @@ export const credentials = z.object({
   name: z.string().trim().min(1).max(60).optional(),
 });
 export const profileSchema = z.object({
+  avatar: imageSchema,
   name: z.string().trim().min(1).max(60),
   startup: z.string().trim().min(1).max(60),
   industry: z.string().max(60),

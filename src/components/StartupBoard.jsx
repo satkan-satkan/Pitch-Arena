@@ -1,3 +1,4 @@
+import { Avatar } from "./ImagePicker";
 import React, { useEffect, useState } from "react";
 import { ArrowUpRight, Plus, RefreshCw } from "lucide-react";
 import { api } from "../services/api";
@@ -74,7 +75,7 @@ export default function StartupBoard({
                 onClick={() => onOpen(item.id)}
               >
                 <span className="board-monogram">
-                  {d.name.slice(0, 2).toUpperCase()}
+                  <Avatar src={d.logo} name={d.name} />
                 </span>
                 <div>
                   <h3>{d.name}</h3>

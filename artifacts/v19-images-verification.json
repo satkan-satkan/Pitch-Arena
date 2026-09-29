@@ -1,0 +1,21 @@
+{
+  "checks": [
+    "Profile upload saves successfully",
+    "Profile avatar survives reload",
+    "Invalid upload shows a recoverable message",
+    "Editor saves logo, founder and distinct metrics",
+    "Private draft never appears in catalogue",
+    "Moderation publishes uploaded images",
+    "Reference layout has four real metrics and two images",
+    "Original draggable widgets remain available",
+    "Visit opens the founder supplied website",
+    "Share copies the actual public URL",
+    "Sharing still works without clipboard access",
+    "English metrics render real values",
+    "Mobile overview text is not clipped",
+    "Startup details fit a mobile screen",
+    "Catalogue uses the published logo",
+    "No uncaught browser errors"
+  ],
+  "errors": []
+}

@@ -190,7 +190,7 @@ try {
 
   await page.goto(`${f.origin}/startups/${first}`);
   await page.locator('[data-slot="widget-grid"]').waitFor();
-  await loaded(page.locator(".public-campus-header"));
+  await loaded(page.locator(".startup-overview"));
   await page
     .locator(".startup-detail")
     .screenshot({ path: "artifacts/v17-startup-widgets.png" });
@@ -337,6 +337,7 @@ try {
     .getByRole("button", { name: "Переставить блоки", exact: true })
     .click();
   const touchRevenue = touchPage.locator('[data-widget-id="revenue"]');
+  await touchPage.evaluate(() => document.fonts.ready);
   const positionRevenue = async () =>
     touchRevenue.evaluate((el) =>
       window.scrollTo(0, el.getBoundingClientRect().top + scrollY - 130),
@@ -366,6 +367,21 @@ try {
     beforeScroll,
   );
   check("Touch swipe scrolls the page even in arrange mode", true);
+  // Let native swipe inertia finish before starting an independent long press.
+  await touchPage.evaluate(
+    () =>
+      new Promise((resolve) => {
+        let last = scrollY,
+          stable = 0;
+        const tick = () => {
+          stable = scrollY === last ? stable + 1 : 0;
+          last = scrollY;
+          if (stable >= 12) resolve();
+          else requestAnimationFrame(tick);
+        };
+        requestAnimationFrame(tick);
+      }),
+  );
   await positionRevenue();
   box = await touchRevenue.boundingBox();
   const destination = await touchPage

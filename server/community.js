@@ -1,6 +1,7 @@
 import { randomUUID } from "node:crypto";
 import { z } from "zod";
 import { audit } from "./admin.js";
+import { imageSchema, normalizeListingImages } from "./images.js";
 const fail = (status, code) => {
   throw Object.assign(new Error(code), { status });
 };
@@ -43,6 +44,26 @@ const teamSchema = z
   .strict();
 const listingSchema = z
   .object({
+    logo: imageSchema,
+    founderAvatar: imageSchema,
+    founderName: z.string().trim().max(80).default(""),
+    foundedMonth: z
+      .string()
+      .refine(
+        (v) =>
+          !v ||
+          (/^(19|20)\d{2}-(0[1-9]|1[012])$/.test(v) &&
+            v <= new Date().toISOString().slice(0, 7)),
+      )
+      .default(""),
+    totalRevenue: z.number().finite().min(0).max(1e12).nullable().default(null),
+    monthlyRecurringRevenue: z
+      .number()
+      .finite()
+      .min(0)
+      .max(1e12)
+      .nullable()
+      .default(null),
     name: z.string().trim().min(2).max(80),
     tagline: z.string().trim().min(10).max(160),
     description: z.string().trim().min(20).max(3000),
@@ -360,6 +381,7 @@ export async function handleCommunity({ req, url, user, store, body }) {
         !["owner", "editor"].includes(await memberRole(store, e.teamId, user))
       )
         fail(403, "TEAM_ACCESS_REQUIRED");
+      await normalizeListingImages(e.data);
       const id = randomUUID(),
         date = now();
       await store.run(
@@ -391,6 +413,7 @@ export async function handleCommunity({ req, url, user, store, body }) {
           .strict()
           .parse(input);
         if (e.revision !== r.revision) fail(409, "STALE_LISTING");
+        await normalizeListingImages(e.data, JSON.parse(r.data));
         await store.run(
           "UPDATE startup_listings SET data=?,revision=revision+1,status='draft',moderation_note='',updated_at=? WHERE startup_id=?",
           JSON.stringify(e.data),

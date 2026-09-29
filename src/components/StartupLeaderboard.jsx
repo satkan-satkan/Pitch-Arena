@@ -1,3 +1,4 @@
+import { Avatar } from "./ImagePicker";
 import React, { useEffect, useState } from "react";
 import { ArrowUpRight, Plus, RefreshCw, Trophy } from "lucide-react";
 import { api, errorText } from "../services/api";
@@ -108,7 +109,7 @@ export default function StartupLeaderboard({ t, onOpen, onCreate }) {
                 <button onClick={() => onOpen(s.id)}>
                   <span className="live-rank">{page * 24 + i + 1}</span>
                   <span className="startup-icon">
-                    {s.name.slice(0, 2).toUpperCase()}
+                    <Avatar src={s.logo} name={s.name} />
                   </span>
                   <span className="live-ranking-copy">
                     <strong>{s.name}</strong>
