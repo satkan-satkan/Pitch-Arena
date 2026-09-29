@@ -342,6 +342,40 @@ const funds = [
     [["Ники Шевак", "Niki Scevak", "niki"]],
   ),
 ];
+const portraits = {
+  alfred: "/portraits/alfred.webp",
+  "jim-goetz": "/portraits/jim-goetz.webp",
+  murat: "/portraits/murat.jpg",
+  suranga: "/portraits/suranga.jpg",
+  bernard: "/portraits/bernard.jpg",
+  braccia: "/portraits/braccia.jpg",
+  "rich-wong": "/portraits/rich-wong.jpg",
+  deeter: "/portraits/deeter.png",
+  talia: "/portraits/talia.png",
+  tsai: "/portraits/tsai.png",
+  "jan-hammer": "/portraits/jan-hammer.png",
+  janz: "/portraits/janz.jpg",
+  pawel: "/portraits/pawel.jpg",
+  shailendra: "/portraits/shailendra.webp",
+  rajan: "/portraits/rajan.webp",
+  magnus: "/portraits/magnus.avif",
+  niki: "/portraits/niki.avif",
+  collombel: "/portraits/collombel.webp",
+  tidjane: "/portraits/tidjane.webp",
+  varlamov: "/portraits/varlamov.png",
+  kalaev: "/portraits/kalaev.png",
+  alim: "/portraits/alim.png",
+  pavel: "/portraits/pavel.png",
+  walid: "/portraits/walid.jpg",
+  hernan: "/portraits/hernan.jpg",
+  szekasy: "/portraits/szekasy.jpg",
+  marc: "/portraits/marc.png",
+  ben: "/portraits/ben.png",
+  thiel: "/portraits/thiel.jpg",
+  sarkisov: "/portraits/sarkisov.png",
+  reshma: "/portraits/reshma.jpg",
+  carlos: "/portraits/carlos.jpg",
+};
 export const worldInvestors = funds
   .flatMap((f) =>
     f.people.map(([ru, en, id]) => ({
@@ -354,14 +388,8 @@ export const worldInvestors = funds
         .slice(0, 2)
         .join(""),
       color: "blue",
-      photo:
-        {
-          alfred: "/portraits/alfred.webp",
-          "jim-goetz": "/portraits/jim-goetz.webp",
-          murat: "/portraits/murat.jpg",
-          suranga: "/portraits/suranga.jpg",
-          bernard: "/portraits/bernard.jpg",
-        }[id] || null,
+      photo: portraits[id] || null,
+      ...(id === "janz" ? { photoPosition: "85% 25%" } : {}),
       level: f.level,
       region: f.region,
       country: f.country,
@@ -389,7 +417,7 @@ export const worldInvestors = funds
       },
     ].map((p) => ({
       ...p,
-      photo: null,
+      photo: portraits[p.id] || null,
       color: "blue",
       level: 5,
       region: "us",

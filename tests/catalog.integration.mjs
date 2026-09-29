@@ -48,8 +48,29 @@ test("Only admins create validated, unique funds and investors; linked people en
     assert.equal((await call("arena", "test-fund", fund)).status, 200);
     assert.equal((await call("arena", "test-fund", fund)).status, 409);
     assert.equal((await call("investor", "test-person", person)).status, 200);
+    // Model a previously edited profile from before its portrait was sourced.
+    const legacyRow = await f.store.get(
+      "SELECT data FROM catalog WHERE kind='investor' AND id='deeter'",
+    );
+    const legacyPerson = {
+      ...JSON.parse(legacyRow.data),
+      name: ["Редакция владельца", "Owner's edit"],
+      photo: null,
+    };
+    await f.store.run(
+      "UPDATE catalog SET data=?,revision=2 WHERE kind='investor' AND id='deeter'",
+      JSON.stringify(legacyPerson),
+    );
     await seedCatalog(f.store);
     let catalog = (await f.request("/catalog")).data;
+    const refreshedPerson = catalog.investors.find((p) => p.id === "deeter");
+    assert.equal(refreshedPerson.name[1], "Owner's edit");
+    assert.equal(refreshedPerson.revision, 2);
+    assert.ok(refreshedPerson.photo?.startsWith("/portraits/"));
+    assert.equal(
+      catalog.investors.find((p) => p.id === "test-person").photo,
+      null,
+    );
     for (const p of catalog.investors) {
       assert.ok(
         investorEdit.safeParse({

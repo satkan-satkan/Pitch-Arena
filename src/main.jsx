@@ -1038,7 +1038,12 @@ function App() {
                           .filter((v) => v.photo)
                           .slice(0, 3)
                           .map((v) => (
-                            <img key={v.id} src={photo(v.photo, 60)} alt="" />
+                            <img
+                              key={v.id}
+                              style={{ objectPosition: v.photoPosition }}
+                              src={photo(v.photo, 60)}
+                              alt=""
+                            />
                           ))}
                       </span>
                       <span>
@@ -1185,7 +1190,11 @@ function App() {
                       >
                         <div className={`investor-photo ${v.color}`}>
                           {v.photo ? (
-                            <img src={photo(v.photo, 180)} alt={pick(v.name)} />
+                            <img
+                              style={{ objectPosition: v.photoPosition }}
+                              src={photo(v.photo, 180)}
+                              alt={pick(v.name)}
+                            />
                           ) : (
                             <span className="investor-initial">
                               {v.initial}
@@ -1383,7 +1392,11 @@ function App() {
                           )}
                         </span>
                         {v.photo ? (
-                          <img src={photo(v.photo, 300)} alt={pick(v.name)} />
+                          <img
+                            style={{ objectPosition: v.photoPosition }}
+                            src={photo(v.photo, 300)}
+                            alt={pick(v.name)}
+                          />
                         ) : (
                           <span className="investor-initial">{v.initial}</span>
                         )}
@@ -2180,7 +2193,11 @@ function Setup({
         {panelFor(arena).map((v, i) => (
           <div key={i}>
             {v.photo ? (
-              <img src={photo(v.photo, 80)} alt="" />
+              <img
+                style={{ objectPosition: v.photoPosition }}
+                src={photo(v.photo, 80)}
+                alt=""
+              />
             ) : (
               <span className="cast-initial">{v.initial}</span>
             )}

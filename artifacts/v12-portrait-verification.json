@@ -1,0 +1,10 @@
+{
+  "passed": 4,
+  "checks": [
+    "All 37 official investor portraits decode in the actual directory",
+    "Portrait extends below the banner without clipping or covering the name",
+    "Mobile card keeps the full portrait visible without horizontal overflow",
+    "No browser runtime errors"
+  ],
+  "errors": []
+}

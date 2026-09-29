@@ -112,13 +112,20 @@ export async function readCatalog(store) {
     const merged = new Map(
       base.map((item) => [item.id, { ...item, enabled: true, revision: 0 }]),
     );
-    for (const row of rows.filter((r) => r.kind === kind))
+    for (const row of rows.filter((r) => r.kind === kind)) {
+      const saved = JSON.parse(row.data);
+      const defaults = merged.get(row.id);
       merged.set(row.id, {
-        ...merged.get(row.id),
-        ...JSON.parse(row.data),
+        ...defaults,
+        ...saved,
+        // Fill newly sourced portraits without overwriting an admin's edits.
+        ...(kind === "investor" && !saved.photo && defaults?.photo
+          ? { photo: defaults.photo }
+          : {}),
         revision: row.revision,
         updatedAt: row.updated_at,
       });
+    }
     return [...merged.values()];
   };
   const locations = get("arena", arenas);

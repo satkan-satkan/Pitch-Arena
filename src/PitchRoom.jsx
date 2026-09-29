@@ -47,7 +47,11 @@ function Portrait({ person, pick }) {
   return (
     <span className={`stage-portrait ${person.fictional ? "illustrated" : ""}`}>
       {person.photo ? (
-        <img src={photo(person.photo, 180)} alt={pick(person.name)} />
+        <img
+          style={{ objectPosition: person.photoPosition }}
+          src={photo(person.photo, 180)}
+          alt={pick(person.name)}
+        />
       ) : (
         <span>{person.initial}</span>
       )}
