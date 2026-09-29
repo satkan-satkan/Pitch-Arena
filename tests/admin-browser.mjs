@@ -175,6 +175,10 @@ try {
   player.on("pageerror", (e) => errors.push(e.message));
   await player.goto(origin + "/play");
   await player
+    .locator(".nav-item")
+    .filter({ hasText: "Карта и арены" })
+    .click();
+  await player
     .locator(".map-regions")
     .getByRole("button", { name: "СНГ", exact: true })
     .click();

@@ -103,6 +103,7 @@ try {
     window.webkitSpeechRecognition = undefined;
   });
   await page.goto(origin + "/play");
+  await page.locator(".nav-item").filter({ hasText: "Карта и арены" }).click();
   await page.locator(".atlas-pin").first().waitFor();
   await page
     .locator(".map-regions")

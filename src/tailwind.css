@@ -10,6 +10,9 @@
   --color-muted-foreground: var(--text-secondary);
   --color-primary: var(--accent);
   --color-ring: var(--accent);
+  --color-card: #1b2024;
+  --color-card-foreground: var(--foreground);
+  --color-border: #3b4249;
 }
 :root {
   --background: #111214;

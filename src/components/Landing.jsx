@@ -13,6 +13,7 @@ import "./landing.css";
 import LandingExperience from "./LandingExperience";
 import { Reveal, Tilt, MotionControls } from "../motion/Motion";
 import { GarageChapters, GarageScene } from "./GarageWorld";
+import { BeyondGarage } from "./ValleyMap";
 export default function Landing({
   t,
   lang,
@@ -20,6 +21,7 @@ export default function Landing({
   Brand,
   onPlay,
   onWorkbench,
+  onInvestors,
   onAuth,
   onDirectory,
   onStartup,
@@ -153,6 +155,11 @@ export default function Landing({
           onDirectory={onDirectory}
           onOpen={onStartup}
           onCreate={onCreateStartup}
+        />
+        <BeyondGarage
+          t={t}
+          onInvestors={onInvestors}
+          onDirectory={onDirectory}
         />
         <LandingExperience t={t} onGuide={onGuide} />
         <Reveal as="section" id="how" className="landing-how">

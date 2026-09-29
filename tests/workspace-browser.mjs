@@ -41,6 +41,7 @@ async function boot(p = page) {
   return p.evaluate(() => fetch("/api/bootstrap").then((r) => r.json()));
 }
 async function openArena(p = page) {
+  await p.locator(".nav-item").filter({ hasText: "Карта и арены" }).click();
   await p
     .locator(".map-regions")
     .getByRole("button", { name: "СНГ", exact: true })
@@ -87,7 +88,7 @@ try {
     await route.continue();
   });
   await page.goto(origin + "/play");
-  await page.locator(".atlas-pin").first().waitFor();
+  await page.locator(".valley-hotspot").first().waitFor();
   check(
     "Pending sign-in never displays a fake account",
     (await page.locator(".account-entry").isDisabled()) &&

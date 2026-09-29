@@ -62,6 +62,7 @@ try {
   await btn("Close").click();
   const map = page.locator(".atlas-map"),
     cam = page.getByTestId("atlas-camera");
+  await page.locator(".nav-item").filter({ hasText: "Карта и арены" }).click();
   await map.waitFor();
   const world = await cam.getAttribute("data-viewbox");
   await map
@@ -220,6 +221,7 @@ try {
     await page.evaluate(() => window.captureTracks.length === 0),
   );
   await page.goto(f.origin + "/play");
+  await page.locator(".nav-item").filter({ hasText: "Карта и арены" }).click();
   await page.locator(".atlas-map").waitFor();
   await page.setViewportSize({ width: 390, height: 844 });
   await page

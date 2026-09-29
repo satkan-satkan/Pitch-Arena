@@ -1,0 +1,289 @@
+.valley-map {
+  border: 1px solid #3c4b50;
+  border-radius: 12px;
+  overflow: hidden;
+  background: #172124;
+  margin-bottom: 28px;
+}
+.valley-map-topline {
+  padding: 18px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  color: #a8c8c2;
+}
+.valley-map-topline > span {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  font:
+    10px ui-monospace,
+    monospace;
+  letter-spacing: 1px;
+}
+.valley-map-topline small {
+  font-size: 10px;
+  color: #bac8c9;
+}
+.valley-map-scene {
+  position: relative;
+  background: #bdcdd2;
+}
+.valley-map-scene > img {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
+}
+.valley-hotspot {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  padding: 0;
+  background: none;
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  gap: 4px;
+  z-index: 1;
+  color: #f1f5ef;
+  cursor: pointer;
+}
+.valley-pin {
+  width: 34px;
+  height: 34px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: #182c32;
+  border: 2px solid #ebf3e8;
+  box-shadow: 0 4px 14px #0c212957;
+  font:
+    11px ui-monospace,
+    monospace;
+}
+.valley-pin-label {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  background: #17282fef;
+  box-shadow: 0 3px 12px #0c212940;
+  border: 1px solid #819a9c;
+  border-radius: 4px;
+  padding: 7px 10px;
+  font-size: 10px;
+  white-space: nowrap;
+}
+.valley-hotspot.active .valley-pin,
+.valley-hotspot:hover .valley-pin {
+  background: #db7350;
+  color: #fff;
+}
+.valley-hotspot:focus-visible {
+  outline: 3px solid #263842;
+  outline-offset: 5px;
+  border-radius: 8px;
+}
+html[data-motion="on"] .valley-pin {
+  transition:
+    background 180ms ease,
+    box-shadow 180ms ease;
+}
+.valley-map-caption {
+  padding: 22px 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 20px;
+}
+.valley-map-caption strong {
+  color: #e7efe9;
+  font-size: 16px;
+}
+.valley-map-caption p {
+  font-size: 12px;
+  color: #b4c5c5;
+  line-height: 1.6;
+  margin: 6px 0 0;
+}
+.valley-map-caption .button {
+  flex-shrink: 0;
+}
+.valley-mobile-places {
+  display: none;
+}
+.beyond-garage {
+  max-width: 1300px;
+  margin: 0 auto;
+  padding: 48px 42px 72px;
+}
+.beyond-garage-heading {
+  max-width: 670px;
+  margin-bottom: 28px;
+}
+.beyond-garage-heading .landing-eyebrow {
+  color: #9dc4c2;
+}
+.beyond-garage-heading p {
+  color: #b2c3c5;
+  font-size: 14px;
+  line-height: 1.8;
+}
+.beyond-garage-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 24px;
+}
+.beyond-garage-card {
+  position: relative;
+  aspect-ratio: 1.5;
+  overflow: hidden;
+  isolation: isolate;
+  background: #21333c;
+  border: 1px solid #52646b;
+  border-radius: 6px;
+  text-align: left;
+  color: #fff;
+  padding: 32px;
+  display: flex;
+  align-items: flex-end;
+}
+.beyond-garage-card > img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 70% center;
+  z-index: -2;
+}
+.beyond-garage-card::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(0deg, #12232cef, #12232c12 80%);
+  z-index: -1;
+}
+.beyond-scene-copy {
+  display: block;
+  width: 100%;
+}
+.beyond-scene-copy small {
+  font:
+    10px ui-monospace,
+    monospace;
+  letter-spacing: 1.4px;
+  color: #c4dedd;
+}
+.beyond-scene-copy strong {
+  display: block;
+  font-size: clamp(23px, 3vw, 31px);
+  line-height: 1.2;
+  letter-spacing: -0.7px;
+  font-weight: 550;
+  margin: 13px 0 25px;
+}
+.beyond-scene-copy > span {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 12px;
+}
+.beyond-garage-card:focus-visible {
+  outline: 2px solid #b0d4d0;
+  outline-offset: 5px;
+}
+html[data-motion="on"] .beyond-garage-card img {
+  transition: transform 650ms ease;
+}
+html[data-motion="on"] .beyond-garage-card:hover img {
+  transform: scale(1.04);
+}
+.garage-environment[data-garage-scene="office"] .garage-environment-shade {
+  background: linear-gradient(90deg, #15232eeb, #15232e85 50%, #15232e08);
+}
+.garage-environment[data-garage-scene="campus"] .garage-environment-shade {
+  background: linear-gradient(90deg, #152a26ef, #152a269c 55%, #152a261a);
+}
+.public-campus-header {
+  padding: 30px;
+  margin-bottom: 28px;
+}
+.public-campus-header .community-heading {
+  margin: 0;
+  min-height: 150px;
+}
+.public-campus-header .community-heading p {
+  color: #deebe3;
+}
+.public-campus-header .eyebrow {
+  color: #b3d4cc;
+}
+@media (max-width: 700px) {
+  .valley-pin-label {
+    display: none;
+  }
+  .valley-hotspot {
+    width: 44px;
+    height: 44px;
+    justify-content: center;
+  }
+  .valley-pin {
+    width: 26px;
+    height: 26px;
+    font-size: 9px;
+  }
+  .valley-map-topline {
+    padding: 16px;
+  }
+  .valley-mobile-places {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1px;
+    background: #334449;
+  }
+  .valley-mobile-places button {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    background: #1b2b31;
+    padding: 16px 10px;
+    color: #edf1e9;
+    font-size: 10px;
+    text-align: left;
+  }
+  .valley-mobile-places small {
+    color: #9ecac6;
+    font:
+      9px ui-monospace,
+      monospace;
+  }
+  .valley-mobile-places svg {
+    margin-left: auto;
+    flex-shrink: 0;
+  }
+  .valley-map-caption {
+    display: none;
+  }
+  .beyond-garage {
+    padding: 30px 22px 50px;
+  }
+  .beyond-garage-grid {
+    grid-template-columns: 1fr;
+  }
+  .beyond-garage-card {
+    padding: 24px;
+  }
+  .public-campus-header {
+    padding: 24px 20px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .beyond-garage-card img,
+  .valley-pin {
+    transition: none !important;
+    transform: none !important;
+  }
+}

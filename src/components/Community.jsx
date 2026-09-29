@@ -13,6 +13,7 @@ import { api, errorText } from "../services/api";
 import "./community.css";
 import { ProfileSelector, ProfileIcon } from "@/components/ui/profile-selector";
 import { GarageScene } from "./GarageWorld";
+import StartupWidgets from "./StartupWidgets";
 export const socialNames = {
   website: "Website",
   telegram: "Telegram",
@@ -115,7 +116,7 @@ function Revenue({ data, t }) {
     </div>
   ) : null;
 }
-function ListingContent({ data, t }) {
+function ListingContent({ data, t, widgets = false }) {
   return (
     <>
       <div className="community-tags">
@@ -125,9 +126,22 @@ function ListingContent({ data, t }) {
       </div>
       <h2>{data.name}</h2>
       <p className="startup-tagline">{data.tagline}</p>
-      <p className="startup-description">{data.description}</p>
-      <Revenue data={data} t={t} />
-      <SocialLinks links={data.links} />
+      {widgets ? (
+        <StartupWidgets
+          key={data.id}
+          data={data}
+          t={t}
+          category={t(...categories[data.category])}
+          stage={t(...stages[data.stage])}
+          links={<SocialLinks links={data.links} />}
+        />
+      ) : (
+        <>
+          <p className="startup-description">{data.description}</p>
+          <Revenue data={data} t={t} />
+          <SocialLinks links={data.links} />
+        </>
+      )}
     </>
   );
 }
@@ -162,29 +176,31 @@ export function PublicDirectory({
   }, [detailId, search, category, page, refresh]);
   return (
     <section className="community-page public-directory">
-      <div className="community-heading">
-        <div>
-          <span className="eyebrow">
-            <Globe2 size={15} />
-            {t("СОЗДАНО ОСНОВАТЕЛЯМИ", "BUILT BY FOUNDERS")}
-          </span>
-          <h1>
-            {detailId
-              ? t("История стартапа", "Startup story")
-              : t("Идеи становятся бизнесом.", "Ideas become businesses.")}
-          </h1>
-          <p>
-            {t(
-              "Открывай проекты, знакомься с продуктами и расскажи о своём.",
-              "Discover products, explore businesses and share what you are building.",
-            )}
-          </p>
+      <GarageScene scene="campus" className="public-campus-header">
+        <div className="community-heading">
+          <div>
+            <span className="eyebrow">
+              <Globe2 size={15} />
+              {t("СОЗДАНО ОСНОВАТЕЛЯМИ", "BUILT BY FOUNDERS")}
+            </span>
+            <h1>
+              {detailId
+                ? t("История стартапа", "Startup story")
+                : t("Идеи становятся бизнесом.", "Ideas become businesses.")}
+            </h1>
+            <p>
+              {t(
+                "Открывай проекты, знакомься с продуктами и расскажи о своём.",
+                "Discover products, explore businesses and share what you are building.",
+              )}
+            </p>
+          </div>
+          <button className="button dark" onClick={onJoin}>
+            <Plus size={16} />
+            {t("Добавить стартап", "Add a startup")}
+          </button>
         </div>
-        <button className="button dark" onClick={onJoin}>
-          <Plus size={16} />
-          {t("Добавить стартап", "Add a startup")}
-        </button>
-      </div>
+      </GarageScene>
       {detailId ? (
         <button className="ready-text-button" onClick={onBack}>
           <ArrowLeft size={15} />
@@ -236,8 +252,8 @@ export function PublicDirectory({
       ) : !data ? (
         <p role="status">{t("Загружаем…", "Loading…")}</p>
       ) : detailId ? (
-        <article className="startup-detail">
-          <ListingContent data={data} t={t} />
+        <article className="startup-detail startup-detail-widgets">
+          <ListingContent data={data} t={t} widgets />
           <small>
             {t(
               "Карточка прошла модерацию содержания. Финансовые показатели не подтверждены платформой.",

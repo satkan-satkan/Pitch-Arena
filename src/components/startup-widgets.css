@@ -1,0 +1,121 @@
+.startup-widgets {
+  margin: 30px 0 14px;
+}
+.startup-detail.startup-detail-widgets {
+  max-width: 1180px;
+}
+.startup-widget-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 22px;
+}
+.startup-widget-toolbar > p {
+  flex: 1;
+  min-width: 230px;
+  font-size: 12px;
+  line-height: 1.7;
+  color: #b4c0c4;
+  margin: 0;
+}
+.startup-widget-panel {
+  padding: 24px;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  box-sizing: border-box;
+}
+.startup-widget-heading {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  color: #9ebbc7;
+  flex-shrink: 0;
+  margin-bottom: 20px;
+}
+.startup-widget-heading h3 {
+  margin: 0;
+  font-size: 12px;
+  font-weight: 500;
+  color: #c9d2d4;
+  flex: 1;
+}
+.startup-widget-body {
+  min-height: 0;
+  overflow: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+  overflow-wrap: anywhere;
+  flex: 1;
+}
+.startup-widget-body:focus-visible {
+  outline: 2px solid #94c1cc;
+  outline-offset: -2px;
+}
+.startup-widget-body p {
+  font-size: 12px;
+  line-height: 1.7;
+  color: #b8c4c8;
+  margin: 14px 0 0;
+}
+.startup-widget-body .startup-widget-description {
+  margin: 0;
+  color: #e4e8e6;
+  font-size: 14px;
+  white-space: pre-wrap;
+}
+.startup-widget-value {
+  font-size: clamp(23px, 2.4vw, 35px);
+  letter-spacing: -1px;
+  font-weight: 550;
+  color: #eff3ed;
+  display: block;
+  margin-top: 8px;
+  line-height: 1.25;
+}
+.startup-widget-value small {
+  display: block;
+  font-size: 13px;
+  letter-spacing: 0;
+  color: #a9babb;
+  margin-top: 12px;
+}
+.widget-revenue {
+  background: linear-gradient(135deg, #223b35, #192724);
+}
+.widget-region {
+  background: linear-gradient(135deg, #263944, #1a242c);
+}
+.widget-category {
+  background: linear-gradient(135deg, #39302c, #252321);
+}
+.startup-widgets .social-links {
+  margin: 0;
+  align-items: flex-start;
+}
+.startup-widgets .social-links a {
+  background: #263137;
+  border-color: #48565f;
+  color: #e1e8e7;
+  font-size: 12px;
+}
+.startup-widgets.is-editing [data-slot="widget"] {
+  outline: 1px dashed #6d8a95;
+  outline-offset: 3px;
+}
+.startup-widget-notice {
+  min-height: 20px;
+  font-size: 12px;
+  color: #b2c7bd;
+  margin: 12px 0 0;
+}
+@media (max-width: 600px) {
+  .startup-widget-panel {
+    padding: 22px;
+  }
+  .startup-widget-toolbar > p {
+    flex-basis: 100%;
+  }
+}

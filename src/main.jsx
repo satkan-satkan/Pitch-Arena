@@ -78,6 +78,7 @@ import useBodyScrollLock from "./hooks/useBodyScrollLock";
 import StartupLeaderboard from "./components/StartupLeaderboard";
 import Notifications from "./components/Notifications";
 import { GarageScene } from "./components/GarageWorld";
+import ValleyMap from "./components/ValleyMap";
 import { api, hydrateSession, sessionClient, errorText } from "./services/api";
 
 import { summarizeScores } from "./practice/engine";
@@ -674,6 +675,10 @@ function App() {
               navigate("/play");
               setPage("home");
             }}
+            onInvestors={() => {
+              navigate("/play");
+              setPage("investors");
+            }}
             onAuth={openAuth}
             onDirectory={() => navigate("/startups")}
             onStartup={(id) => navigate(`/startups/${id}`)}
@@ -1103,22 +1108,25 @@ function App() {
               />
               <div className="section-heading">
                 <div className="section-title">
-                  <h2>
-                    {t("Выбери следующую комнату", "Choose your next room")}
-                  </h2>
-                  <span className="count-badge">{arenas.length}</span>
+                  <h2>{t("Твоя стартап-долина", "Your startup valley")}</h2>
+                  <span className="count-badge">06</span>
                 </div>
                 <button className="text-button" onClick={() => go("arenas")}>
                   {t("Все арены", "All arenas")}
                   <ArrowRight size={16} />
                 </button>
               </div>
-              <JourneyMap
-                arenas={arenas}
-                history={history}
+              <ValleyMap
                 t={t}
-                pick={pick}
-                onSelect={setSelected}
+                onNavigate={(place) => {
+                  if (place === "garage") go("home");
+                  else if (place === "stage")
+                    setSelected(nextArena(history, arenas));
+                  else if (place === "office") go("investors");
+                  else if (place === "campus") go("community");
+                  else if (place === "showroom") navigate("/startups");
+                  else if (place === "plaza") go("leaderboard");
+                }}
               />
               <TrophyShelf history={history} t={t} pick={pick} />
               <div className="bottom-grid">
@@ -1310,17 +1318,19 @@ function App() {
           )}
           {page === "investors" && (
             <>
-              <PageTitle
-                eyebrow={t(
-                  "НАЙДИ СВОЕГО СОБЕСЕДНИКА",
-                  "MEET YOUR NEXT CHALLENGE",
-                )}
-                title={t("По ту сторону стола", "Across the table")}
-                subtitle={t(
-                  "Реальные прототипы, игровые диалоги. Выбери, перед кем репетировать следующий питч.",
-                  "Real-world references, fictional dialogue. Choose who to rehearse your next pitch with.",
-                )}
-              />
+              <GarageScene scene="office" className="arena-garage-intro">
+                <PageTitle
+                  eyebrow={t(
+                    "НАЙДИ СВОЕГО СОБЕСЕДНИКА",
+                    "MEET YOUR NEXT CHALLENGE",
+                  )}
+                  title={t("По ту сторону стола", "Across the table")}
+                  subtitle={t(
+                    "Реальные прототипы, игровые диалоги. Выбери, перед кем репетировать следующий питч.",
+                    "Real-world references, fictional dialogue. Choose who to rehearse your next pitch with.",
+                  )}
+                />
+              </GarageScene>
               <div className="filter-bar">
                 <label>
                   {t("Регион инвесторов", "Investor region")}

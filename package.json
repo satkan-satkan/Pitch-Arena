@@ -27,7 +27,8 @@
     "typecheck": "tsc --noEmit",
     "test:catalog": "node --env-file-if-exists=.env --test tests/catalog.integration.mjs",
     "test:expansion": "node --env-file-if-exists=.env tests/expansion-browser.mjs",
-    "test:prelaunch": "node --env-file-if-exists=.env tests/prelaunch-browser.mjs"
+    "test:prelaunch": "node --env-file-if-exists=.env tests/prelaunch-browser.mjs",
+    "test:world": "node --env-file-if-exists=.env tests/world-browser.mjs"
   },
   "dependencies": {
     "clsx": "^2.1.1",

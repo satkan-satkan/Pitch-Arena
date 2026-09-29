@@ -7,6 +7,8 @@ export const garageScenes = {
   workbench: "/scenes/garage-workbench.webp",
   rehearsal: "/scenes/garage-rehearsal.webp",
   crew: "/scenes/garage-crew.webp",
+  office: "/scenes/startup-office.webp",
+  campus: "/scenes/startup-campus.webp",
 };
 
 export function GarageScene({ scene, children, className = "" }) {
