@@ -23,7 +23,7 @@ export function GuidePortrait({
   useEffect(() => {
     let active = true;
     const image = new Image();
-    image.src = `/guide/iskra-${mood}.png`;
+    image.src = "/guide/iskra-majore-v11.png";
     image
       .decode()
       .then(() => {
@@ -56,13 +56,14 @@ export function GuidePortrait({
       }
     >
       <AnimatePresence initial={false}>
-        <motion.img
+        <motion.span
           key={loadedMood}
-          src={`/guide/iskra-${loadedMood}.png`}
-          alt={`${t("Искра", "Iskra")} — ${t(...emotions[loadedMood])}`}
-          width="180"
-          height="180"
-          decoding="async"
+          className="iskra-sprite"
+          role="img"
+          style={{
+            backgroundPosition: `${Object.keys(emotions).indexOf(loadedMood) * 25}% 50%`,
+          }}
+          aria-label={`${t("Искра", "Iskra")} — ${t(...emotions[loadedMood])}`}
           initial={{ opacity: moving ? 0 : 1, scale: moving ? 0.95 : 1 }}
           animate={{ opacity: 1, scale: 1 }}
           exit={{ opacity: 0 }}

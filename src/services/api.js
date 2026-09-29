@@ -36,6 +36,11 @@ export async function api(
 }
 export function errorText(error, t) {
   const messages = {
+    CATALOG_ID_EXISTS: [
+      "Этот ID уже занят. Укажи другой.",
+      "This ID already exists. Choose another.",
+    ],
+    INVALID_ARENA: ["Выбери существующую арену.", "Choose an existing arena."],
     NOT_FOUND: [
       "Карточка недоступна или ещё не опубликована.",
       "This listing is unavailable or not published yet.",

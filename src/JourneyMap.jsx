@@ -1,5 +1,8 @@
 import React, { useEffect, useId, useRef, useState } from "react";
 import { geoNaturalEarth1, geoPath, geoGraticule10 } from "d3-geo";
+import { motion } from "framer-motion";
+import { useArenaMotion } from "./motion/Motion";
+import { regions } from "./world-catalog";
 import { feature } from "topojson-client";
 import world from "world-atlas/countries-110m.json";
 import {
@@ -146,233 +149,211 @@ export function JourneyMap({
   onSelect,
   arenas = defaultArenas,
 }) {
-  const [activeId, setActiveId] = useState(nextArena(history, arenas).id);
+  const [activeId, setActiveId] = useState(
+    nextArena(history, arenas)?.id || arenas[0]?.id,
+  );
   const [region, setRegion] = useState("all");
-  const id = useId().replaceAll(":", "");
-  const active = arenas.find((a) => a.id === activeId);
-  const viewport = useRef(null);
+  const { enabled } = useArenaMotion();
+  const camera = useRef(null);
+  const [aspect, setAspect] = useState(1000 / 460);
   useEffect(() => {
-    const el = viewport.current;
-    if (el && el.scrollWidth > el.clientWidth)
-      el.scrollTo({
-        left: Math.max(
-          0,
-          (active.mapPosition[0] / 1000) * el.scrollWidth - el.clientWidth / 2,
-        ),
-        behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches
-          ? "auto"
-          : "smooth",
-      });
-  }, [activeId]);
-  const done = history.some((h) => h.arenaId === activeId);
+    const observer = new ResizeObserver(([entry]) => {
+      const { width, height } = entry.contentRect;
+      if (width && height) setAspect(width / height);
+    });
+    if (camera.current) observer.observe(camera.current);
+    return () => observer.disconnect();
+  }, []);
+  const active = arenas.find((a) => a.id === activeId) || arenas[0];
+  const locations = arenas.filter(
+    (a) => a.coordinates && (region === "all" || a.region === region),
+  );
+  // Nearby cities in one country share a pin (e.g. the Bay Area), so their
+  // buttons remain reachable even at world scale.
+  const clusters = locations.reduce((out, a) => {
+    const p = projection(a.coordinates);
+    const nearby = out.find(
+      (c) =>
+        c.items[0].country === a.country &&
+        Math.hypot(c.p[0] - p[0], c.p[1] - p[1]) < 8,
+    );
+    if (nearby) nearby.items.push(a);
+    else out.push({ key: a.id, p, items: [a] });
+    return out;
+  }, []);
+  let box = [0, (460 - 1000 / aspect) / 2, 1000, 1000 / aspect];
+  if (region !== "all" && clusters.length) {
+    const xs = clusters.map((c) => c.p[0]),
+      ys = clusters.map((c) => c.p[1]);
+    const width = Math.max(
+      170,
+      Math.max(...xs) - Math.min(...xs) + 120,
+      (Math.max(...ys) - Math.min(...ys) + 80) * aspect,
+    );
+    const height = width / aspect;
+    box = [
+      (Math.min(...xs) + Math.max(...xs) - width) / 2,
+      (Math.min(...ys) + Math.max(...ys) - height) / 2,
+      width,
+      height,
+    ];
+  }
+  const activeCluster = clusters.find((c) =>
+    c.items.some((a) => a.id === active.id),
+  );
+  const local =
+    activeCluster?.items ||
+    (region === "all"
+      ? [
+          arenas.find((a) => a.id === "family"),
+          ...locations.slice(0, 5),
+        ].filter(Boolean)
+      : locations);
+  const done = history.some((h) => h.arenaId === active.id);
   const { best } = summarizeScores(
-    history.filter((h) => h.arenaId === activeId),
+    history.filter((h) => h.arenaId === active.id),
   );
   const panel = panelFor(active);
-  const visible = (a) =>
-    region === "all" || a.region === region || a.id === "family";
-  const order = campaign.map((id) => arenas.find((a) => a.id === id));
-  const route = order.map((a) => a.mapPosition);
-  const routeD = route.reduce(
-    (s, p, i) =>
-      i
-        ? s +
-          ` Q ${(route[i - 1][0] + p[0]) / 2} ${Math.min(route[i - 1][1], p[1]) - 55} ${p[0]} ${p[1]}`
-        : `M${p[0]} ${p[1]}`,
-    "",
-  );
+  const duration = enabled ? 0.55 : 0;
   return (
     <section
-      className="journey-map"
+      className="journey-map atlas-map"
       aria-label={t("Карта арен мира", "World arena map")}
+      data-region={region}
     >
       <div className="map-toolbar">
         <div>
           <span className="map-season">
-            <span />
-            {t("СЕЗОН 01", "SEASON 01")}
+            {t("МЕЖДУНАРОДНЫЙ КАТАЛОГ", "GLOBAL DIRECTORY")}
           </span>
-          <h3>{t("Весь мир — твоя арена", "The world is your arena")}</h3>
+          <h3>
+            {t("Твой следующий стол переговоров", "Your next meeting table")}
+          </h3>
         </div>
         <div className="map-regions">
-          {[
-            ["all", "Мир", "World"],
-            ["cis", "СНГ", "CIS"],
-            ["us", "Америка", "Americas"],
-            ["eu", "Европа", "Europe"],
-            ["uae", "ОАЭ", "UAE"],
-          ].map(([r, ru, en]) => (
+          {regions.map(([id, ru, en]) => (
             <button
-              key={r}
-              aria-pressed={region === r}
-              className={region === r ? "active" : ""}
+              key={id}
+              aria-pressed={region === id}
+              className={region === id ? "active" : ""}
               onClick={() => {
-                setRegion(r);
-                if (r !== "all")
-                  setActiveId(arenas.find((a) => a.region === r).id);
+                setRegion(id);
+                const first = arenas.find((a) =>
+                  id === "all" ? a.id === "family" : a.region === id,
+                );
+                if (first) setActiveId(first.id);
               }}
             >
-              {r === "all" && <Globe2 size={12} />} {t(ru, en)}
+              {id === "all" && <Globe2 size={12} />} {t(ru, en)}
             </button>
           ))}
         </div>
       </div>
-      <div className="map-scroll" ref={viewport}>
-        <div className="map-canvas">
-          <svg viewBox="0 0 1000 460" className="world-svg" aria-hidden="true">
-            <defs>
-              <pattern
-                id={`dots-${id}`}
-                width="12"
-                height="12"
-                patternUnits="userSpaceOnUse"
-              >
-                <circle cx="1" cy="1" r=".65" fill="#6f7176" opacity=".23" />
-              </pattern>
-              <linearGradient id={`land-${id}`} x1="0" y1="0" x2="0" y2="1">
-                <stop stopColor="#333538" />
-                <stop offset="1" stopColor="#25272b" />
-              </linearGradient>
-            </defs>
-            <rect width="1000" height="460" fill={`url(#dots-${id})`} />
-            <path d={path(geoGraticule10())} className="map-graticule" />
-            {countries.map((c) => (
-              <path
-                d={path(c)}
-                key={c.id}
-                className={
-                  active.country === c.id
-                    ? "country selected-country"
-                    : "country"
-                }
-                fill={`url(#land-${id})`}
-              />
-            ))}
-            <path d={routeD} className="campaign-route" />
-            {arenas
-              .filter((a) => a.coordinates && visible(a))
-              .map((a) => {
-                const p = projection(a.coordinates);
-                return (
-                  <g key={a.id}>
-                    <line
-                      x1={p[0]}
-                      y1={p[1]}
-                      x2={a.mapPosition[0]}
-                      y2={a.mapPosition[1]}
-                      className={`pin-leader ${a.id === activeId ? "active" : ""}`}
-                    />
-                    <circle cx={p[0]} cy={p[1]} r="3" className="city-dot" />
-                  </g>
-                );
-              })}
-            <text x="310" y="355" className="ocean-label">
-              ATLANTIC OCEAN
-            </text>
-            <text x="734" y="356" className="ocean-label">
-              INDIAN OCEAN
-            </text>
-            <text
-              x="31"
-              y="223"
-              className="ocean-label"
-              transform="rotate(-90 31 223)"
+      <div
+        ref={camera}
+        className="atlas-viewport"
+        data-testid="atlas-camera"
+        data-viewbox={box.join(" ")}
+      >
+        <motion.svg
+          className="atlas-world"
+          initial={false}
+          animate={{ viewBox: box.join(" ") }}
+          transition={{ duration }}
+          aria-hidden="true"
+        >
+          <rect x="-1000" y="-500" width="3000" height="1500" fill="#141a1d" />
+          <path d={path(geoGraticule10())} className="map-graticule" />
+          {countries.map((c) => (
+            <path
+              key={c.id}
+              d={path(c)}
+              className={
+                active.country === c.id ? "country selected-country" : "country"
+              }
+              fill="#384147"
+            />
+          ))}
+        </motion.svg>
+        {clusters.map((c) => {
+          const current = c.items.some((a) => a.id === active.id),
+            first = c.items[0];
+          return (
+            <motion.button
+              key={c.key}
+              initial={false}
+              animate={{
+                left: `${((c.p[0] - box[0]) / box[2]) * 100}%`,
+                top: `${((c.p[1] - box[1]) / box[3]) * 100}%`,
+              }}
+              transition={{ duration }}
+              className={`atlas-pin ${current ? "selected" : ""}`}
+              onClick={() => setActiveId(first.id)}
+              aria-label={`${pick(first.city)} · ${c.items.length} ${t("арен", "arenas")}`}
+              aria-pressed={current}
             >
-              PACIFIC OCEAN
-            </text>
-          </svg>
-          {arenas.filter(visible).map((a) => {
-            const cleared = history.some((h) => h.arenaId === a.id),
-              portrait = a.personaIds ? panelFor(a)[0] : null;
-            return (
-              <button
-                key={a.id}
-                className={`map-pin ${a.kind} ${a.id === activeId ? "selected" : ""} ${cleared ? "cleared" : ""}`}
-                style={{
-                  left: `${a.mapPosition[0] / 10}%`,
-                  top: `${a.mapPosition[1] / 4.6}%`,
-                }}
-                onClick={() => setActiveId(a.id)}
-                aria-label={`${pick(a.title)} — ${pick(a.city)}`}
-                aria-pressed={a.id === activeId}
-              >
-                <span className="pin-disc">
-                  {portrait ? (
-                    <img src={photo(portrait.photo)} alt="" />
-                  ) : (
-                    <span>{a.symbol}</span>
-                  )}
-                  {cleared ? (
-                    <i className="pin-clear">
-                      <Check size={10} />
-                    </i>
-                  ) : (
-                    <i className="pin-level">{a.level}</i>
-                  )}
-                </span>
-                <span className="pin-label">
-                  {a.id === "arena"
-                    ? t("Арена Единорогов", "Unicorn Arena")
-                    : a.id === "nfactorial"
-                      ? "nFactorial"
-                      : pick(a.title)}
-                  {a.id === "arena" && <span className="pin-boss">BOSS</span>}
-                </span>
-                {a.id === activeId && (
-                  <span className="pin-location">{pick(a.city)}</span>
-                )}
-              </button>
-            );
-          })}
-          <div className="map-compass">
-            <Compass size={26} strokeWidth={1} />
-            <span>N</span>
-          </div>
-          <div className="map-home-note">
-            <span>⌂</span>
-            {t("Приключение начинается дома", "Every adventure starts at home")}
-          </div>
-          <div className="map-legend">
-            <span>
-              <i className="legend-current" />
-              {t("Выбрано", "Selected")}
-            </span>
-            <span>
-              <i className="legend-complete" />
-              {t("Пройдено", "Cleared")}
-            </span>
-            <span>
-              <i className="legend-route" />
-              {t("Путь основателя", "Founder journey")}
-            </span>
-          </div>
+              <span>{c.items.length > 1 ? c.items.length : first.symbol}</span>
+              <strong>{pick(first.city).split(",")[0]}</strong>
+            </motion.button>
+          );
+        })}
+        <span className="atlas-scale">
+          {region === "all"
+            ? t("Мир", "World")
+            : t(...regions.find((r) => r[0] === region).slice(1))}{" "}
+          · {locations.length} {t("арен", "arenas")}
+        </span>
+        {region === "all" && (
+          <button className="atlas-home" onClick={() => setActiveId("family")}>
+            ⌂ {t("Свои люди", "Friends & family")}
+          </button>
+        )}
+      </div>
+      <div className="atlas-local">
+        <div>
+          <strong>
+            {activeCluster
+              ? pick(activeCluster.items[0].city)
+              : t("Выбери локацию на карте", "Choose a location on the map")}
+          </strong>
+          <span>
+            {t(
+              "Фонды и программы в этой локации",
+              "Funds and programs in this location",
+            )}
+          </span>
+        </div>
+        <div className="atlas-fund-list">
+          {local.map((a) => (
+            <button
+              key={a.id}
+              onClick={() => setActiveId(a.id)}
+              aria-pressed={active.id === a.id}
+              className={active.id === a.id ? "selected" : ""}
+            >
+              <span>{a.symbol}</span>
+              {pick(a.title)}
+              {a.enabled === false && (
+                <small>{t("Недоступно", "Unavailable")}</small>
+              )}
+            </button>
+          ))}
         </div>
       </div>
       <div className="map-mission">
-        <div className={`mission-emblem ${active.kind}`}>
-          {active.personaIds ? (
-            <img src={photo(panel[0].photo, 160)} alt={pick(panel[0].name)} />
-          ) : (
-            active.symbol
-          )}
-        </div>
+        <div className="mission-emblem venture">{active.symbol}</div>
         <div className="mission-text">
           <span>
             {done
-              ? t("МИССИЯ ПРОЙДЕНА", "MISSION CLEARED")
-              : active.level >= 3
-                ? t("ВЫЗОВ ПРИНЯТ?", "UP FOR THE CHALLENGE?")
-                : t("ТВОЯ СЛЕДУЮЩАЯ ИСТОРИЯ", "YOUR NEXT STORY")}
+              ? t("ПРОЙДЕНО", "COMPLETED")
+              : t("УЧЕБНАЯ СИМУЛЯЦИЯ", "PRACTICE SIMULATION")}
           </span>
           <h3>{pick(active.title)}</h3>
           <p>
             <MapPin size={12} />
             {pick(active.city)}
-            <span>·</span>
-            {active.personaIds
-              ? pick(panel[0].name)
-              : t("Учебная панель", "Practice panel")}
           </p>
+          <p>{panel.map((p) => pick(p.name)).join(" · ")}</p>
         </div>
         <div className="mission-rewards">
           <span>
@@ -383,13 +364,7 @@ export function JourneyMap({
             <Zap size={14} />+{active.xp} XP
           </strong>
           {best !== null && (
-            <small
-              title={t(
-                "По текущим правилам оценки",
-                "Using the current scoring rules",
-              )}
-            >
-              <Star size={11} />
+            <small>
               {t("Лучший", "Best")}: {best}/100
             </small>
           )}
@@ -408,11 +383,15 @@ export function JourneyMap({
       <div className="map-footnote">
         <span>
           {t(
-            "Выбирай любую арену. Маршрут — рекомендация, а не ограничение.",
-            "Every arena is playable. The route is a guide, not a restriction.",
+            "Нажми на город, затем выбери фонд. Локации — ориентиры для тренировки.",
+            "Select a city, then a fund. Locations are practice reference points.",
           )}
         </span>
-        <span>{t("Метки — игровые локации", "Pins are game locations")}</span>
+        {active.source && (
+          <a href={active.source} target="_blank" rel="noreferrer">
+            {t("Официальный источник", "Official source")} ↗
+          </a>
+        )}
       </div>
     </section>
   );

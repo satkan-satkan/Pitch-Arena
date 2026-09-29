@@ -1,5 +1,7 @@
+import { worldArenas, worldInvestors } from "./world-catalog.js";
 // Public profiles supply identities only. All dialogue and game rules are fictional.
 export const investors = [
+  ...worldInvestors,
   {
     id: "oskar",
     name: ["Оскар Хартманн", "Oskar Hartmann"],
@@ -303,10 +305,23 @@ const definitions = [
     ],
   },
 ];
-export const arenas = definitions.map((a) => ({
-  ...a,
-  panel: panelFor(a).map((v) => v.name[0]),
-}));
+export const arenas = [...definitions, ...worldArenas].map((original) => {
+  const a =
+    original.id === "a16z"
+      ? {
+          ...original,
+          personaIds: ["marc", "ben"],
+          description: [
+            "Учебная симуляция с прототипами Марка Андриссена и Бена Хоровица. Вопросы и лимиты — игровые.",
+            "Practice with Marc Andreessen and Ben Horowitz references. Dialogue and limits are fictional.",
+          ],
+        }
+      : original;
+  return {
+    ...a,
+    panel: panelFor(a).map((v) => v.name[0]),
+  };
+});
 export const campaign = ["family", "nfactorial", "arena", "yc", "a16z"];
 export const totalXP = (history) =>
   history.reduce((sum, h) => sum + (h.xp ?? 100), 0);

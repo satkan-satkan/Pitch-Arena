@@ -1,3 +1,4 @@
+import StartupBoard from "./StartupBoard";
 import React from "react";
 import {
   ArrowRight,
@@ -20,6 +21,8 @@ export default function Landing({
   onPlay,
   onAuth,
   onDirectory,
+  onStartup,
+  onCreateStartup,
   account,
   onGuide,
 }) {
@@ -117,8 +120,8 @@ export default function Landing({
           <div>
             {[
               t("Свои люди", "Friends & family"),
-              "nFactorial",
-              t("Арена Единорогов", "Unicorn Arena"),
+              "Sequoia Capital",
+              "Seedcamp",
               "Y Combinator",
               "a16z",
             ].map((v, i) => (
@@ -138,6 +141,12 @@ export default function Landing({
             )}
           </small>
         </section>
+        <StartupBoard
+          t={t}
+          onDirectory={onDirectory}
+          onOpen={onStartup}
+          onCreate={onCreateStartup}
+        />
         <LandingExperience t={t} onGuide={onGuide} />
         <Reveal as="section" id="how" className="landing-how">
           <div className="landing-section-heading">

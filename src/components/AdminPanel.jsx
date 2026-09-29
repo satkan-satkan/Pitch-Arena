@@ -11,9 +11,11 @@ import {
   Save,
   X,
   Search,
+  Plus,
 } from "lucide-react";
 import { api, errorText } from "../services/api";
 import "./admin.css";
+import { regions } from "../world-catalog";
 import { StartupModeration } from "./Community";
 const sections = [
   ["overview", ShieldCheck, ["Обзор", "Overview"]],
@@ -26,9 +28,24 @@ const sections = [
 const selectFields = (item, kind) =>
   Object.fromEntries(
     (kind === "arena"
-      ? ["title", "description", "pitchSeconds", "level", "enabled"]
-      : ["name", "role", "focus", "source", "enabled"]
-    ).map((k) => [k, item[k] ?? (k === "source" ? "" : null)]),
+      ? [
+          "title",
+          "description",
+          "pitchSeconds",
+          "level",
+          "enabled",
+          "region",
+          ...(item.country ? ["country"] : []),
+          "city",
+          "source",
+          "symbol",
+          ...(item.coordinates ? ["coordinates"] : []),
+        ]
+      : ["name", "role", "focus", "source", "enabled", "arenaId", "level"]
+    ).map((k) => [
+      k,
+      item[k] ?? (["source", "country"].includes(k) ? "" : null),
+    ]),
   );
 export default function AdminPanel({ account, t, onRefresh, Modal }) {
   const [section, setSection] = useState("overview"),
@@ -98,6 +115,40 @@ export default function AdminPanel({ account, t, onRefresh, Modal }) {
           },
     );
   };
+  const create = () => {
+    setError("");
+    setReason("");
+    setEditing({
+      kind,
+      creating: true,
+      id: "",
+      label: t("Новая карточка", "New entry"),
+      data:
+        kind === "arena"
+          ? {
+              title: ["", ""],
+              description: ["", ""],
+              pitchSeconds: 120,
+              level: 3,
+              enabled: true,
+              region: "us",
+              country: "840",
+              city: ["", ""],
+              coordinates: [-122.42, 37.77],
+              source: "",
+              symbol: "VC",
+            }
+          : {
+              name: ["", ""],
+              role: "",
+              focus: ["", ""],
+              source: "",
+              enabled: true,
+              arenaId: data.arenas[0].id,
+              level: 3,
+            },
+    });
+  };
   const patch = (key, value) =>
     setEditing((e) => ({ ...e, data: { ...e.data, [key]: value } }));
   const save = async (e) => {
@@ -108,13 +159,19 @@ export default function AdminPanel({ account, t, onRefresh, Modal }) {
       await api(
         editing.kind === "user"
           ? `/admin/users/${editing.id}`
-          : `/admin/catalog/${editing.kind}/${editing.id}`,
+          : `/admin/catalog/${editing.kind}${editing.creating ? "" : `/${editing.id}`}`,
         {
-          method: "PUT",
+          method: editing.creating ? "POST" : "PUT",
           data:
             editing.kind === "user"
               ? { ...editing.data, reason }
-              : { revision: editing.revision, data: editing.data, reason },
+              : {
+                  ...(editing.creating
+                    ? { id: editing.id }
+                    : { revision: editing.revision }),
+                  data: editing.data,
+                  reason,
+                },
         },
       );
       setEditing(null);
@@ -405,11 +462,17 @@ export default function AdminPanel({ account, t, onRefresh, Modal }) {
                         : t("Инвесторы", "Investors")}
                     </button>
                   ))}
+                  <button className="button dark" onClick={create}>
+                    <Plus size={15} />
+                    {kind === "arena"
+                      ? t("Добавить фонд / арену", "Add fund / arena")
+                      : t("Добавить инвестора", "Add investor")}
+                  </button>
                 </div>
                 <p className="admin-help">
                   {t(
-                    "Редактируй существующие карточки. Новые настройки применяются к новым тренировкам; начатые сохраняют прежнюю версию.",
-                    "Edit existing cards. New settings apply to new practices; ongoing sessions retain their original version.",
+                    "Добавляй фонды, привязывай инвесторов и редактируй карточки. Новые настройки применяются к новым тренировкам; начатые сохраняют прежнюю версию.",
+                    "Add funds, link investors and edit cards. New settings apply to new practices; ongoing sessions retain their original version.",
                   )}
                 </p>
                 <div className="admin-catalog-grid">
@@ -511,6 +574,19 @@ export default function AdminPanel({ account, t, onRefresh, Modal }) {
               {t("ИЗМЕНЕНИЕ С ЗАПИСЬЮ В ЖУРНАЛ", "AUDITED CHANGE")}
             </span>
             <h2>{editing.label}</h2>
+            {editing.creating && (
+              <label>
+                {t("ID карточки (латиница)", "Entry ID (Latin characters)")}
+                <input
+                  required
+                  pattern="[a-z0-9][a-z0-9-]{1,63}"
+                  value={editing.id}
+                  onChange={(e) =>
+                    setEditing((v) => ({ ...v, id: e.target.value }))
+                  }
+                />
+              </label>
+            )}
             {editing.kind === "user" ? (
               <>
                 <label>
@@ -606,6 +682,107 @@ export default function AdminPanel({ account, t, onRefresh, Modal }) {
                 </label>
               </>
             )}
+            {editing.kind === "arena" && editing.id !== "family" && (
+              <>
+                <div className="form-grid">
+                  <label>
+                    {t("Регион карты", "Map region")}
+                    <select
+                      aria-label={t("Регион карты", "Map region")}
+                      value={editing.data.region}
+                      onChange={(e) => patch("region", e.target.value)}
+                    >
+                      {regions
+                        .filter((r) => r[0] !== "all")
+                        .map(([id, ru, en]) => (
+                          <option key={id} value={id}>
+                            {t(ru, en)}
+                          </option>
+                        ))}
+                    </select>
+                  </label>
+                  <label>
+                    {t("Код страны ISO, 3 цифры", "ISO country code, 3 digits")}
+                    <input
+                      required
+                      pattern="[0-9]{3}"
+                      value={editing.data.country}
+                      onChange={(e) => patch("country", e.target.value)}
+                    />
+                  </label>
+                </div>
+                {pairInputs("city", ["Город и страна", "City and country"])}
+                <div className="form-grid">
+                  {["longitude", "latitude"].map((key, i) => (
+                    <label key={key}>
+                      {i ? t("Широта", "Latitude") : t("Долгота", "Longitude")}
+                      <input
+                        required
+                        type="number"
+                        step="any"
+                        min={i ? -85 : -180}
+                        max={i ? 85 : 180}
+                        value={editing.data.coordinates?.[i] ?? 0}
+                        onChange={(e) =>
+                          patch(
+                            "coordinates",
+                            (editing.data.coordinates || [0, 0]).map((v, j) =>
+                              i === j ? Number(e.target.value) : v,
+                            ),
+                          )
+                        }
+                      />
+                    </label>
+                  ))}
+                </div>
+                <label>
+                  {t("Знак на карте", "Map symbol")}
+                  <input
+                    required
+                    maxLength={6}
+                    value={editing.data.symbol}
+                    onChange={(e) => patch("symbol", e.target.value)}
+                  />
+                </label>
+                <label>
+                  {t("Источник фонда (HTTPS)", "Fund source (HTTPS)")}
+                  <input
+                    type="url"
+                    value={editing.data.source}
+                    onChange={(e) => patch("source", e.target.value)}
+                  />
+                </label>
+              </>
+            )}
+            {editing.kind === "investor" && (
+              <div className="form-grid">
+                <label>
+                  {t("Фонд / арена", "Fund / arena")}
+                  <select
+                    aria-label={t("Фонд / арена", "Fund / arena")}
+                    value={editing.data.arenaId}
+                    onChange={(e) => patch("arenaId", e.target.value)}
+                  >
+                    {data.arenas.map((a) => (
+                      <option key={a.id} value={a.id}>
+                        {t(...a.title)}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+                <label>
+                  {t("Уровень сложности", "Difficulty level")}
+                  <input
+                    required
+                    type="number"
+                    min={1}
+                    max={5}
+                    value={editing.data.level}
+                    onChange={(e) => patch("level", Number(e.target.value))}
+                  />
+                </label>
+              </div>
+            )}
             {editing.kind !== "user" && (
               <label className="admin-checkbox">
                 <input
@@ -655,7 +832,9 @@ export default function AdminPanel({ account, t, onRefresh, Modal }) {
                 <Save size={15} />
                 {busy
                   ? t("Сохраняем…", "Saving…")
-                  : t("Сохранить изменения", "Save changes")}
+                  : editing.creating
+                    ? t("Создать карточку", "Create entry")
+                    : t("Сохранить изменения", "Save changes")}
               </button>
             </div>
           </form>

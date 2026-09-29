@@ -70,6 +70,8 @@ import AccountPanel from "./components/AccountPanel";
 import AdminPanel from "./components/AdminPanel";
 import useGuide from "./guide/useGuide";
 import { GuideIntro, GuideMessage } from "./guide/Guide";
+import StartupBoard from "./components/StartupBoard";
+import { regions } from "./world-catalog";
 import Landing from "./components/Landing";
 import { PublicDirectory, FounderWorkspace } from "./components/Community";
 import useWorkspace from "./hooks/useWorkspace";
@@ -79,6 +81,7 @@ import { summarizeScores } from "./practice/engine";
 import { PracticeGoal } from "./components/PracticeFeedback";
 import "./motion/motion.css";
 import "./studio.css";
+import "./expansion.css";
 import { ArenaMotionProvider, MotionControls } from "./motion/Motion";
 
 const seedRanking = [
@@ -701,6 +704,11 @@ function App() {
             onPlay={() => navigate("/play")}
             onAuth={openAuth}
             onDirectory={() => navigate("/startups")}
+            onStartup={(id) => navigate(`/startups/${id}`)}
+            onCreateStartup={() => {
+              navigate("/play");
+              setPage("community");
+            }}
             onGuide={() => {
               navigate("/play");
               openGuide();
@@ -1026,9 +1034,12 @@ function App() {
                     </button>
                     <div className="hero-footnote">
                       <span className="mini-avatars">
-                        {investors.slice(0, 3).map((v) => (
-                          <img key={v.id} src={photo(v.photo, 60)} alt="" />
-                        ))}
+                        {investors
+                          .filter((v) => v.photo)
+                          .slice(0, 3)
+                          .map((v) => (
+                            <img key={v.id} src={photo(v.photo, 60)} alt="" />
+                          ))}
                       </span>
                       <span>
                         {t(
@@ -1173,7 +1184,13 @@ function App() {
                         }
                       >
                         <div className={`investor-photo ${v.color}`}>
-                          <img src={photo(v.photo, 180)} alt={pick(v.name)} />
+                          {v.photo ? (
+                            <img src={photo(v.photo, 180)} alt={pick(v.name)} />
+                          ) : (
+                            <span className="investor-initial">
+                              {v.initial}
+                            </span>
+                          )}
                           <span className="online-dot" />
                         </div>
                         <strong>{pick(v.name)}</strong>
@@ -1194,53 +1211,13 @@ function App() {
                     ))}
                   </div>
                 </section>
-                <section className="leader-preview">
-                  <div className="section-heading">
-                    <div className="section-title">
-                      <Trophy size={17} />
-                      <h2>{t("На радаре", "On the radar")}</h2>
-                    </div>
-                    <span className="week-badge">{t("Демо", "Demo")}</span>
-                  </div>
-                  <p className="section-subtitle">
-                    {t(
-                      "Идеи, которые звучат громче всех",
-                      "Ideas that are making themselves heard",
-                    )}
-                  </p>
-                  <div className="ranking-mini">
-                    {seedRanking.slice(0, 3).map((r, i) => (
-                      <div className="ranking-row" key={r.name}>
-                        <span className={`rank rank-${i}`}>
-                          {i === 0 ? (
-                            <Trophy size={15} />
-                          ) : (
-                            String(i + 1).padStart(2, "0")
-                          )}
-                        </span>
-                        <span className={`startup-icon ${r.color}`}>
-                          {r.initial}
-                        </span>
-                        <div>
-                          <strong>{r.name}</strong>
-                          <span>{r.description}</span>
-                        </div>
-                        <strong className="rank-score">
-                          {r.score}
-                          <span>XP</span>
-                        </strong>
-                        <span className="rank-change">↗ {r.change}</span>
-                      </div>
-                    ))}
-                  </div>
-                  <button
-                    className="leader-link"
-                    onClick={() => go("leaderboard")}
-                  >
-                    {t("Открыть рейтинг", "Explore leaderboard")}
-                    <ArrowUpRight size={15} />
-                  </button>
-                </section>
+                <StartupBoard
+                  compact
+                  t={t}
+                  onDirectory={() => navigate("/startups")}
+                  onOpen={(id) => navigate(`/startups/${id}`)}
+                  onCreate={() => go("community")}
+                />
               </div>
               <div className="dashboard-footer">
                 <span>
@@ -1300,13 +1277,7 @@ function App() {
                     onChange={(e) => setRegion(e.target.value)}
                     aria-label={t("Регион", "Region")}
                   >
-                    {[
-                      ["all", "Весь мир", "Worldwide"],
-                      ["cis", "СНГ", "CIS"],
-                      ["eu", "Европа", "Europe"],
-                      ["us", "Америка", "Americas"],
-                      ["uae", "Эмираты", "UAE"],
-                    ].map(([id, ru, en]) => (
+                    {[...regions].map(([id, ru, en]) => (
                       <option value={id} key={id}>
                         {t(ru, en)}
                       </option>
@@ -1371,75 +1342,108 @@ function App() {
                   "Real-world references, fictional dialogue. Choose who to rehearse your next pitch with.",
                 )}
               />
+              <div className="filter-bar">
+                <label>
+                  {t("Регион инвесторов", "Investor region")}
+                  <select
+                    aria-label={t("Регион инвесторов", "Investor region")}
+                    value={region}
+                    onChange={(e) => setRegion(e.target.value)}
+                  >
+                    {regions.map(([id, ru, en]) => (
+                      <option key={id} value={id}>
+                        {t(ru, en)}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+                <input
+                  aria-label={t("Поиск инвестора", "Find an investor")}
+                  placeholder={t("Имя или фонд", "Name or fund")}
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                />
+              </div>
               <div className="investor-full-grid">
-                {investors.map((v, i) => (
-                  <div className="investor-full" key={i}>
-                    <div className={`investor-banner ${v.color}`}>
-                      <span className="tag">
-                        {t(
-                          "РЕАЛЬНЫЙ ПРОТОТИП · СИМУЛЯЦИЯ",
-                          "REAL-WORLD REFERENCE · SIMULATION",
+                {investors
+                  .filter(
+                    (v) =>
+                      (region === "all" || v.region === region) &&
+                      `${v.name.join(" ")} ${v.role}`
+                        .toLowerCase()
+                        .includes(search.toLowerCase()),
+                  )
+                  .map((v, i) => (
+                    <div className="investor-full" key={i}>
+                      <div className={`investor-banner ${v.color}`}>
+                        <span className="tag">
+                          {t(
+                            "РЕАЛЬНЫЙ ПРОТОТИП · СИМУЛЯЦИЯ",
+                            "REAL-WORLD REFERENCE · SIMULATION",
+                          )}
+                        </span>
+                        {v.photo ? (
+                          <img src={photo(v.photo, 300)} alt={pick(v.name)} />
+                        ) : (
+                          <span className="investor-initial">{v.initial}</span>
                         )}
-                      </span>
-                      <img src={photo(v.photo, 300)} alt={pick(v.name)} />
-                    </div>
-                    <div className="investor-full-body">
-                      <h2>{pick(v.name)}</h2>
-                      <p>{v.role}</p>
-                      <div className="investor-meta">
-                        <span>
-                          <Globe2 size={15} />
-                          {v.region === "us"
-                            ? t("США", "United States")
-                            : v.region === "eu"
-                              ? t("Европа", "Europe")
-                              : v.id === "arman"
-                                ? t("Алматы", "Almaty")
-                                : t("Москва", "Moscow")}
-                        </span>
-                        <span>
-                          <Zap size={15} />
-                          {t("Уровень", "Level")} {v.level}
-                        </span>
                       </div>
-                      <p className="investor-description">
-                        {t("Фокус игрового сценария: ", "Practice focus: ")}
-                        {pick(v.focus)}.{" "}
-                        {t(
-                          "Реплики не являются цитатами реального человека.",
-                          "Dialogue is not a quotation from the real person.",
-                        )}
-                      </p>
-                      <a
-                        className="persona-source"
-                        href={v.source}
-                        target="_blank"
-                        rel="noreferrer"
-                      >
-                        {t(
-                          "О прототипе · официальный источник",
-                          "About this person · official source",
-                        )}
-                        <ArrowUpRight size={12} />
-                      </a>
-                      <button
-                        className="button white"
-                        onClick={() =>
-                          setSelected({
-                            ...arenas.find((a) => a.id === v.arenaId),
-                            personaIds: [v.id],
-                            title: v.name,
-                            panel: [pick(v.name)],
-                            level: v.level,
-                          })
-                        }
-                      >
-                        {t("Начать диалог", "Start a conversation")}
-                        <ArrowUpRight size={16} />
-                      </button>
+                      <div className="investor-full-body">
+                        <h2>{pick(v.name)}</h2>
+                        <p>{v.role}</p>
+                        <div className="investor-meta">
+                          <span>
+                            <Globe2 size={15} />
+                            {pick(
+                              arenas.find((a) => a.id === v.arenaId)?.city || [
+                                "Международный",
+                                "International",
+                              ],
+                            )}
+                          </span>
+                          <span>
+                            <Zap size={15} />
+                            {t("Уровень", "Level")} {v.level}
+                          </span>
+                        </div>
+                        <p className="investor-description">
+                          {t("Фокус игрового сценария: ", "Practice focus: ")}
+                          {pick(v.focus)}.{" "}
+                          {t(
+                            "Реплики не являются цитатами реального человека.",
+                            "Dialogue is not a quotation from the real person.",
+                          )}
+                        </p>
+                        <a
+                          className="persona-source"
+                          href={v.source}
+                          target="_blank"
+                          rel="noreferrer"
+                        >
+                          {t(
+                            "О прототипе · официальный источник",
+                            "About this person · official source",
+                          )}
+                          <ArrowUpRight size={12} />
+                        </a>
+                        <button
+                          className="button white"
+                          onClick={() =>
+                            setSelected({
+                              ...arenas.find((a) => a.id === v.arenaId),
+                              personaIds: [v.id],
+                              title: v.name,
+                              panel: [pick(v.name)],
+                              level: v.level,
+                            })
+                          }
+                        >
+                          {t("Начать диалог", "Start a conversation")}
+                          <ArrowUpRight size={16} />
+                        </button>
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  ))}
               </div>
               <p className="simulation-note">
                 {t(

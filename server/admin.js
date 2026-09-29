@@ -1,6 +1,14 @@
 import { randomUUID } from "node:crypto";
 import { z } from "zod";
-import { readCatalog, arenaEdit, investorEdit } from "./catalog.js";
+import {
+  readCatalog,
+  arenaEdit,
+  investorEdit,
+  arenaCreate,
+  investorCreate,
+  catalogId,
+  newCatalogItem,
+} from "./catalog.js";
 const error = (status, code) => {
   throw Object.assign(new Error(code), { status });
 };
@@ -149,6 +157,64 @@ export async function handleAdmin({ req, url, user, store, body, aiReady }) {
       };
     }
   }
+  const createMatch = path.match(/^\/api\/admin\/catalog\/(arena|investor)$/);
+  if (req.method === "POST" && createMatch) {
+    const kind = createMatch[1];
+    const input = z
+      .object({
+        id: catalogId,
+        data: z.unknown(),
+        reason: z.string().trim().min(3).max(300),
+      })
+      .strict()
+      .parse(await body(req));
+    const data = (kind === "arena" ? arenaCreate : investorCreate).parse(
+      input.data,
+    );
+    return store.transaction(async () => {
+      await store.lock("admin:mutations");
+      const actor = await store.get(
+        "SELECT role,status FROM users WHERE id=?",
+        user.id,
+      );
+      if (actor?.role !== "admin" || actor.status !== "active")
+        error(403, "ADMIN_REQUIRED");
+      if (
+        await store.get(
+          "SELECT id FROM catalog WHERE kind=? AND id=?",
+          kind,
+          input.id,
+        )
+      )
+        error(409, "CATALOG_ID_EXISTS");
+      const parent =
+        kind === "investor"
+          ? await store.get(
+              "SELECT data FROM catalog WHERE kind='arena' AND id=?",
+              data.arenaId,
+            )
+          : null;
+      if (kind === "investor" && !parent) error(400, "INVALID_ARENA");
+      const item = newCatalogItem(
+        kind,
+        input.id,
+        data,
+        parent ? JSON.parse(parent.data) : null,
+      );
+      await store.run(
+        "INSERT INTO catalog(kind,id,data,revision,updated_at) VALUES(?,?,?,1,?)",
+        kind,
+        input.id,
+        JSON.stringify(item),
+        new Date().toISOString(),
+      );
+      await audit(store, user.id, "catalog.created", kind, input.id, {
+        after: item,
+        reason: input.reason,
+      });
+      return { ok: true, id: input.id, revision: 1 };
+    });
+  }
   const userMatch = path.match(/^\/api\/admin\/users\/([^/]+)$/);
   const catalogMatch = path.match(
     /^\/api\/admin\/catalog\/(arena|investor)\/([^/]+)$/,
@@ -234,6 +300,15 @@ export async function handleAdmin({ req, url, user, store, body, aiReady }) {
     if (row.revision !== envelope.revision) error(409, "STALE_ADMIN_DATA");
     if (kind === "arena" && id === "family" && !patch.enabled)
       error(409, "START_ARENA_REQUIRED");
+    if (
+      kind === "investor" &&
+      patch.arenaId &&
+      !(await store.get(
+        "SELECT id FROM catalog WHERE kind='arena' AND id=?",
+        patch.arenaId,
+      ))
+    )
+      error(400, "INVALID_ARENA");
     const before = JSON.parse(row.data),
       data = { ...before, ...patch };
     await store.run(

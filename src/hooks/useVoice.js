@@ -73,7 +73,8 @@ export default function useVoice(lang, t, onText) {
     }
   };
   const start = async () => {
-    if (active || pending) return;
+    if (active) return true;
+    if (pending) return false;
     const token = ++request.current;
     setPending(true);
     setError("");
@@ -83,7 +84,7 @@ export default function useVoice(lang, t, onText) {
       const media = await navigator.mediaDevices.getUserMedia({ audio: true });
       if (!mounted.current || request.current !== token) {
         media.getTracks().forEach((track) => track.stop());
-        return;
+        return false;
       }
       stream.current = media;
       const chunks = [];
@@ -149,6 +150,7 @@ export default function useVoice(lang, t, onText) {
             "This browser has no speech recognition. Audio is recording; you can add the transcript manually.",
           ),
         );
+      return true;
     } catch {
       stream.current?.getTracks().forEach((track) => track.stop());
       if (mounted.current) {
@@ -160,6 +162,7 @@ export default function useVoice(lang, t, onText) {
           ),
         );
       }
+      return false;
     } finally {
       if (mounted.current && request.current === token) setPending(false);
     }

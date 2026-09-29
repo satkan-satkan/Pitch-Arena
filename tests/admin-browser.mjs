@@ -120,7 +120,7 @@ try {
     await page.getByText("Ожидает API-ключ", { exact: true }).isVisible(),
   );
   mkdirSync("artifacts", { recursive: true });
-  await page.screenshot({ path: "artifacts/v5-admin-overview.png" });
+  await page.screenshot({ path: "artifacts/v11-admin-overview.png" });
   await section("Пользователи");
   await page.getByLabel("Поиск в админке", { exact: true }).fill("member@");
   await page.getByRole("button", { name: "Найти", exact: true }).click();
@@ -175,7 +175,13 @@ try {
   player.on("pageerror", (e) => errors.push(e.message));
   await player.goto(origin + "/play");
   await player
-    .getByRole("button", { name: "Арена роста — Москва, Россия", exact: true })
+    .locator(".map-regions")
+    .getByRole("button", { name: "СНГ", exact: true })
+    .click();
+  await player.getByRole("button", { name: /Москва, Россия ·/ }).click();
+  await player
+    .locator(".atlas-fund-list")
+    .getByRole("button", { name: /Арена роста/ })
     .click();
   await player
     .locator(".map-mission")
@@ -215,10 +221,10 @@ try {
     (await page.getByText("catalog.updated", { exact: true }).count()) === 2,
   );
   await page.locator(".admin-audit summary").first().click();
-  await page.screenshot({ path: "artifacts/v5-admin-audit.png" });
+  await page.screenshot({ path: "artifacts/v11-admin-audit.png" });
   await section("Обзор");
   await page.setViewportSize({ width: 390, height: 844 });
-  await page.screenshot({ path: "artifacts/v5-admin-mobile.png" });
+  await page.screenshot({ path: "artifacts/v11-admin-mobile.png" });
   check(
     "Admin overview fits mobile width",
     await page.evaluate(
@@ -237,7 +243,7 @@ try {
   );
   check("No browser runtime errors", errors.length === 0);
   writeFileSync(
-    "artifacts/v5-verification.json",
+    "artifacts/v11-admin-verification.json",
     JSON.stringify(
       {
         passed: checks.length,

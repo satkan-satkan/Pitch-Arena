@@ -35,6 +35,7 @@ import {
 } from "./practice/engine";
 import { EvidenceChecks, PracticeGoal } from "./components/PracticeFeedback";
 
+import MicrophoneCheck from "./components/MicrophoneCheck";
 import useVoice from "./hooks/useVoice";
 import { errorText } from "./services/api";
 import MentorFeedback from "./components/MentorFeedback";
@@ -95,6 +96,7 @@ export default function PitchRoom({
       initial.voiceEnabled ?? data.spokenQuestions ?? true,
     ),
     [speechError, setSpeechError] = useState("");
+  const [micTesting, setMicTesting] = useState(false);
   const [mentor, setMentor] = useState(initial.mentor || null),
     [answerMentor, setAnswerMentor] = useState(initial.answerMentor || null),
     [syncError, setSyncError] = useState(""),
@@ -296,17 +298,21 @@ export default function PitchRoom({
   const startPitch = async (withMic) => {
     if (busy || voice.pending) return;
     setBusy(true);
-    if (data.cloud) {
-      const snapshot = await cloudAction("start", {}, false);
-      if (!snapshot) {
-        setBusy(false);
-        return;
-      }
-      if (withMic) await voice.start();
+    if (withMic && !(await voice.start())) {
       setBusy(false);
       return;
     }
-    if (withMic) await voice.start();
+    if (!mounted.current) return;
+    if (data.cloud) {
+      const snapshot = await cloudAction("start", {}, false);
+      if (!snapshot) {
+        await voice.stop();
+        setBusy(false);
+        return;
+      }
+      setBusy(false);
+      return;
+    }
     if (!mounted.current) return;
     started.current = Date.now();
     deadline.current = Date.now() + limit * 1000;
@@ -843,10 +849,11 @@ export default function PitchRoom({
                   </span>
                 </div>
               </div>
+              <MicrophoneCheck t={t} onActive={setMicTesting} />
               <button
                 className="button dark full"
                 onClick={() => startPitch(true)}
-                disabled={busy || voice.pending}
+                disabled={busy || voice.pending || micTesting}
               >
                 {voice.pending
                   ? t("Ждём доступ к микрофону…", "Waiting for microphone…")
@@ -856,7 +863,7 @@ export default function PitchRoom({
               <button
                 className="ready-text-button"
                 onClick={() => startPitch(false)}
-                disabled={busy}
+                disabled={busy || micTesting}
               >
                 {t("Начать текстом", "Start with text")}
                 <ArrowRight size={14} />

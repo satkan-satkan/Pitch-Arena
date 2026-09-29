@@ -50,7 +50,7 @@ try {
   );
   mkdirSync("artifacts", { recursive: true });
   await page.screenshot({
-    path: "artifacts/v10-community-landing.png",
+    path: "artifacts/v11-community-landing.png",
     fullPage: true,
   });
   await button("Попробовать без регистрации").click();
@@ -110,7 +110,7 @@ try {
   );
   await page
     .locator(".team-selection-shell")
-    .screenshot({ path: "artifacts/v10-team-selector.png" });
+    .screenshot({ path: "artifacts/v11-team-selector.png" });
   await page.setViewportSize({ width: 390, height: 844 });
   check(
     "Team selector fits mobile width",
@@ -120,7 +120,7 @@ try {
   );
   await page
     .locator(".team-selection-shell")
-    .screenshot({ path: "artifacts/v10-team-selector-mobile.png" });
+    .screenshot({ path: "artifacts/v11-team-selector-mobile.png" });
   await page.setViewportSize({ width: 1440, height: 1100 });
   await button("Switch to English").click();
   await button("Select team: Side Project").focus();
@@ -176,7 +176,7 @@ try {
     "Opening an invitation does not join the team",
     !(await member.getByText("Orbit Studio", { exact: true }).isVisible()),
   );
-  await member.screenshot({ path: "artifacts/v10-team-invitation.png" });
+  await member.screenshot({ path: "artifacts/v11-team-invitation.png" });
   await button("Принять", member).click();
   await member.getByRole("dialog").waitFor({ state: "hidden" });
   check(
@@ -214,6 +214,21 @@ try {
     }),
     visitor = await publicContext.newPage();
   visitor.on("pageerror", (e) => errors.push(e.message));
+  await visitor.goto(f.origin);
+  await visitor
+    .locator(".startup-board")
+    .getByRole("heading", { name: "Orbit Studio", exact: true })
+    .waitFor();
+  check(
+    "Approved startup appears on the public landing board",
+    await visitor
+      .locator(".board-startup")
+      .getByText("Orbit Studio", { exact: true })
+      .isVisible(),
+  );
+  await visitor
+    .locator(".startup-board")
+    .screenshot({ path: "artifacts/v11-startup-board-published.png" });
   await visitor.goto(f.origin + "/startups");
   await visitor
     .getByRole("link", { name: "Orbit Studio", exact: true })
@@ -229,7 +244,7 @@ try {
       .isVisible(),
   );
   await visitor.screenshot({
-    path: "artifacts/v10-community-directory.png",
+    path: "artifacts/v11-community-directory.png",
     fullPage: true,
   });
   await visitor
@@ -269,7 +284,7 @@ try {
     (await f.request("/startups")).data.total === 0,
   );
   await page.screenshot({
-    path: "artifacts/v10-community-workspace.png",
+    path: "artifacts/v11-community-workspace.png",
     fullPage: true,
   });
   await visitor.emulateMedia({ reducedMotion: "reduce" });
@@ -283,7 +298,7 @@ try {
     ),
   );
   await visitor.screenshot({
-    path: "artifacts/v10-community-landing-mobile.png",
+    path: "artifacts/v11-community-landing-mobile.png",
     fullPage: true,
   });
   await button("Switch to English", visitor).click();
@@ -307,7 +322,7 @@ try {
   );
   check("No browser runtime errors", errors.length === 0);
   writeFileSync(
-    "artifacts/v10-community-verification.json",
+    "artifacts/v11-community-verification.json",
     JSON.stringify(
       { passed: checks.length, checks, errors, liveAI: false },
       null,

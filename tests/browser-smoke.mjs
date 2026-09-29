@@ -103,12 +103,15 @@ try {
     window.webkitSpeechRecognition = undefined;
   });
   await page.goto(origin + "/play");
-  await page.locator(".map-pin").first().waitFor();
+  await page.locator(".atlas-pin").first().waitFor();
   await page
-    .getByRole("button", {
-      name: "Арена Единорогов — Москва, Россия",
-      exact: true,
-    })
+    .locator(".map-regions")
+    .getByRole("button", { name: "СНГ", exact: true })
+    .click();
+  await page.getByRole("button", { name: /Москва, Россия ·/ }).click();
+  await page
+    .locator(".atlas-fund-list")
+    .getByRole("button", { name: /Арена Единорогов/ })
     .click();
   await page
     .locator(".map-mission")
@@ -132,7 +135,7 @@ try {
   await reviewPitch(weak);
   const firstCount = await answerRound(
     "Пока я об этом ничего не знаю.",
-    "v3-answer-feedback",
+    "v11-guest-answer-feedback",
   );
   check("Weak answers produce only one contextual follow-up", firstCount === 6);
   let history = await page.evaluate(() =>
@@ -208,7 +211,10 @@ try {
         .textContent()
     ).includes("Клиники теряют"),
   );
-  await page.screenshot({ path: "artifacts/v3-debrief.png", fullPage: false });
+  await page.screenshot({
+    path: "artifacts/v11-guest-debrief.png",
+    fullPage: false,
+  });
   await page
     .getByRole("button", { name: "Перейти к вопросам", exact: true })
     .click();
@@ -229,9 +235,12 @@ try {
     "Five dimension deltas rendered",
     (await page.locator(".rubric-delta").count()) === 5,
   );
-  await page.screenshot({ path: "artifacts/v3-results.png", fullPage: false });
+  await page.screenshot({
+    path: "artifacts/v11-guest-results.png",
+    fullPage: false,
+  });
   await page.locator(".practice-goal").scrollIntoViewIfNeeded();
-  await page.screenshot({ path: "artifacts/v3-next-mission.png" });
+  await page.screenshot({ path: "artifacts/v11-guest-next-mission.png" });
   const download = page.waitForEvent("download");
   await page
     .getByRole("button", { name: "Скачать диалог", exact: true })
@@ -265,7 +274,7 @@ try {
     ),
   );
   await page.screenshot({
-    path: "artifacts/v3-mobile-results.png",
+    path: "artifacts/v11-guest-mobile-results.png",
     fullPage: false,
   });
   await page
@@ -288,10 +297,13 @@ try {
     .getByRole("button", { name: "Back to the world map", exact: true })
     .click();
   await page
-    .getByRole("button", {
-      name: "Y Combinator — San Francisco, USA",
-      exact: true,
-    })
+    .locator(".map-regions")
+    .getByRole("button", { name: "Americas", exact: true })
+    .click();
+  await page.getByRole("button", { name: /San Francisco, USA ·/ }).click();
+  await page
+    .locator(".atlas-fund-list")
+    .getByRole("button", { name: /Y Combinator/ })
     .click();
   await page
     .locator(".map-mission")
@@ -340,7 +352,7 @@ try {
     ),
   );
   await page.screenshot({
-    path: "artifacts/v3-mobile-question.png",
+    path: "artifacts/v11-guest-mobile-question.png",
     fullPage: false,
   });
   await page.getByRole("button", { name: "Exit", exact: true }).click();
@@ -389,7 +401,7 @@ try {
   );
   check("No browser runtime errors", errors.length === 0);
   await writeFile(
-    "artifacts/v3-verification.json",
+    "artifacts/v11-guest-verification.json",
     JSON.stringify({ passed: checks.length, checks, errors }, null, 2) + "\n",
   );
 } finally {

@@ -1,6 +1,14 @@
 # Iskra / Искра: original guide assets
 
-**Current visual direction.** The original five images are restored in the live UI, with contextual pose transitions and motion in `src/guide/Guide.jsx`. The brief SVG-signal revision remains in Git history.
+## Current sprite prompt (v11)
+
+Generated with the built-in image generation tool, saved directly as `public/guide/iskra-majore-v11.png`. No raster postprocessing. The five frames and their transitions were visually checked in the application; reduced motion keeps the current pose static.
+
+```text
+Use case: stylized-concept. Asset type: ONE game guide character emotion sprite sheet for Pitch Arena, an adult startup pitch simulator with cinematic garage atmosphere. Original character ISKRA: an anthropomorphic unicorn who is a young wealthy venture-world insider, a slightly cheeky rich kid grown up, charismatic confident and helpful, dry ironic smile. Ivory short fur, elegant equine muzzle, one brushed champagne-gold horn, slicked-back charcoal mane, expressive normal-sized eyes, tailored charcoal blazer over black turtleneck, subtle gold chain and tasteful watch, expensive understated style. Premium editorial 3D character with tangible fabric and fur, sophisticated proportions rather than cute toy. Frame waist-up, horn and ears fully visible. Exactly FIVE equal-width cells in ONE horizontal row, NO gaps, borders or text, identical scale and head position for easy CSS sprite use. SAME character identity in all five cells. Left to right: 1 confident welcoming half-smile, 2 analytical raised eyebrow one hoof at chin, 3 attentive serious listening with folded arms, 4 reassuring open hoof gesture, 5 pleased knowing grin with small approving nod. Background flat near-black #17181b in every cell; amber rim light, neutral key light; no environment. Wide image 5:2. Each figure completely contained in its own equal-width fifth, no overlap. No human faces, no rainbow, no lavender, no pink, no big baby eyes, no chibi, no baby proportions, no plush toy, no childish cartoon, no dollar symbols, no banknotes, no cigars, no logos, no watermark. Tone: Silicon Valley startup satire and understated wealth, with personality.
+```
+
+**Current visual direction (v11).** `iskra-majore-v11.png` is a new five-cell sprite sheet: an ivory unicorn with a gold horn, dark mane, tailored charcoal blazer and understated jewellery. Generated with the built-in image tool on 2026-09-29 and integrated in `src/guide/Guide.jsx`. From left to right: welcome, thinking, listening, support, celebrate. The previous five standalone images below are historical assets.
 
 Created for Pitch Arena on 2026-09-29 with the **built-in image generation tool**, not the CLI. Original generated character; no reference to an existing mascot. Transparent PNGs are stored beside this file. No external image provider or API key is needed at runtime.
 

@@ -42,10 +42,13 @@ async function boot(p = page) {
 }
 async function openArena(p = page) {
   await p
-    .getByRole("button", {
-      name: "Арена Единорогов — Москва, Россия",
-      exact: true,
-    })
+    .locator(".map-regions")
+    .getByRole("button", { name: "СНГ", exact: true })
+    .click();
+  await p.getByRole("button", { name: /Москва, Россия ·/ }).click();
+  await p
+    .locator(".atlas-fund-list")
+    .getByRole("button", { name: /Арена Единорогов/ })
     .click();
   await p
     .locator(".map-mission")
@@ -84,7 +87,7 @@ try {
     await route.continue();
   });
   await page.goto(origin + "/play");
-  await page.locator(".map-pin").first().waitFor();
+  await page.locator(".atlas-pin").first().waitFor();
   check(
     "Pending sign-in never displays a fake account",
     (await page.locator(".account-entry").isDisabled()) &&
@@ -301,7 +304,7 @@ try {
   await page
     .getByRole("button", { name: "Вернуться на карту", exact: true })
     .click();
-  await page.screenshot({ path: "artifacts/v4-workspace.png" });
+  await page.screenshot({ path: "artifacts/v11-workspace-workspace.png" });
   const second = await browser.newContext({
     viewport: { width: 390, height: 844 },
   });
@@ -332,7 +335,9 @@ try {
   await mobile.waitForFunction(
     () => document.querySelector(".sidebar").getBoundingClientRect().right <= 0,
   );
-  await mobile.screenshot({ path: "artifacts/v4-mobile-history.png" });
+  await mobile.screenshot({
+    path: "artifacts/v11-workspace-mobile-history.png",
+  });
   await page.getByRole("button", { name: "Аккаунт", exact: true }).click();
   await page
     .getByRole("button", { name: "Выйти из аккаунта", exact: true })
@@ -387,7 +392,7 @@ try {
   check("No browser runtime errors", errors.length === 0);
   mkdirSync("artifacts", { recursive: true });
   writeFileSync(
-    "artifacts/v4-verification.json",
+    "artifacts/v11-workspace-verification.json",
     JSON.stringify(
       { passed: checks.length, checks, errors, aiLiveTested: false },
       null,
