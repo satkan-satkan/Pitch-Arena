@@ -2,6 +2,7 @@ import React, { useEffect, useId, useRef, useState } from "react";
 import { geoNaturalEarth1, geoPath, geoGraticule10 } from "d3-geo";
 import { motion } from "framer-motion";
 import { useArenaMotion } from "./motion/Motion";
+import { AnimatedMapRoutes } from "./components/ui/map-routes";
 import { regions } from "./world-catalog";
 import { feature } from "topojson-client";
 import world from "world-atlas/countries-110m.json";
@@ -201,6 +202,15 @@ export function JourneyMap({
   const activeCluster = clusters.find((c) =>
     c.items.some((a) => a.id === active.id),
   );
+  const routeOrigin = activeCluster || clusters[0];
+  const routes = routeOrigin
+    ? clusters
+        .filter((c) => c !== routeOrigin)
+        .map((c) => ({
+          start: { x: routeOrigin.p[0], y: routeOrigin.p[1] },
+          end: { x: c.p[0], y: c.p[1] },
+        }))
+    : [];
   const local =
     activeCluster?.items ||
     (region === "all"
@@ -274,6 +284,13 @@ export function JourneyMap({
               fill="#384147"
             />
           ))}
+          <AnimatedMapRoutes
+            key={`${region}:${routeOrigin?.key}`}
+            routes={routes}
+            motionEnabled={enabled}
+            pointRadius={(3 * box[2]) / 1000}
+            curveHeight={Math.min(50, box[3] * 0.18)}
+          />
         </motion.svg>
         {clusters.map((c) => {
           const current = c.items.some((a) => a.id === active.id),
@@ -292,7 +309,9 @@ export function JourneyMap({
               aria-label={`${pick(first.city)} · ${c.items.length} ${t("арен", "arenas")}`}
               aria-pressed={current}
             >
-              <span>{c.items.length > 1 ? c.items.length : first.symbol}</span>
+              <span className={enabled ? "atlas-pin-live" : ""}>
+                {c.items.length > 1 ? c.items.length : first.symbol}
+              </span>
               <strong>{pick(first.city).split(",")[0]}</strong>
             </motion.button>
           );
@@ -383,8 +402,8 @@ export function JourneyMap({
       <div className="map-footnote">
         <span>
           {t(
-            "Нажми на город, затем выбери фонд. Локации — ориентиры для тренировки.",
-            "Select a city, then a fund. Locations are practice reference points.",
+            "Нажми на город, затем выбери фонд. Линии — игровые маршруты, а не связи между фондами.",
+            "Select a city, then a fund. Lines are game routes, not relationships between funds.",
           )}
         </span>
         {active.source && (

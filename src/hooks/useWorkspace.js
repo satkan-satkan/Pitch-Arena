@@ -46,6 +46,7 @@ export default function useWorkspace() {
     account,
     setAccount,
     projects,
+    setProjects,
     history,
     setHistory,
     draft,

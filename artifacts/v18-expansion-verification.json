@@ -1,0 +1,20 @@
+{
+  "checks": [
+    "Landing removes nFactorial and exposes the real startup board",
+    "CIS selection zooms the geographic camera",
+    "City clusters reveal local funds",
+    "Europe exposes several distinct fund choices",
+    "Nearby Bay Area funds share an accessible pin",
+    "Admin can create a fund through the UI",
+    "Admin can create and link an investor",
+    "Created investor is immediately playable",
+    "New fund renders its real linked panel",
+    "Mic check creates playback, releases the device and leaves the timer stopped",
+    "Waiting for microphone does not start the account timer",
+    "Investors do not ask questions during the pitch",
+    "Reload restores the pitch without reopening the microphone",
+    "Map and board fit the mobile viewport",
+    "No browser runtime errors"
+  ],
+  "errors": []
+}

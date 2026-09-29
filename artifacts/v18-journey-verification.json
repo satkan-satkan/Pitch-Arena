@@ -1,0 +1,25 @@
+{
+  "checks": [
+    "Playable map has animated routes",
+    "Routes animate on the in-game map",
+    "Pause stops in-game routes and beacons",
+    "Region zoom remains active",
+    "Animated map still selects real funds",
+    "Animated map fits mobile",
+    "System reduced motion stops map animation",
+    "Questions stay hidden while pitching",
+    "Pitch and timer survive reload",
+    "Failed analysis keeps the transcript and phase",
+    "Lost answer response recovers without duplicating the answer",
+    "Lost completion response awards XP exactly once",
+    "Completed transcript and every answer are saved",
+    "Result opens the next unfinished arena",
+    "Next arena keeps the same project and uses its own time limit",
+    "Back to map opens the actual arena map",
+    "Progress persists after reload",
+    "Deadline ends the pitch before any questions",
+    "Account progress is isolated from guests",
+    "No browser runtime errors"
+  ],
+  "errors": []
+}

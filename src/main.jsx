@@ -59,6 +59,7 @@ import {
   panelFor,
   totalXP,
   nextArena,
+  campaign,
   medalsFor,
 } from "./game-data";
 import { JourneyMap, QuestStrip, TrophyShelf } from "./JourneyMap";
@@ -442,6 +443,11 @@ function App() {
             data: { name: data.startup, industry: profile.industry },
           });
           projectId = p.id;
+          workspace.setProjects((items) => [
+            p,
+            ...items.filter((item) => item.id !== p.id),
+          ]);
+          workspace.setActiveProjectId(p.id);
         }
         const snap = await api("/sessions", {
           method: "POST",
@@ -1597,7 +1603,26 @@ function App() {
           onClose={() => setResult(null)}
           onMap={() => {
             setResult(null);
-            go("home");
+            go("arenas");
+          }}
+          nextChallenge={campaign
+            .map((id) => arenas.find((a) => a.id === id))
+            .find(
+              (a) =>
+                a &&
+                a.enabled !== false &&
+                !history.some((h) => h.arenaId === a.id),
+            )}
+          onNext={() => {
+            const next = nextArena(history, arenas);
+            setRetry({
+              startup: result.startup,
+              ask: result.ask,
+              projectId: result.projectId,
+            });
+            setTutorial(false);
+            setResult(null);
+            setSelected(next);
           }}
           onRetry={() => {
             setRetry(result);

@@ -20,6 +20,8 @@ export default function Results({
   onClose,
   onRetry,
   onMap,
+  nextChallenge,
+  onNext,
   Modal,
   history,
   guideEnabled = true,
@@ -200,6 +202,19 @@ export default function Results({
         {t("Вернуться на карту", "Back to the world map")}
         <Globe2 size={17} />
       </button>
+      {nextChallenge && (
+        <section className="result-next-challenge">
+          <div>
+            <small>{t("СЛЕДУЮЩАЯ АРЕНА", "NEXT ARENA")}</small>
+            <strong>{t(...nextChallenge.title)}</strong>
+            <p>{t(...nextChallenge.subtitle)}</p>
+          </div>
+          <button className="button dark" onClick={onNext}>
+            {t("Продолжить путь", "Continue the journey")}{" "}
+            <ArrowUpRight size={17} />
+          </button>
+        </section>
+      )}
       <div className="modal-actions">
         <button className="button white" onClick={download}>
           <Download size={16} />

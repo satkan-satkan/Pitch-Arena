@@ -60,6 +60,7 @@
   white-space: nowrap;
 }
 .atlas-pin > span {
+  position: relative;
   display: grid;
   place-items: center;
   width: 30px;
@@ -70,6 +71,31 @@
   font-size: 11px;
   font-weight: 650;
   box-shadow: 0 3px 12px #0006;
+}
+.atlas-pin-live::after {
+  content: "";
+  position: absolute;
+  inset: -2px;
+  border: 1px solid #0ea5e9;
+  border-radius: 50%;
+  animation: atlas-beacon 2s ease-out infinite;
+  pointer-events: none;
+}
+@keyframes atlas-beacon {
+  from {
+    transform: scale(1);
+    opacity: 0.6;
+  }
+  to {
+    transform: scale(1.7);
+    opacity: 0;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .atlas-pin-live::after {
+    animation: none;
+    opacity: 0;
+  }
 }
 .atlas-pin > strong {
   font-size: 9px;
@@ -793,4 +819,39 @@
   color: #c5bda9;
   font-size: 11px;
   margin-top: 10px;
+}
+
+.result-next-challenge {
+  margin-top: 16px;
+  padding: 20px;
+  border: 1px solid #514739;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 20px;
+  background: #23211c;
+}
+.result-next-challenge > div {
+  flex: 1;
+  min-width: 180px;
+}
+.result-next-challenge small {
+  display: block;
+  color: #d4b27a;
+  font-size: 10px;
+  letter-spacing: 0.12em;
+}
+.result-next-challenge strong {
+  display: block;
+  color: #eeeae2;
+  font-size: 20px;
+  margin-top: 9px;
+}
+.result-next-challenge p {
+  color: #bbb6ad;
+  font-size: 12px;
+  line-height: 1.5;
+  margin: 8px 0 0;
 }

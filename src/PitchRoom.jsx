@@ -105,7 +105,14 @@ export default function PitchRoom({
   const [mentor, setMentor] = useState(initial.mentor || null),
     [answerMentor, setAnswerMentor] = useState(initial.answerMentor || null),
     [syncError, setSyncError] = useState(""),
+    [syncCode, setSyncCode] = useState(""),
     [saveState, setSaveState] = useState("saved");
+  const draftCache = useRef(null);
+  const reportSyncError = (error) => {
+    setSyncCode(error.message);
+    setSyncError(errorText(error, t));
+    setSaveState("error");
+  };
   const [urls] = useState(() =>
     files.map((f) => ({
       url: URL.createObjectURL(f),
@@ -158,6 +165,13 @@ export default function PitchRoom({
     setAnswerFeedback(s.answerFeedback);
     setMentor(s.mentor);
     setAnswerMentor(s.answerMentor);
+    setSlide(s.slide);
+    setVoiceEnabled(s.voiceEnabled);
+    setRemaining(
+      snapshot.deadline
+        ? Math.max(0, Math.ceil((snapshot.deadline - Date.now()) / 1000))
+        : limit,
+    );
   };
   useEffect(() => {
     if (phase === "completed") return;
@@ -179,6 +193,7 @@ export default function PitchRoom({
       startedAt: started.current,
       deadline: deadline.current,
     };
+    draftCache.current = cached;
     try {
       localStorage.setItem(data.draftKey || "pa-draft", JSON.stringify(cached));
     } catch {
@@ -199,12 +214,12 @@ export default function PitchRoom({
           if (mounted.current) {
             setSaveState("saved");
             setSyncError("");
+            setSyncCode("");
           }
         })
         .catch((error) => {
           if (mounted.current) {
-            setSaveState("error");
-            setSyncError(errorText(error, t));
+            reportSyncError(error);
           }
         });
     }, 600);
@@ -234,7 +249,7 @@ export default function PitchRoom({
       if (mounted.current && snapshot.state) applySnapshot(snapshot);
       return snapshot;
     } catch (error) {
-      if (mounted.current) setSyncError(errorText(error, t));
+      if (mounted.current) reportSyncError(error);
       return null;
     } finally {
       transition.current = false;
@@ -489,10 +504,7 @@ export default function PitchRoom({
           ? saveState === "saving"
             ? t("Сохраняем на сервере…", "Saving to server…")
             : saveState === "error"
-              ? t(
-                  "Нет соединения · текст на устройстве",
-                  "Offline · text saved on device",
-                )
+              ? t("Есть несохранённые изменения", "There are unsaved changes")
               : t("Сохранено в аккаунте", "Saved to account")
           : t(
               "Черновик сохраняется на этом устройстве",
@@ -505,18 +517,44 @@ export default function PitchRoom({
           <button
             className="button white"
             disabled={busy}
-            onClick={() =>
-              data.cloud &&
-              data.cloud
-                .save(stateRef.current)
-                .then(() => {
-                  setSyncError("");
-                  setSaveState("saved");
-                })
-                .catch((error) => setSyncError(errorText(error, t)))
-            }
+            onClick={async () => {
+              setBusy(true);
+              transition.current = true;
+              try {
+                if (
+                  data.cloud &&
+                  ["STALE_SESSION", "SESSION_CLOSED"].includes(syncCode)
+                ) {
+                  await voice.stop();
+                  const snapshot = await data.cloud.refresh();
+                  if (!mounted.current) return;
+                  if (snapshot.result) {
+                    onComplete(snapshot.result);
+                    return;
+                  }
+                  applySnapshot(snapshot);
+                } else if (data.cloud) {
+                  await data.cloud.save(stateRef.current);
+                } else {
+                  localStorage.setItem(
+                    data.draftKey || "pa-draft",
+                    JSON.stringify(draftCache.current),
+                  );
+                }
+                setSyncError("");
+                setSyncCode("");
+                setSaveState("saved");
+              } catch (error) {
+                if (mounted.current) reportSyncError(error);
+              } finally {
+                transition.current = false;
+                if (mounted.current) setBusy(false);
+              }
+            }}
           >
-            {t("Повторить сохранение", "Retry save")}
+            {["STALE_SESSION", "SESSION_CLOSED"].includes(syncCode)
+              ? t("Загрузить серверную версию", "Load server version")
+              : t("Повторить сохранение", "Retry save")}
           </button>
         </div>
       )}

@@ -3,6 +3,7 @@
 import { useRef, useState, useMemo, useId } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import DottedMap from "dotted-map";
+import { AnimatedMapRoutes } from "./map-routes";
 
 interface MapProps {
   theme?: "dark" | "light";
@@ -31,7 +32,6 @@ export function WorldMap({
   const svgRef = useRef<SVGSVGElement>(null);
   const [hoveredLocation, setHoveredLocation] = useState<string | null>(null);
   const instanceId = useId().replace(/:/g, "");
-  const gradientId = `path-gradient-${instanceId}`;
   const glowId = `glow-${instanceId}`;
 
   const map = useMemo(
@@ -56,21 +56,6 @@ export function WorldMap({
     return { x, y };
   };
 
-  const createCurvedPath = (
-    start: { x: number; y: number },
-    end: { x: number; y: number },
-  ) => {
-    const midX = (start.x + end.x) / 2;
-    const midY = Math.min(start.y, end.y) - 50;
-    return `M ${start.x} ${start.y} Q ${midX} ${midY} ${end.x} ${end.y}`;
-  };
-
-  // Calculate animation timing
-  const staggerDelay = 0.3;
-  const totalAnimationTime = dots.length * staggerDelay + animationDuration;
-  const pauseTime = 2; // Pause for 2 seconds when all paths are drawn
-  const fullCycleDuration = totalAnimationTime + pauseTime;
-
   return (
     <div
       data-world-map
@@ -93,13 +78,6 @@ export function WorldMap({
         preserveAspectRatio="xMidYMid meet"
       >
         <defs>
-          <linearGradient id={gradientId} x1="0%" y1="0%" x2="100%" y2="0%">
-            <stop offset="0%" stopColor="white" stopOpacity="0" />
-            <stop offset="5%" stopColor={lineColor} stopOpacity="1" />
-            <stop offset="95%" stopColor={lineColor} stopOpacity="1" />
-            <stop offset="100%" stopColor="white" stopOpacity="0" />
-          </linearGradient>
-
           <filter id={glowId}>
             <feMorphology operator="dilate" radius="0.5" />
             <feGaussianBlur stdDeviation="1" result="coloredBlur" />
@@ -110,76 +88,13 @@ export function WorldMap({
           </filter>
         </defs>
 
-        {dots.map((dot, i) => {
-          const startPoint = projectPoint(dot.start.lat, dot.start.lng);
-          const endPoint = projectPoint(dot.end.lat, dot.end.lng);
-
-          // Calculate keyframe times for this specific path
-          const startTime = (i * staggerDelay) / fullCycleDuration;
-          const endTime =
-            (i * staggerDelay + animationDuration) / fullCycleDuration;
-          const resetTime = totalAnimationTime / fullCycleDuration;
-
-          return (
-            <g key={`path-group-${i}`}>
-              <motion.path
-                d={createCurvedPath(startPoint, endPoint)}
-                fill="none"
-                stroke={`url(#${gradientId})`}
-                strokeWidth="1"
-                initial={{ pathLength: motionEnabled ? 0 : 1 }}
-                animate={
-                  motionEnabled && loop
-                    ? {
-                        pathLength: [0, 0, 1, 1, 0],
-                      }
-                    : {
-                        pathLength: 1,
-                      }
-                }
-                transition={
-                  !motionEnabled
-                    ? { duration: 0 }
-                    : loop
-                      ? {
-                          duration: fullCycleDuration,
-                          times: [0, startTime, endTime, resetTime, 1],
-                          ease: "easeInOut",
-                          repeat: Infinity,
-                          repeatDelay: 0,
-                        }
-                      : {
-                          duration: animationDuration,
-                          delay: i * staggerDelay,
-                          ease: "easeInOut",
-                        }
-                }
-              />
-
-              {motionEnabled && loop && (
-                <motion.circle
-                  r="4"
-                  fill={lineColor}
-                  initial={{ offsetDistance: "0%", opacity: 0 }}
-                  animate={{
-                    offsetDistance: [null, "0%", "100%", "100%", "100%"],
-                    opacity: [0, 0, 1, 0, 0],
-                  }}
-                  transition={{
-                    duration: fullCycleDuration,
-                    times: [0, startTime, endTime, resetTime, 1],
-                    ease: "easeInOut",
-                    repeat: Infinity,
-                    repeatDelay: 0,
-                  }}
-                  style={{
-                    offsetPath: `path('${createCurvedPath(startPoint, endPoint)}')`,
-                  }}
-                />
-              )}
-            </g>
-          );
-        })}
+        <AnimatedMapRoutes
+          routes={dots.map((dot) => ({
+            start: projectPoint(dot.start.lat, dot.start.lng),
+            end: projectPoint(dot.end.lat, dot.end.lng),
+          }))}
+          {...{ lineColor, motionEnabled, animationDuration, loop }}
+        />
 
         {dots.map((dot, i) => {
           const startPoint = projectPoint(dot.start.lat, dot.start.lng);

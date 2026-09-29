@@ -115,8 +115,12 @@ export function errorText(error, t) {
       "Check your input. Passwords need at least 12 characters.",
     ],
     STALE_SESSION: [
-      "Эта тренировка изменена в другой вкладке. Вернись на карту и открой сохранённую версию.",
-      "This practice changed in another tab. Return to the map and reopen the saved version.",
+      "Версия на сервере изменилась. Загрузка серверной версии заменит текст и этап в этой комнате.",
+      "The server version has changed. Loading it will replace the text and stage in this room.",
+    ],
+    SESSION_CLOSED: [
+      "Тренировка уже завершена. Загрузи сохранённый результат.",
+      "This practice is already complete. Load the saved result.",
     ],
     SESSION_BUSY: [
       "Сервер обрабатывает тренировку. Повтори через несколько секунд.",
@@ -161,6 +165,12 @@ export function sessionClient(initial) {
   return {
     get snapshot() {
       return snapshot;
+    },
+    refresh() {
+      return enqueue(async () => {
+        snapshot = await api(`/sessions/${snapshot.id}`);
+        return snapshot;
+      });
     },
     call(action, data = {}, method = "POST", extra = {}) {
       return enqueue(async () => {
