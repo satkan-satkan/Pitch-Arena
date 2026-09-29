@@ -640,3 +640,157 @@
 .guide-intro-progress button {
   color: #c6c5bd;
 }
+
+/* Real community data and scroll-safe overlays. */
+.modal,
+.pitch-room {
+  overscroll-behavior-y: contain;
+}
+.leaderboard-controls {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
+  margin: 22px 0;
+}
+.leaderboard-controls label {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: #cfccc4;
+  font-size: 12px;
+}
+.leaderboard-controls select {
+  width: auto;
+  margin: 0;
+  padding: 8px 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: #191b1d;
+  color: #ece9e1;
+}
+.leaderboard-note {
+  color: #b9b7af;
+  font-size: 12px;
+  line-height: 1.7;
+  margin-bottom: 20px;
+}
+.live-ranking {
+  padding: 0;
+  list-style: none;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  overflow: hidden;
+}
+.live-ranking li + li {
+  border-top: 1px solid var(--border);
+}
+.live-ranking button {
+  background: #191b1d;
+  color: #ece9e1;
+  width: 100%;
+  padding: 22px;
+  display: flex;
+  align-items: center;
+  text-align: left;
+  gap: 18px;
+}
+.live-ranking button:hover {
+  background: #252729;
+}
+.live-rank {
+  width: 24px;
+  flex-shrink: 0;
+  color: #d5b273;
+  font:
+    16px ui-monospace,
+    monospace;
+}
+.live-ranking-copy {
+  flex: 1;
+  min-width: 0;
+}
+.live-ranking-copy strong,
+.live-ranking-copy span,
+.live-revenue strong,
+.live-revenue small {
+  display: block;
+}
+.live-ranking-copy span,
+.live-revenue small {
+  font-size: 11px;
+  color: #bab8af;
+  margin-top: 6px;
+  overflow-wrap: anywhere;
+}
+.live-revenue {
+  text-align: right;
+}
+.notification-center {
+  width: 320px;
+  max-width: calc(100vw - 24px);
+  max-height: min(520px, calc(100dvh - 105px));
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+.notification-center p {
+  color: #b9b7af;
+}
+.notification-center ul {
+  list-style: none;
+  padding: 0;
+  margin: 14px 0;
+}
+.notification-center li {
+  margin: 8px 0;
+}
+.notification-center li button {
+  width: 100%;
+  justify-content: space-between;
+  text-align: left;
+  border: 1px solid #3a3b3b;
+}
+.notification-center small {
+  display: block;
+  color: #b9b7af;
+  margin-top: 4px;
+}
+.notification-center .unread {
+  border-left: 3px solid #d5b273;
+}
+.notification-center .read {
+  opacity: 0.75;
+}
+@media (max-width: 800px) {
+  .notification-center {
+    position: fixed;
+    top: 72px;
+    right: 12px;
+  }
+}
+@media (max-width: 600px) {
+  .topbar .notification-wrap {
+    display: block;
+  }
+  .topbar .top-avatar {
+    display: none;
+  }
+  .live-ranking button {
+    flex-wrap: wrap;
+    padding: 16px;
+    gap: 12px;
+  }
+  .live-ranking-copy {
+    flex-basis: calc(100% - 110px);
+  }
+  .live-revenue {
+    margin-left: 36px;
+    text-align: left;
+    flex: 1;
+  }
+}
+.level-remaining {
+  color: #c5bda9;
+  font-size: 11px;
+  margin-top: 10px;
+}

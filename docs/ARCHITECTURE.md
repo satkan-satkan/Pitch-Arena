@@ -35,6 +35,8 @@ flowchart TD
 | `src/components/AccountPanel.jsx` | Вход, регистрация, выбор проектов, явный импорт старой истории |
 | `src/guide/` | Необязательное знакомство, локальный прогресс, реплики и эмоции по состоянию UI; не управляет оценкой |
 | `src/components/BackgroundMusic.jsx` | Музыка, громкость, пауза в комнате и скрытой вкладке |
+| `src/browser/scroll-lock.js`, `src/hooks/useBodyScrollLock.js` | Общая блокировка прокрутки: каждый оверлей владеет своим токеном, последний закрытый оверлей восстанавливает исходный стиль |
+| `src/components/StartupLeaderboard.jsx`, `Notifications.jsx` | Рейтинг публичных снимков и приватная сводка приглашений/модерации |
 | `src/components/Results.jsx`, `PracticeFeedback.jsx`, `MentorFeedback.jsx` | История, цитаты, рубрика, ИИ-советы, сравнение и экспорт |
 | `server/app.js` | HTTP-маршруты, права владельца, состояние, награды и файлы |
 | `server/auth.js`, `schemas.js`, `postgres.js` | Вход, проверка контрактов, SQL и схема БД |

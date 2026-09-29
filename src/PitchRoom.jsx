@@ -37,6 +37,7 @@ import { EvidenceChecks, PracticeGoal } from "./components/PracticeFeedback";
 
 import MicrophoneCheck from "./components/MicrophoneCheck";
 import useVoice from "./hooks/useVoice";
+import useBodyScrollLock from "./hooks/useBodyScrollLock";
 import { errorText } from "./services/api";
 import MentorFeedback from "./components/MentorFeedback";
 import { GuideMessage } from "./guide/Guide";
@@ -270,13 +271,11 @@ export default function PitchRoom({
     transition.current = false;
   };
   endPitchRef.current = endPitch;
+  useBodyScrollLock();
   useEffect(() => {
     mounted.current = true;
-    const previous = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
     return () => {
       mounted.current = false;
-      document.body.style.overflow = previous;
       urls.forEach((f) => URL.revokeObjectURL(f.url));
       window.speechSynthesis?.cancel();
     };

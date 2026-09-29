@@ -296,3 +296,92 @@ test("Concurrent listing updates have one winner; rejection feedback stays priva
   assert.equal((await mod(6, "hide")).status, 200);
   assert.equal((await f.request(`/startups/${id}`)).status, 404);
 });
+
+test("Revenue ranking uses only approved snapshots, numeric ordering and one currency", async (t) => {
+  const f = await setup(t),
+    owner = await f.register("ranking@example.com"),
+    admin = await f.register("ranking-admin@example.com", true);
+  const add = async (name, monthlyRevenue, currency, publish = true) => {
+    const r = await f.request("/workspace/startups", {
+      method: "POST",
+      cookie: owner.cookie,
+      data: {
+        teamId: null,
+        data: { ...listing, name, monthlyRevenue, currency },
+      },
+    });
+    assert.equal(r.status, 200);
+    const id = r.data.id;
+    if (publish) {
+      assert.equal(
+        (
+          await f.request(`/workspace/startups/${id}/submit`, {
+            method: "POST",
+            cookie: owner.cookie,
+            data: { revision: 1 },
+          })
+        ).status,
+        200,
+      );
+      assert.equal(
+        (
+          await f.request(`/admin/startups/${id}`, {
+            method: "PUT",
+            cookie: admin.cookie,
+            data: {
+              revision: 2,
+              action: "publish",
+              reason: "Reviewed public startup",
+            },
+          })
+        ).status,
+        200,
+      );
+    }
+    return id;
+  };
+  await add("Undisclosed", null, "USD");
+  await add("Zero revenue", 0, "USD");
+  const small = await add("Small public", 9, "USD");
+  await add("Larger public", 100, "USD");
+  await add("Euro startup", 9999, "EUR");
+  await add("Private draft", 999999, "USD", false);
+  const edited = await f.request(`/workspace/startups/${small}`, {
+    method: "PUT",
+    cookie: owner.cookie,
+    data: {
+      revision: 3,
+      data: {
+        ...listing,
+        name: "PRIVATE EDIT",
+        monthlyRevenue: 999999,
+        currency: "USD",
+      },
+    },
+  });
+  assert.equal(edited.status, 200);
+  let r = await f.request("/startups?sort=revenue&currency=USD");
+  assert.equal(r.status, 200);
+  assert.deepEqual(
+    r.data.items.map((i) => i.name),
+    ["Larger public", "Small public", "Zero revenue"],
+  );
+  assert.equal(r.data.total, 3);
+  assert.ok(!JSON.stringify(r.data).includes("ranking@example.com"));
+  assert.deepEqual(
+    (await f.request("/startups?sort=revenue&currency=EUR")).data.items.map(
+      (i) => i.name,
+    ),
+    ["Euro startup"],
+  );
+  assert.equal(
+    (await f.request("/startups?sort=revenue&currency=BTC")).status,
+    400,
+  );
+  assert.equal((await f.request("/startups?sort=unsafe")).status, 400);
+  assert.equal(
+    (await f.request("/startups?sort=revenue&currency=USD&page=1")).data.items
+      .length,
+    0,
+  );
+});

@@ -41,6 +41,10 @@ export function errorText(error, t) {
       "This ID already exists. Choose another.",
     ],
     INVALID_ARENA: ["Выбери существующую арену.", "Choose an existing arena."],
+    INVALID_FILTER: [
+      "Проверь валюту и порядок сортировки.",
+      "Check the currency and sort order.",
+    ],
     NOT_FOUND: [
       "Карточка недоступна или ещё не опубликована.",
       "This listing is unavailable or not published yet.",

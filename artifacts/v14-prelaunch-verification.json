@@ -1,0 +1,28 @@
+{
+  "checks": [
+    "Notifications show an actual invitation and moderation result",
+    "Read notification state survives reload",
+    "Notification opens the working team workspace",
+    "Leaderboard shows a published startup rather than demo XP",
+    "Ranking opens the public startup detail",
+    "Page unlocks after all overlays close",
+    "Wheel scroll works after changing tabs",
+    "Room keeps the page locked after its confirmation closes",
+    "Page unlocks after all overlays close",
+    "Wheel scroll works after changing tabs",
+    "Комната основателя: guide closes without leaving a scroll lock",
+    "Карта и арены: guide closes without leaving a scroll lock",
+    "Инвесторы: guide closes without leaving a scroll lock",
+    "Мои выступления: guide closes without leaving a scroll lock",
+    "Рейтинг стартапов: guide closes without leaving a scroll lock",
+    "Стартапы и команды: guide closes without leaving a scroll lock",
+    "Mobile menu retains its own scroll lock after closing a dialog",
+    "Mobile navigation unlocks the content",
+    "Resizing from an open mobile drawer releases the page",
+    "Leaderboard fits mobile width",
+    "Leaderboard supports English",
+    "Leaderboard recovers after a failed request",
+    "No browser runtime errors"
+  ],
+  "errors": []
+}

@@ -111,25 +111,41 @@ export async function handleCommunity({ req, url, user, store, body }) {
       .toLowerCase()
       .slice(0, 100);
     const category = url.searchParams.get("category") || "";
+    const sort = url.searchParams.get("sort") || "recent";
+    const currency = url.searchParams.get("currency") || "USD";
+    if (
+      !["recent", "revenue"].includes(sort) ||
+      !["USD", "KZT", "RUB", "EUR"].includes(currency)
+    )
+      fail(400, "INVALID_FILTER");
     const page = Math.max(
       0,
       Math.min(100000, Math.floor(Number(url.searchParams.get("page")) || 0)),
     );
     // Search only the approved snapshot; drafts never participate in public results.
     const where =
-      "WHERE l.published_data IS NOT NULL AND (?='' OR CAST(l.published_data AS jsonb)->>'category'=?) AND position(? in lower((CAST(l.published_data AS jsonb)->>'name') || ' ' || (CAST(l.published_data AS jsonb)->>'tagline'))) > 0";
-    const rows = await store.all(
-      `${joined} ${where} ORDER BY l.published_at DESC,s.id LIMIT 24 OFFSET ?`,
+      "WHERE l.published_data IS NOT NULL AND (?='' OR CAST(l.published_data AS jsonb)->>'category'=?) AND position(? in lower((CAST(l.published_data AS jsonb)->>'name') || ' ' || (CAST(l.published_data AS jsonb)->>'tagline'))) > 0" +
+      (sort === "revenue"
+        ? " AND CAST(l.published_data AS jsonb)->>'monthlyRevenue' IS NOT NULL AND CAST(l.published_data AS jsonb)->>'currency'=?"
+        : "");
+    const params = [
       category,
       category,
       q,
+      ...(sort === "revenue" ? [currency] : []),
+    ];
+    const order =
+      sort === "revenue"
+        ? "CAST(CAST(l.published_data AS jsonb)->>'monthlyRevenue' AS numeric) DESC,l.published_at DESC,s.id"
+        : "l.published_at DESC,s.id";
+    const rows = await store.all(
+      `${joined} ${where} ORDER BY ${order} LIMIT 24 OFFSET ?`,
+      ...params,
       page * 24,
     );
     const count = await store.get(
       `SELECT count(*) AS n FROM startup_listings l ${where}`,
-      category,
-      category,
-      q,
+      ...params,
     );
     return {
       items: rows.map(publicView),

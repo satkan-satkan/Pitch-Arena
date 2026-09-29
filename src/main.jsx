@@ -4,7 +4,6 @@ import {
   ArrowUpRight,
   ArrowRight,
   ArrowLeft,
-  Bell,
   BookOpen,
   Check,
   CheckCircle2,
@@ -75,6 +74,9 @@ import { regions } from "./world-catalog";
 import Landing from "./components/Landing";
 import { PublicDirectory, FounderWorkspace } from "./components/Community";
 import useWorkspace from "./hooks/useWorkspace";
+import useBodyScrollLock from "./hooks/useBodyScrollLock";
+import StartupLeaderboard from "./components/StartupLeaderboard";
+import Notifications from "./components/Notifications";
 import { api, hydrateSession, sessionClient, errorText } from "./services/api";
 
 import { summarizeScores } from "./practice/engine";
@@ -84,48 +86,6 @@ import "./studio.css";
 import "./expansion.css";
 import { ArenaMotionProvider, MotionControls } from "./motion/Motion";
 
-const seedRanking = [
-  {
-    name: "Lumio",
-    description: "AI workspace",
-    initial: "L",
-    color: "purple",
-    score: 984,
-    change: 3,
-  },
-  {
-    name: "Rootly",
-    description: "Climate tech",
-    initial: "r",
-    color: "green",
-    score: 956,
-    change: 1,
-  },
-  {
-    name: "Finch",
-    description: "Personal finance",
-    initial: "f",
-    color: "orange",
-    score: 932,
-    change: 2,
-  },
-  {
-    name: "Orbit",
-    description: "Future of work",
-    initial: "o",
-    color: "blue",
-    score: 908,
-    change: 5,
-  },
-  {
-    name: "Nectar",
-    description: "Health tech",
-    initial: "n",
-    color: "pink",
-    score: 885,
-    change: 2,
-  },
-];
 const read = (key, fallback) => {
   try {
     return JSON.parse(localStorage.getItem(key)) ?? fallback;
@@ -306,6 +266,15 @@ function App() {
   const pick = (a) => a[lang === "ru" ? 0 : 1];
   const [page, setPage] = useState("home");
   const [mobile, setMobile] = useState(false);
+  useBodyScrollLock(mobile && route === "/play");
+  useEffect(() => {
+    const media = window.matchMedia("(max-width: 800px)");
+    const sync = () => {
+      if (!media.matches) setMobile(false);
+    };
+    media.addEventListener("change", sync);
+    return () => media.removeEventListener("change", sync);
+  }, []);
   const [region, setRegion] = useState("all");
   const [difficulty, setDifficulty] = useState("all");
   const [search, setSearch] = useState("");
@@ -386,7 +355,6 @@ function App() {
   const [session, setSession] = useState(null);
   const [result, setResult] = useState(null);
   const [help, setHelp] = useState(false);
-  const [notifications, setNotifications] = useState(false);
   const [toast, setToast] = useState("");
   useEffect(() => {
     localStorage.setItem("pa-lang", JSON.stringify(lang));
@@ -412,7 +380,6 @@ function App() {
         setSelected(null);
         setRetry(null);
         setHelp(false);
-        setNotifications(false);
         setMobile(false);
       }
     };
@@ -748,7 +715,6 @@ function App() {
                 )}
               </span>
             </div>
-            <ChevronDown size={14} />
           </div>
           <div className="nav-label">
             {t("РАБОЧЕЕ ПРОСТРАНСТВО", "WORKSPACE")}
@@ -880,41 +846,13 @@ function App() {
               {lang.toUpperCase()}
               <ChevronDown size={12} />
             </button>
-            <div className="notification-wrap">
-              <button
-                className="icon-button notification-button"
-                onClick={() => setNotifications(!notifications)}
-                aria-label={t("Уведомления", "Notifications")}
-              >
-                <Bell size={19} />
-                <i />
-              </button>
-              {notifications && (
-                <div className="notification-pop">
-                  <strong>
-                    {t(
-                      "Всё готово к первому питчу",
-                      "Ready for your first pitch",
-                    )}
-                  </strong>
-                  <p>
-                    {t(
-                      "Выбери арену и сделай первый шаг. Здесь можно ошибаться и пробовать снова.",
-                      "Pick an arena and take the first step. This is a place to experiment and try again.",
-                    )}
-                  </p>
-                  <button
-                    onClick={() => {
-                      setNotifications(false);
-                      setSelected(arenas[0]);
-                    }}
-                  >
-                    {t("Начать тренировку", "Start practicing")}
-                    <ArrowRight size={14} />
-                  </button>
-                </div>
-              )}
-            </div>
+            <Notifications
+              key={workspace.account?.id || "guest"}
+              t={t}
+              account={workspace.account}
+              onWorkspace={() => go("community")}
+              onSignIn={() => setAccountOpen(true)}
+            />
             {workspace.account && (
               <button
                 className="user-avatar top-avatar"
@@ -1102,11 +1040,27 @@ function App() {
                       {(Math.floor(totalXP(history) / 500) + 1) * 500} XP
                     </span>
                   </div>
-                  <div className="xp-track">
+                  <div
+                    className="xp-track"
+                    role="progressbar"
+                    aria-label={t(
+                      "Прогресс до следующего уровня",
+                      "Progress to the next level",
+                    )}
+                    aria-valuemin={0}
+                    aria-valuemax={500}
+                    aria-valuenow={totalXP(history) % 500}
+                  >
                     <span
                       style={{ width: `${(totalXP(history) % 500) / 5}%` }}
                     />
                   </div>
+                  <p className="level-remaining">
+                    {t(
+                      `До следующего уровня: ${500 - (totalXP(history) % 500)} XP`,
+                      `${500 - (totalXP(history) % 500)} XP to the next level`,
+                    )}
+                  </p>
                   <div className="progress-divider" />
                   <div className="progress-stat">
                     <span>
@@ -1126,9 +1080,9 @@ function App() {
                   </div>
                   <button
                     className="progress-link"
-                    onClick={() => go("profile")}
+                    onClick={() => go("history")}
                   >
-                    {t("Посмотреть мой профиль", "View my profile")}
+                    {t("История моего прогресса", "My progress history")}
                     <ArrowRight size={14} />
                   </button>
                 </div>
@@ -1559,92 +1513,11 @@ function App() {
             </>
           )}
           {page === "leaderboard" && (
-            <>
-              <PageTitle
-                eyebrow={t(
-                  "СООБЩЕСТВО БУДУЩИХ ЕДИНОРОГОВ",
-                  "A COMMUNITY OF FUTURE UNICORNS",
-                )}
-                title={t("Большие идеи наверху", "Big ideas rise to the top")}
-                subtitle={t(
-                  "Пример будущего рейтинга сообщества. Личные результаты находятся в разделе «Мои выступления».",
-                  "A preview of the community leaderboard. Your personal results are in My pitches.",
-                )}
-              />
-              <div className="leaderboard-banner">
-                <div>
-                  <div className="hero-pill">
-                    <Sparkles size={13} />
-                    {t(
-                      "КАЖДЫЙ МОЖЕТ СТАТЬ ПЕРВЫМ",
-                      "EVERY FOUNDER STARTS SOMEWHERE",
-                    )}
-                  </div>
-                  <h2>
-                    {t(
-                      "Следующий единорог — твой?",
-                      "Is yours the next unicorn?",
-                    )}
-                  </h2>
-                  <p>
-                    {t(
-                      "Репетируй, набирай опыт и улучшай свой питч.",
-                      "Practice, earn experience, and make every pitch better.",
-                    )}
-                  </p>
-                </div>
-                <Trophy size={94} strokeWidth={1} />
-              </div>
-              <div className="leaderboard-table">
-                <div className="leaderboard-table-heading">
-                  <h3>{t("Демонстрационный рейтинг", "Demo leaderboard")}</h3>
-                  <span className="week-badge">
-                    {t("Пример данных", "Sample data")}
-                  </span>
-                </div>
-                {seedRanking.map((r, i) => (
-                  <div className="ranking-row" key={r.name}>
-                    <span className={`rank rank-${i}`}>
-                      {i === 0 ? (
-                        <Trophy size={18} />
-                      ) : (
-                        String(i + 1).padStart(2, "0")
-                      )}
-                    </span>
-                    <span className={`startup-icon ${r.color}`}>
-                      {r.initial}
-                    </span>
-                    <div>
-                      <strong>{r.name}</strong>
-                      <span>{r.description}</span>
-                    </div>
-                    <strong className="rank-score">
-                      {r.score}
-                      <span>XP</span>
-                    </strong>
-                    <span className="rank-change">↗ {r.change}</span>
-                  </div>
-                ))}
-                <div className="ranking-row your-ranking">
-                  <span className="rank">—</span>
-                  <span className="startup-icon purple">
-                    {profile.startup.slice(0, 1)}
-                  </span>
-                  <div>
-                    <strong>
-                      {profile.startup}
-                      <span className="you-badge">{t("Это ты", "You")}</span>
-                    </strong>
-                    <span>{t("Локальный прогресс", "Local progress")}</span>
-                  </div>
-                  <strong className="rank-score">
-                    {totalXP(history)}
-                    <span>XP</span>
-                  </strong>
-                  <Rocket size={19} />
-                </div>
-              </div>
-            </>
+            <StartupLeaderboard
+              t={t}
+              onOpen={(id) => navigate(`/startups/${id}`)}
+              onCreate={() => go("community")}
+            />
           )}
           {page === "profile" && (
             <>
@@ -1894,18 +1767,26 @@ function ArenaCard({ arena: a, t, pick, onClick }) {
     </button>
   );
 }
+const modalStack = [];
 function Modal({ children, onClose, label, wide = false }) {
   const ref = useRef();
+  const closeRef = useRef(onClose);
+  closeRef.current = onClose;
+  useBodyScrollLock();
   useEffect(() => {
     const previous = document.activeElement;
-    const previousOverflow = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
+    const element = ref.current;
+    modalStack.push(element);
     ref.current?.focus();
     const key = (e) => {
-      if (e.key === "Escape") onClose();
+      if (modalStack.at(-1) !== element) return;
+      if (e.key === "Escape") {
+        e.stopPropagation();
+        closeRef.current();
+      }
       if (e.key === "Tab") {
         const items = ref.current?.querySelectorAll(
-          'button, input, select, textarea, [tabindex="0"]',
+          'button:not(:disabled), input:not(:disabled), select:not(:disabled), textarea:not(:disabled), a[href], [tabindex="0"]',
         );
         if (!items?.length) return;
         const first = items[0],
@@ -1921,9 +1802,13 @@ function Modal({ children, onClose, label, wide = false }) {
     };
     document.addEventListener("keydown", key);
     return () => {
-      document.body.style.overflow = previousOverflow;
+      const wasTop = modalStack.at(-1) === element;
+      modalStack.splice(modalStack.indexOf(element), 1);
       document.removeEventListener("keydown", key);
-      previous?.focus();
+      if (wasTop) {
+        const target = modalStack.at(-1) || previous;
+        if (target?.isConnected) target.focus({ preventScroll: true });
+      }
     };
   }, []);
   return (
