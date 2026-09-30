@@ -1,6 +1,6 @@
 .game-room.phase-qa .room-content {
-  grid-template-columns: minmax(0, 1fr) 410px;
-  max-width: 1440px;
+  grid-template-columns: minmax(0, 1fr) 320px;
+  max-width: 1280px;
   align-items: start;
 }
 .phase-qa .room-stage {
@@ -118,7 +118,7 @@
   position: relative;
   z-index: 3;
   grid-column: 1 / -1;
-  margin: 0 14px 14px;
+  margin: 20px 14px 14px;
   padding: 16px 18px 12px;
   border: 1px solid #867456;
   border-radius: 12px;
@@ -254,7 +254,7 @@
     height: 135px;
   }
   .novel-dialogue {
-    margin: 0 10px 10px;
+    margin: 20px 10px 10px;
     padding: 17px 16px 12px;
   }
   .novel-question {
@@ -315,86 +315,4 @@
   mask-size: contain;
   mask-repeat: no-repeat;
   mask-position: center bottom;
-}
-
-/* Q&A lives beside the deck, never above its pixels. */
-.novel-compact {
-  margin-top: 12px;
-  grid-template-columns: minmax(0, 1fr) 76px;
-  grid-template-rows: auto auto auto;
-  border-radius: 12px;
-  box-shadow: none;
-}
-.novel-compact .novel-scene-heading,
-.novel-compact .novel-cast {
-  display: none;
-}
-.novel-compact .novel-character {
-  grid-row: 1;
-  width: 66px;
-  height: 88px;
-  margin-right: 8px;
-}
-.novel-compact .novel-dialogue {
-  display: contents;
-}
-.novel-compact .novel-speaker {
-  grid-column: 1;
-  grid-row: 1;
-  padding: 12px 0 10px 14px;
-  gap: 8px;
-}
-.novel-compact .novel-speaker h2 {
-  font-size: 17px;
-}
-.novel-compact .novel-speaker > div > span {
-  font-size: 8px;
-  letter-spacing: 1px;
-}
-.novel-compact .novel-speaker small {
-  font-size: 10px;
-}
-.novel-compact .novel-audio {
-  width: 30px;
-  height: 30px;
-}
-.novel-compact .novel-question {
-  grid-column: 1 / -1;
-  margin: 0;
-  padding: 10px 14px 12px;
-  font-size: 14px;
-  line-height: 1.55;
-}
-.novel-compact footer {
-  grid-column: 1 / -1;
-  margin: 0 14px 10px;
-  padding-top: 7px;
-  gap: 6px;
-}
-.novel-compact footer > span:first-child {
-  font-size: 9px;
-}
-.game-room.phase-qa .game-conversation {
-  padding: 16px;
-}
-.game-room.phase-qa .conversation-heading h3 {
-  margin: 0;
-}
-.game-room.phase-qa .question-progress {
-  margin-top: 12px;
-}
-.game-room.phase-qa .answer-header {
-  margin-top: 16px;
-}
-.game-room.phase-qa #pitch-answer {
-  min-height: 90px;
-  height: 90px;
-}
-.game-room.phase-qa .game-conversation > .coach-tip {
-  display: none;
-}
-@media (max-width: 1050px) {
-  .game-room.phase-qa .room-content {
-    grid-template-columns: minmax(0, 1fr);
-  }
 }

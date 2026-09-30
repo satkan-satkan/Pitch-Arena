@@ -594,153 +594,170 @@ export default function PitchRoom({
       </div>
       <div className="room-content">
         <section className="room-stage">
-          <div className="stage-top">
-            <div>
-              <span className="eyebrow">
-                {stagePhase
-                  ? t("СЦЕНА ТВОЯ", "THE STAGE IS YOURS")
-                  : t("ПИТЧ ЗАВЕРШЁН", "PITCH COMPLETE")}
-              </span>
-              <h2>{startup}</h2>
-            </div>
-            {stagePhase ? (
-              <div className={`countdown ${remaining <= 15 ? "urgent" : ""}`}>
-                <Clock3 size={19} />
-                <strong data-testid="pitch-countdown">
-                  {formatTime(remaining)}
-                </strong>
-                <span>
-                  {phase === "ready"
-                    ? t("на твою историю", "to tell your story")
-                    : t("осталось", "remaining")}
-                </span>
-              </div>
-            ) : (
-              <span className="funding-ask">
-                ${ask.toLocaleString()}
-                <small>{t("инвестиционный запрос", "funding ask")}</small>
-              </span>
-            )}
-          </div>
-          <div className="presentation">
-            {phase !== "qa" && <CameraPreview t={t} />}
-            {urls.length ? (
-              urls[slide].type === "application/pdf" ? (
-                <iframe
-                  title={t("Презентация", "Pitch deck")}
-                  src={urls[slide].url}
-                />
-              ) : (
-                <img
-                  src={urls[slide].url}
-                  alt={`${t("Слайд", "Slide")} ${slide + 1}`}
-                />
-              )
-            ) : (
-              <div className="demo-slide">
-                <div className="demo-slide-label">
-                  {String(slide + 1).padStart(2, "0")} / 05{" "}
-                  <span>YOUR NEXT BIG THING</span>
-                </div>
-                <div className="slide-spark">✳</div>
-                <h1>
-                  {
-                    [
-                      startup,
-                      t(
-                        "Проблема.\nИ твоё решение.",
-                        "The problem.\nYour solution.",
-                      ),
-                      t("Рынок ждёт.", "The market is waiting."),
-                      t(
-                        "От идеи\nк первым клиентам.",
-                        "From an idea\nto your first customers.",
-                      ),
-                      t(
-                        "Создадим будущее.\nВместе.",
-                        "Let’s build the future.\nTogether.",
-                      ),
-                    ][slide]
-                  }
-                </h1>
-                <p>
-                  {
-                    [
-                      t(
-                        "Две минуты могут стать началом большой истории.",
-                        "A few minutes can be the start of a great story.",
-                      ),
-                      t(
-                        "Кому ты помогаешь и что меняешь?",
-                        "Who do you help, and what do you change?",
-                      ),
-                      t(
-                        "Кто твой клиент? Почему сейчас?",
-                        "Who is your customer? Why now?",
-                      ),
-                      t(
-                        "Расскажи о бизнес-модели и росте.",
-                        "Tell us about your business model and growth.",
-                      ),
-                      t(
-                        `Раунд: $${ask.toLocaleString()} · Твой следующий большой шаг`,
-                        `Raising $${ask.toLocaleString()} · Your next big step`,
-                      ),
-                    ][slide]
-                  }
-                </p>
-                <div className="demo-slide-bottom">
-                  {startup}
-                  <ArrowUpRight size={25} />
-                </div>
-              </div>
-            )}
-            {phase === "pitch" && (
-              <div className="stage-time-track">
-                <span style={{ width: `${(remaining / limit) * 100}%` }} />
-              </div>
-            )}
-          </div>
-          <div className="slide-controls">
-            <span>
-              <FileText size={14} />
-              {urls.length
-                ? urls[slide].name
-                : t("Тренировочная презентация", "Practice deck")}
-            </span>
-            {urls[slide]?.type === "application/pdf" ? (
-              <small>
-                {t(
-                  "Страницы листаются внутри PDF",
-                  "Scroll inside the PDF to change pages",
-                )}
-              </small>
-            ) : (
-              <div>
-                <button
-                  className="icon-button"
-                  disabled={slide === 0}
-                  onClick={() => setSlide((s) => s - 1)}
-                  aria-label={t("Предыдущий слайд", "Previous slide")}
-                >
-                  <ChevronLeft size={18} />
-                </button>
-                <span>
-                  {slide + 1} / {urls.length || 5}
-                </span>
-                <button
-                  className="icon-button"
-                  disabled={slide === (urls.length || 5) - 1}
-                  onClick={() => setSlide((s) => s + 1)}
-                  aria-label={t("Следующий слайд", "Next slide")}
-                >
-                  <ChevronRight size={18} />
-                </button>
-              </div>
-            )}
-          </div>
-          {phase !== "qa" && (
+          {phase === "qa" ? (
+            <InvestorDialogue
+              key={`${step}-${current.id || pick(current.name)}`}
+              person={current}
+              panel={panel}
+              question={questions[step]}
+              step={step}
+              total={questions.length}
+              arena={arena}
+              startup={startup}
+              answered={Boolean(answerFeedback)}
+              t={t}
+              pick={pick}
+              onSpeak={() => speak(questions[step].text)}
+            />
+          ) : (
             <>
+              <div className="stage-top">
+                <div>
+                  <span className="eyebrow">
+                    {stagePhase
+                      ? t("СЦЕНА ТВОЯ", "THE STAGE IS YOURS")
+                      : t("ПИТЧ ЗАВЕРШЁН", "PITCH COMPLETE")}
+                  </span>
+                  <h2>{startup}</h2>
+                </div>
+                {stagePhase ? (
+                  <div
+                    className={`countdown ${remaining <= 15 ? "urgent" : ""}`}
+                  >
+                    <Clock3 size={19} />
+                    <strong data-testid="pitch-countdown">
+                      {formatTime(remaining)}
+                    </strong>
+                    <span>
+                      {phase === "ready"
+                        ? t("на твою историю", "to tell your story")
+                        : t("осталось", "remaining")}
+                    </span>
+                  </div>
+                ) : (
+                  <span className="funding-ask">
+                    ${ask.toLocaleString()}
+                    <small>{t("инвестиционный запрос", "funding ask")}</small>
+                  </span>
+                )}
+              </div>
+              <div className="presentation">
+                <CameraPreview t={t} />
+                {urls.length ? (
+                  urls[slide].type === "application/pdf" ? (
+                    <iframe
+                      title={t("Презентация", "Pitch deck")}
+                      src={urls[slide].url}
+                    />
+                  ) : (
+                    <img
+                      src={urls[slide].url}
+                      alt={`${t("Слайд", "Slide")} ${slide + 1}`}
+                    />
+                  )
+                ) : (
+                  <div className="demo-slide">
+                    <div className="demo-slide-label">
+                      {String(slide + 1).padStart(2, "0")} / 05{" "}
+                      <span>YOUR NEXT BIG THING</span>
+                    </div>
+                    <div className="slide-spark">✳</div>
+                    <h1>
+                      {
+                        [
+                          startup,
+                          t(
+                            "Проблема.\nИ твоё решение.",
+                            "The problem.\nYour solution.",
+                          ),
+                          t("Рынок ждёт.", "The market is waiting."),
+                          t(
+                            "От идеи\nк первым клиентам.",
+                            "From an idea\nto your first customers.",
+                          ),
+                          t(
+                            "Создадим будущее.\nВместе.",
+                            "Let’s build the future.\nTogether.",
+                          ),
+                        ][slide]
+                      }
+                    </h1>
+                    <p>
+                      {
+                        [
+                          t(
+                            "Две минуты могут стать началом большой истории.",
+                            "A few minutes can be the start of a great story.",
+                          ),
+                          t(
+                            "Кому ты помогаешь и что меняешь?",
+                            "Who do you help, and what do you change?",
+                          ),
+                          t(
+                            "Кто твой клиент? Почему сейчас?",
+                            "Who is your customer? Why now?",
+                          ),
+                          t(
+                            "Расскажи о бизнес-модели и росте.",
+                            "Tell us about your business model and growth.",
+                          ),
+                          t(
+                            `Раунд: $${ask.toLocaleString()} · Твой следующий большой шаг`,
+                            `Raising $${ask.toLocaleString()} · Your next big step`,
+                          ),
+                        ][slide]
+                      }
+                    </p>
+                    <div className="demo-slide-bottom">
+                      {startup}
+                      <ArrowUpRight size={25} />
+                    </div>
+                  </div>
+                )}
+                {phase === "pitch" && (
+                  <div className="stage-time-track">
+                    <span style={{ width: `${(remaining / limit) * 100}%` }} />
+                  </div>
+                )}
+              </div>
+              <div className="slide-controls">
+                <span>
+                  <FileText size={14} />
+                  {urls.length
+                    ? urls[slide].name
+                    : t("Тренировочная презентация", "Practice deck")}
+                </span>
+                {urls[slide]?.type === "application/pdf" ? (
+                  <small>
+                    {t(
+                      "Страницы листаются внутри PDF",
+                      "Scroll inside the PDF to change pages",
+                    )}
+                  </small>
+                ) : (
+                  <div>
+                    <button
+                      className="icon-button"
+                      disabled={slide === 0}
+                      onClick={() => setSlide((s) => s - 1)}
+                      aria-label={t("Предыдущий слайд", "Previous slide")}
+                    >
+                      <ChevronLeft size={18} />
+                    </button>
+                    <span>
+                      {slide + 1} / {urls.length || 5}
+                    </span>
+                    <button
+                      className="icon-button"
+                      disabled={slide === (urls.length || 5) - 1}
+                      onClick={() => setSlide((s) => s + 1)}
+                      aria-label={t("Следующий слайд", "Next slide")}
+                    >
+                      <ChevronRight size={18} />
+                    </button>
+                  </div>
+                )}
+              </div>
               <div className="panel-label">
                 <Headphones size={15} />
                 {phase === "pitch"
@@ -1164,21 +1181,6 @@ export default function PitchRoom({
                   <span key={i} className={i <= step ? "done" : ""} />
                 ))}
               </div>
-              <InvestorDialogue
-                compact
-                key={`${step}-${current.id || pick(current.name)}`}
-                person={current}
-                panel={panel}
-                question={questions[step]}
-                step={step}
-                total={questions.length}
-                arena={arena}
-                startup={startup}
-                answered={Boolean(answerFeedback)}
-                t={t}
-                pick={pick}
-                onSpeak={() => speak(questions[step].text)}
-              />
               <div className="question-voice-setting">
                 <button
                   onClick={() => setVoiceEnabled(!voiceEnabled)}

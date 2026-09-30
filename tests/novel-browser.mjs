@@ -78,7 +78,7 @@ try {
     "PASS Novel only appears after pitch and analysis, uses Arman portrait and exact contextual question",
   );
   mkdirSync("artifacts", { recursive: true });
-  await page.screenshot({ path: "artifacts/v23-novel-desktop.png" });
+  await page.screenshot({ path: "artifacts/v22-novel-desktop.png" });
   await page.setViewportSize({ width: 1366, height: 768 });
   await page.locator(".pitch-room").evaluate((el) => {
     el.scrollTop = 0;
@@ -87,21 +87,6 @@ try {
   const questionBox = await page.locator(".novel-question").boundingBox();
   const inputBox = await page.locator("#pitch-answer").boundingBox();
   assert.ok(frame.height <= 520, "Novel must stay compact on laptops");
-  const deckBox = await page.locator(".presentation").boundingBox();
-  assert.ok(
-    deckBox.x + deckBox.width <= frame.x,
-    "Dialogue is beside the slide, never overlaps it",
-  );
-  assert.ok(
-    deckBox.y + deckBox.height < 768,
-    "Slide stays visible on the laptop",
-  );
-  const before = await page.locator(".demo-slide h1").innerText();
-  await b("Следующий слайд").click();
-  assert.notEqual(await page.locator(".demo-slide h1").innerText(), before);
-  await b("Предыдущий слайд").click();
-  console.log("PASS Slide remains visible and navigable throughout Q&A");
-
   assert.ok(
     questionBox.y + questionBox.height < 768,
     "Full question fits laptop viewport",
@@ -110,7 +95,7 @@ try {
     inputBox.y + inputBox.height < 768,
     "Answer field fits laptop viewport",
   );
-  await page.screenshot({ path: "artifacts/v23-novel-laptop.png" });
+  await page.screenshot({ path: "artifacts/v22-novel-laptop.png" });
   console.log(
     "PASS Compact novel, full question and answer fit a 1366x768 laptop",
   );
@@ -120,17 +105,11 @@ try {
       .locator(".pitch-room")
       .evaluate((e) => e.scrollWidth <= e.clientWidth),
   );
-  const mobileDeck = await page.locator(".presentation").boundingBox();
-  const mobileDialogue = await page.locator(".investor-novel").boundingBox();
-  assert.ok(
-    mobileDeck.y + mobileDeck.height <= mobileDialogue.y,
-    "Dialogue sits below the slide on mobile",
-  );
   await page.locator("#pitch-answer").scrollIntoViewIfNeeded();
   assert.ok(await page.locator("#pitch-answer").isVisible());
   await page
     .locator(".investor-novel")
-    .screenshot({ path: "artifacts/v23-novel-mobile.png" });
+    .screenshot({ path: "artifacts/v22-novel-mobile.png" });
   console.log(
     "PASS Mobile has no horizontal overflow and answer remains reachable",
   );
