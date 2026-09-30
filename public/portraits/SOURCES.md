@@ -55,3 +55,7 @@ All 37 built-in investor profiles now have official source portraits. Custom inv
 | sarkisov.png | Ruslan Sarkisov | https://voskhod.digital/ | https://static.tildacdn.com/tild3063-6232-4063-a238-326132613139/1.png |
 | reshma.jpg | Reshma Sohoni | https://seedcamp.com/our-team/ | https://seedcamp.com/wp-content/uploads/2021/04/Reshma-Dec-21-1000x667.jpg |
 | carlos.jpg | Carlos Eduardo Espinal | https://seedcamp.com/our-team/ | https://seedcamp.com/wp-content/uploads/2021/04/Carlos-2-1000x1000.jpg |
+
+## Novel silhouette — 2026-09-30
+
+`arman-mask.png` is a generated black-and-white silhouette mask derived from the existing `arman.png`, used only as a CSS luminance mask in the novel scene. The visible face, clothes and hands come from the original nFactorial photograph, not a generated replacement. The original portrait remains unchanged for all other views. The mask is tied to the built-in portrait path; a custom admin photo is displayed without this mask.

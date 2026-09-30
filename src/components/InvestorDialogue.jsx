@@ -17,6 +17,8 @@ export default function InvestorDialogue({
   onSpeak,
 }) {
   const text = question.text;
+  const hasCutout =
+    person.id === "arman" && person.photo === "/portraits/arman.png";
   const [visible, setVisible] = useState(0);
   const [failedPhoto, setFailedPhoto] = useState(false);
   useEffect(() => {
@@ -66,12 +68,19 @@ export default function InvestorDialogue({
           </span>
         ))}
       </div>
-      <div className="novel-character" key={person.id || pick(person.name)}>
+      <div
+        className={`novel-character ${hasCutout ? "has-cutout" : ""}`}
+        key={person.id || pick(person.name)}
+      >
         {person.photo && !failedPhoto ? (
           <img
             src={photo(person.photo, 800)}
             alt={pick(person.name)}
-            style={{ objectPosition: person.photoPosition || "center 30%" }}
+            style={{
+              objectPosition: hasCutout
+                ? "center bottom"
+                : person.photoPosition || "center 30%",
+            }}
             onError={() => setFailedPhoto(true)}
           />
         ) : (

@@ -53,6 +53,18 @@ try {
     await page.locator(".novel-character img").getAttribute("src"),
     /arman.png/,
   );
+  assert.equal(
+    await page
+      .locator(".novel-character img")
+      .evaluate((el) => getComputedStyle(el).maskMode),
+    "luminance",
+  );
+  assert.match(
+    await page
+      .locator(".novel-character img")
+      .evaluate((el) => getComputedStyle(el).maskImage),
+    /arman-mask.png/,
+  );
   await b("Показать весь вопрос").click();
   await page.waitForFunction(
     () => document.querySelector(".novel-unrevealed")?.textContent === "",
@@ -66,7 +78,27 @@ try {
     "PASS Novel only appears after pitch and analysis, uses Arman portrait and exact contextual question",
   );
   mkdirSync("artifacts", { recursive: true });
-  await page.screenshot({ path: "artifacts/v21-novel-desktop.png" });
+  await page.screenshot({ path: "artifacts/v22-novel-desktop.png" });
+  await page.setViewportSize({ width: 1366, height: 768 });
+  await page.locator(".pitch-room").evaluate((el) => {
+    el.scrollTop = 0;
+  });
+  const frame = await page.locator(".investor-novel").boundingBox();
+  const questionBox = await page.locator(".novel-question").boundingBox();
+  const inputBox = await page.locator("#pitch-answer").boundingBox();
+  assert.ok(frame.height <= 520, "Novel must stay compact on laptops");
+  assert.ok(
+    questionBox.y + questionBox.height < 768,
+    "Full question fits laptop viewport",
+  );
+  assert.ok(
+    inputBox.y + inputBox.height < 768,
+    "Answer field fits laptop viewport",
+  );
+  await page.screenshot({ path: "artifacts/v22-novel-laptop.png" });
+  console.log(
+    "PASS Compact novel, full question and answer fit a 1366x768 laptop",
+  );
   await page.setViewportSize({ width: 390, height: 844 });
   assert.ok(
     await page
@@ -77,7 +109,7 @@ try {
   assert.ok(await page.locator("#pitch-answer").isVisible());
   await page
     .locator(".investor-novel")
-    .screenshot({ path: "artifacts/v21-novel-mobile.png" });
+    .screenshot({ path: "artifacts/v22-novel-mobile.png" });
   console.log(
     "PASS Mobile has no horizontal overflow and answer remains reachable",
   );
