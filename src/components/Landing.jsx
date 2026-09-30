@@ -77,14 +77,14 @@ export default function Landing({
               {t("СИМУЛЯТОР ЖИЗНИ ОСНОВАТЕЛЯ", "THE FOUNDER SIMULATOR")}
             </span>
             <h1>
-              {t("Сначала гараж.", "First, the garage.")}
+              {t("Представь свой стартап.", "Pitch your startup.")}
               <br />
-              <em>{t("Потом — раунд.", "Then, the round.")}</em>
+              <em>{t("Ответь инвесторам.", "Face investor questions.")}</em>
             </h1>
             <p>
               {t(
-                "Собери команду. Объясни, зачем миру твой продукт. Выдержи вопросы людей, которые уже слышали «следующий миллиардный стартап».",
-                "Build your team. Explain why your product should exist. Face people who have heard “the next billion-dollar startup” before.",
+                "Тренируй выступление в игровом симуляторе: выбери инвесторов, расскажи о проекте и ответь на их вопросы. После питча получи разбор и узнай, что улучшить.",
+                "Practice in a pitch simulator: choose your investors, present your startup and answer their questions. Get feedback after your pitch and see what to improve.",
               )}
             </p>
             <div className="landing-cta">
