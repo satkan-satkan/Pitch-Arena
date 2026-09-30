@@ -122,7 +122,7 @@ try {
     .getByLabel("Название стартапа", { exact: true })
     .fill("Clinic Loop");
   await page.getByLabel("Своя длительность в секундах").fill("30");
-  await page.getByLabel("Озвучивать вопросы нейтральным голосом").uncheck();
+  await page.getByLabel("Озвучивать вопросы инвесторов").uncheck();
   await page
     .getByRole("button", { name: "Войти на арену", exact: true })
     .click();
@@ -174,7 +174,7 @@ try {
     "Retry displays a concrete mission",
     (await page.locator(".practice-goal").count()) === 1,
   );
-  await page.getByLabel("Озвучивать вопросы нейтральным голосом").uncheck();
+  await page.getByLabel("Озвучивать вопросы инвесторов").uncheck();
   await page
     .getByRole("button", { name: "Войти на арену", exact: true })
     .click();

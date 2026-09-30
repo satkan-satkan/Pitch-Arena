@@ -174,7 +174,7 @@ try {
       .getByLabel("Разбор с ИИ-наставником", { exact: true })
       .isDisabled(),
   );
-  await page.getByLabel("Озвучивать вопросы нейтральным голосом").uncheck();
+  await page.getByLabel("Озвучивать вопросы инвесторов").uncheck();
   await page.locator("input[type=file]").setInputFiles({
     name: "slide.png",
     mimeType: "image/png",
@@ -351,7 +351,7 @@ try {
       "Гостевой режим" && (await page.locator(".top-avatar").count()) === 0,
   );
   await openArena();
-  await page.getByLabel("Озвучивать вопросы нейтральным голосом").uncheck();
+  await page.getByLabel("Озвучивать вопросы инвесторов").uncheck();
   await page
     .getByRole("button", { name: "Войти на арену", exact: true })
     .click();

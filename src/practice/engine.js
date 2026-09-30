@@ -1,4 +1,5 @@
 // Pure, versioned practice rules. Matches are textual signals, never verified facts.
+import { armanRecordings, hasArmanRecordings } from "./arman-recordings.js";
 export const SCORING_VERSION = 3;
 const choose = (ru) => ru;
 export const wordCount = (text = "") =>
@@ -301,6 +302,21 @@ export function createQuestions(text, arena, ask, t = choose) {
           ),
         },
   ];
+  if (hasArmanRecordings(arena, t("ru", "en"))) {
+    questions[0].text = armanRecordings.customer.text;
+    questions[1] = {
+      ...questions[1],
+      text: armanRecordings.demand.text,
+      checks: ["observed", "context"],
+    };
+    questions[3].text = armanRecordings.funding.text;
+    questions[4] = {
+      id: "risk",
+      topicId: "solution",
+      checks: ["risk", "defense"],
+      text: armanRecordings.comparison.text,
+    };
+  }
   // Product-first practice for nFactorial; all five dimensions remain represented.
   const ordered =
     arena.id === "nfactorial"

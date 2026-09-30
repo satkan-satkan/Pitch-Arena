@@ -117,7 +117,7 @@ try {
     .getByLabel("Название стартапа", { exact: true })
     .fill("Journey Clinic");
   await page.getByLabel("Своя длительность в секундах").fill("60");
-  await page.getByLabel("Озвучивать вопросы нейтральным голосом").uncheck();
+  await page.getByLabel("Озвучивать вопросы инвесторов").uncheck();
   await button("Войти на арену").click();
   await page.locator(".phase-ready").waitFor();
   await button("Начать текстом").click();
@@ -259,7 +259,7 @@ try {
   await gp.locator(".nav-item").filter({ hasText: "Карта и арены" }).click();
   await gp.locator(".map-mission .button").click();
   await gp.getByLabel("Своя длительность в секундах").fill("30");
-  await gp.getByLabel("Озвучивать вопросы нейтральным голосом").uncheck();
+  await gp.getByLabel("Озвучивать вопросы инвесторов").uncheck();
   await gp.getByRole("button", { name: "Войти на арену", exact: true }).click();
   await gp.getByRole("button", { name: "Начать текстом", exact: true }).click();
   await gp.locator("#pitch-transcript").fill(pitch);

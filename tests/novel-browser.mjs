@@ -33,7 +33,29 @@ try {
   const [name, value] = cookie.split("=");
   await context.addCookies([{ name, value, url: f.origin }]);
   await context.addInitScript(() => {
-    window.__investorAudio = { spoken: [], cancelled: 0, speaking: false };
+    window.__investorAudio = {
+      spoken: [],
+      clips: [],
+      cancelled: 0,
+      speaking: false,
+    };
+    const NativeAudio = window.Audio;
+    window.Audio = function (src) {
+      const audio = new NativeAudio(src);
+      audio.play = async () => {
+        if (window.__investorAudio.blockNext) {
+          window.__investorAudio.blockNext = false;
+          throw new DOMException("Autoplay blocked", "NotAllowedError");
+        }
+        window.__investorAudio.clips.push(src);
+        window.__investorAudio.speaking = true;
+      };
+      audio.pause = () => {
+        window.__investorAudio.speaking = false;
+      };
+      audio.load = () => {};
+      return audio;
+    };
     Object.defineProperty(window, "speechSynthesis", {
       configurable: true,
       value: {
@@ -62,6 +84,7 @@ try {
       "Наш сервис помогает небольшим школам составлять расписание и экономить время. Директор загружает список учителей и получает готовое расписание. Двадцать школ платят подписку 30 долларов в месяц. За последний месяц мы провели 20 интервью. Просим 50000 долларов на разработку и продажи, чтобы за три месяца привлечь еще 50 школ.",
     );
   await b("Закончить питч").click();
+  assert.deepEqual(await page.evaluate(() => window.__investorAudio.clips), []);
   await b("Разобрать мой питч").click();
   assert.equal(await page.locator(".investor-novel").count(), 0);
   await b("Перейти к вопросам").click();
@@ -99,7 +122,17 @@ try {
     0,
   );
   await b("Включить звук инвестора").click();
-  await page.waitForFunction(() => window.__investorAudio.spoken.length === 1);
+  await page.waitForFunction(() => window.__investorAudio.clips.length === 1);
+  assert.equal(
+    await page.evaluate(() => window.__investorAudio.clips[0]),
+    "/audio/investors/arman/comparison.mp3",
+  );
+  assert.equal(
+    await page.evaluate(() => window.__investorAudio.spoken.length),
+    0,
+  );
+  await b("Повторить вопрос").click();
+  await page.waitForFunction(() => window.__investorAudio.clips.length === 2);
   await page.waitForFunction(
     async () =>
       (await (await fetch("/api/bootstrap")).json()).draft.state
@@ -134,7 +167,7 @@ try {
   };
   await checkPortraitAnchor();
   mkdirSync("artifacts", { recursive: true });
-  await page.screenshot({ path: "artifacts/v25-novel-desktop.png" });
+  await page.screenshot({ path: "artifacts/v26-novel-desktop.png" });
   await page.setViewportSize({ width: 1366, height: 768 });
   await page.locator(".pitch-room").evaluate((el) => {
     el.scrollTop = 0;
@@ -152,7 +185,7 @@ try {
     "Answer field fits laptop viewport",
   );
   await checkPortraitAnchor();
-  await page.screenshot({ path: "artifacts/v25-novel-laptop.png" });
+  await page.screenshot({ path: "artifacts/v26-novel-laptop.png" });
   console.log(
     "PASS Compact novel, full question and answer fit a 1366x768 laptop",
   );
@@ -170,7 +203,7 @@ try {
   assert.ok(await page.locator("#pitch-answer").isVisible());
   await page
     .locator(".investor-novel")
-    .screenshot({ path: "artifacts/v25-novel-mobile.png" });
+    .screenshot({ path: "artifacts/v26-novel-mobile.png" });
   console.log(
     "PASS Mobile has no horizontal overflow and answer remains reachable",
   );
@@ -217,9 +250,82 @@ try {
   console.log(
     "PASS Muted preference survives reload and prevents all following questions from speaking",
   );
+  assert.deepEqual(await page.evaluate(() => window.__investorAudio.clips), []);
   assert.deepEqual(errors, []);
   console.log(
     "PASS Every answer, follow-up and final result saved without browser errors",
+  );
+  // Decode real files too: the playback mock above only observes UI behavior.
+  const durations = await page.evaluate(async () => {
+    const context = new AudioContext();
+    try {
+      return await Promise.all(
+        ["customer", "demand", "comparison", "funding", "time-up"].map(
+          async (name) => {
+            const response = await fetch(`/audio/investors/arman/${name}.mp3`);
+            if (!response.ok) throw new Error(`${name}: ${response.status}`);
+            const decoded = await context.decodeAudioData(
+              await response.arrayBuffer(),
+            );
+            return decoded.duration;
+          },
+        ),
+      );
+    } finally {
+      await context.close();
+    }
+  });
+  assert.ok(durations.every((duration) => duration > 4 && duration < 9));
+  console.log("PASS All five real MP3 files are served and decode in Chromium");
+  const timed = await f.request("/sessions", {
+    method: "POST",
+    cookie,
+    data: {
+      projectId: project.data.id,
+      arenaId: "nfactorial",
+      ask: 50000,
+      pitchSeconds: 120,
+      language: "ru",
+      spokenQuestions: true,
+    },
+  });
+  assert.equal(timed.status, 201);
+  await page.reload();
+  await b("Продолжить питч").click();
+  await b("Начать текстом").click();
+  assert.deepEqual(await page.evaluate(() => window.__investorAudio.clips), []);
+  await page.clock.install();
+  await page.evaluate(() => {
+    window.__investorAudio.blockNext = true;
+  });
+  await page.clock.fastForward(121000);
+  await page.locator(".phase-review").waitFor();
+  await page
+    .getByText("Браузер заблокировал автозвук.", { exact: false })
+    .waitFor();
+  await b("Повторить реплику").click();
+  assert.deepEqual(await page.evaluate(() => window.__investorAudio.clips), [
+    "/audio/investors/arman/time-up.mp3",
+  ]);
+  await b("Заглушить инвестора").click();
+  assert.equal(
+    await page.evaluate(() => window.__investorAudio.speaking),
+    false,
+  );
+  assert.equal(await b("Повторить реплику").isDisabled(), true);
+  await b("Включить звук инвестора").click();
+  const played = await page.evaluate(() => window.__investorAudio.clips.length);
+  await page.locator("#review-transcript").fill(answer);
+  await b("Разобрать мой питч").click();
+  await b("Исправить транскрипт").click();
+  assert.equal(
+    await page.evaluate(() => window.__investorAudio.clips.length),
+    played,
+  );
+  assert.equal(await b("Повторить реплику").count(), 0);
+  assert.deepEqual(errors, []);
+  console.log(
+    "PASS Time-up line waits for the deadline; blocked autoplay can be retried and muted",
   );
 } finally {
   await browser.close();

@@ -41,6 +41,12 @@ import useBodyScrollLock from "./hooks/useBodyScrollLock";
 import { errorText } from "./services/api";
 import MentorFeedback from "./components/MentorFeedback";
 import InvestorDialogue from "./components/InvestorDialogue";
+import { createInvestorAudio } from "./practice/investor-audio";
+import {
+  armanRecordings,
+  hasArmanRecordings,
+  recordingForQuestion,
+} from "./practice/arman-recordings";
 import { GuideMessage } from "./guide/Guide";
 
 const formatTime = (seconds) =>
@@ -103,6 +109,8 @@ export default function PitchRoom({
     ),
     [speechError, setSpeechError] = useState("");
   const [micTesting, setMicTesting] = useState(false);
+  const [investorAudio] = useState(() => createInvestorAudio());
+  const [timeUpAnnounced, setTimeUpAnnounced] = useState(false);
   const [mentor, setMentor] = useState(initial.mentor || null),
     [answerMentor, setAnswerMentor] = useState(initial.answerMentor || null),
     [syncError, setSyncError] = useState(""),
@@ -272,7 +280,7 @@ export default function PitchRoom({
     setPhase(next);
   };
   const endPitchRef = useRef(null);
-  const endPitch = async () => {
+  const endPitch = async (timedOut = false) => {
     if (transition.current || phaseRef.current !== "pitch") return;
     transition.current = true;
     setBusy(true);
@@ -282,6 +290,7 @@ export default function PitchRoom({
     );
     await voice.stop();
     if (!mounted.current) return;
+    setTimeUpAnnounced(timedOut === true && hasArmanRecordings(arena, lang));
     move("STOP");
     setBusy(false);
     transition.current = false;
@@ -293,7 +302,7 @@ export default function PitchRoom({
     return () => {
       mounted.current = false;
       urls.forEach((f) => URL.revokeObjectURL(f.url));
-      window.speechSynthesis?.cancel();
+      investorAudio.stop();
     };
   }, []);
   useEffect(() => {
@@ -304,7 +313,7 @@ export default function PitchRoom({
         Math.ceil((deadline.current - Date.now()) / 1000),
       );
       setRemaining(left);
-      if (left === 0) endPitchRef.current();
+      if (left === 0) endPitchRef.current(true);
     };
     tick();
     const id = setInterval(tick, 250);
@@ -339,6 +348,8 @@ export default function PitchRoom({
     setBusy(false);
   };
   const review = async () => {
+    investorAudio.stop();
+    setTimeUpAnnounced(false);
     const text = pitch.trim();
     if (data.cloud) {
       await cloudAction("analyze", { pitch: text });
@@ -350,52 +361,59 @@ export default function PitchRoom({
     move("ANALYZE");
   };
   const toggleInvestorVoice = () => {
-    window.speechSynthesis?.cancel();
+    investorAudio.stop();
     setSpeechError("");
     setVoiceEnabled((enabled) => !enabled);
   };
-  const speak = (text) => {
+  const speak = (text, recording = null) => {
     if (!voiceEnabled) return;
     setSpeechError("");
-    if (!window.speechSynthesis) {
-      setSpeechError(
-        t(
-          "Озвучивание недоступно в этом браузере.",
-          "Speech playback is unavailable in this browser.",
-        ),
-      );
-      return;
-    }
-    window.speechSynthesis.cancel();
-    const utterance = new SpeechSynthesisUtterance(text);
-    utterance.lang = lang === "ru" ? "ru-RU" : "en-US";
-    utterance.rate = 0.98;
-    const available = window.speechSynthesis.getVoices();
-    utterance.voice =
-      available.find((v) => v.lang.startsWith(lang) && v.localService) ||
-      available.find((v) => v.lang.startsWith(lang)) ||
-      null;
-    utterance.onerror = (e) => {
-      if (!["interrupted", "canceled"].includes(e.error) && mounted.current)
+    investorAudio.play({
+      text,
+      src: recording?.src,
+      language: lang,
+      onError: (reason) => {
+        if (!mounted.current) return;
         setSpeechError(
-          t(
-            "Не удалось озвучить вопрос. Прочитай его на экране.",
-            "Could not play this question. Please read it on screen.",
-          ),
+          reason === "blocked"
+            ? t(
+                "Браузер заблокировал автозвук. Нажми «Повторить», чтобы послушать реплику.",
+                "Your browser blocked autoplay. Press Replay to hear the line.",
+              )
+            : t(
+                "Не удалось воспроизвести реплику. Прочитай текст или попробуй повторить.",
+                "Could not play the line. Read the text or try replaying it.",
+              ),
         );
-    };
-    window.speechSynthesis.speak(utterance);
+      },
+    });
   };
+  const question = questions[step];
+  const speakerIndex = question?.speakerIndex ?? 0;
+  const current = panel[speakerIndex % panel.length];
+  const questionRecording = recordingForQuestion(question, current, lang);
   useEffect(() => {
-    if (phase === "qa" && voiceEnabled && !answerFeedback)
-      speak(questions[step].text);
-    return () => window.speechSynthesis?.cancel();
-  }, [phase, step, voiceEnabled, answerFeedback]);
+    setSpeechError("");
+    if (phase === "qa" && voiceEnabled && !answerFeedback && question)
+      speak(question.text, questionRecording);
+    else if (phase === "review" && voiceEnabled && timeUpAnnounced)
+      speak(armanRecordings.timeUp.text, armanRecordings.timeUp);
+    return () => investorAudio.stop();
+  }, [
+    phase,
+    step,
+    voiceEnabled,
+    answerFeedback,
+    question?.text,
+    current.id,
+    lang,
+    timeUpAnnounced,
+  ]);
   const send = async () => {
     if (!answer.trim() || busy || transition.current || answerFeedback) return;
     transition.current = true;
     setBusy(true);
-    window.speechSynthesis?.cancel();
+    investorAudio.stop();
     await voice.stop();
     if (!mounted.current) return;
     const text = answerRef.current.trim();
@@ -467,8 +485,6 @@ export default function PitchRoom({
     }
     move("QUESTIONS");
   };
-  const speakerIndex = questions[step]?.speakerIndex ?? 0;
-  const current = panel[speakerIndex % panel.length];
   const stagePhase = ["ready", "pitch"].includes(phase);
   const phaseIndex = stagePhase ? 0 : phase === "qa" ? 2 : 1;
   const wordCount = pitch.trim().split(/\s+/).filter(Boolean).length;
@@ -615,6 +631,7 @@ export default function PitchRoom({
               pick={pick}
               voiceEnabled={voiceEnabled}
               onToggleVoice={toggleInvestorVoice}
+              recordedVoice={Boolean(questionRecording)}
             />
           ) : (
             <>
@@ -852,15 +869,20 @@ export default function PitchRoom({
                 })}
               </div>
               <p className="room-disclaimer">
-                {arena.personaIds
+                {hasArmanRecordings(arena, lang)
                   ? t(
-                      "Учебная симуляция. Реплики придуманы, синтетический голос не имитирует реального человека.",
-                      "Educational simulation. Dialogue is fictional; the synthetic voice does not imitate a real person.",
+                      "Учебная симуляция. Подготовленные реплики озвучены синтезированным голосом Армана с его согласия. Остальные вопросы — нейтральным голосом.",
+                      "Practice simulation. Prepared lines use Arman’s synthesized voice with his consent. Other questions use a neutral voice.",
                     )
-                  : t(
-                      "Учебная симуляция с вымышленной панелью. Интерес — игровой показатель.",
-                      "An educational simulation with a fictional panel. Interest is a game indicator.",
-                    )}
+                  : arena.personaIds
+                    ? t(
+                        "Учебная симуляция. Реплики придуманы, синтетический голос не имитирует реального человека.",
+                        "Educational simulation. Dialogue is fictional; the synthetic voice does not imitate a real person.",
+                      )
+                    : t(
+                        "Учебная симуляция с вымышленной панелью. Интерес — игровой показатель.",
+                        "An educational simulation with a fictional panel. Interest is a game indicator.",
+                      )}
               </p>
             </>
           )}
@@ -1064,6 +1086,46 @@ export default function PitchRoom({
                     )}
               </p>
               {audioClip}
+              {timeUpAnnounced && (
+                <>
+                  <p className="phase-description">
+                    {armanRecordings.timeUp.text}
+                  </p>
+                  <div className="question-voice-setting">
+                    <button
+                      type="button"
+                      onClick={toggleInvestorVoice}
+                      aria-pressed={voiceEnabled}
+                    >
+                      {voiceEnabled ? (
+                        <Volume2 size={12} />
+                      ) : (
+                        <VolumeX size={12} />
+                      )}
+                      {voiceEnabled
+                        ? t("Заглушить инвестора", "Mute investor")
+                        : t("Включить звук инвестора", "Unmute investor")}
+                    </button>
+                    <button
+                      type="button"
+                      disabled={!voiceEnabled}
+                      onClick={() =>
+                        speak(
+                          armanRecordings.timeUp.text,
+                          armanRecordings.timeUp,
+                        )
+                      }
+                    >
+                      {t("Повторить реплику", "Replay line")}
+                    </button>
+                  </div>
+                  {speechError && (
+                    <p className="mic-error" role="status">
+                      {speechError}
+                    </p>
+                  )}
+                </>
+              )}
               <label className="transcript-label" htmlFor="review-transcript">
                 {t("Транскрипт питча", "Pitch transcript")}
                 <span>
@@ -1200,7 +1262,7 @@ export default function PitchRoom({
                 <button
                   type="button"
                   disabled={!voiceEnabled}
-                  onClick={() => speak(questions[step].text)}
+                  onClick={() => speak(question.text, questionRecording)}
                 >
                   {t("Повторить вопрос", "Replay question")}
                 </button>
@@ -1271,7 +1333,7 @@ export default function PitchRoom({
                         voice.active
                           ? voice.stop
                           : () => {
-                              window.speechSynthesis?.cancel();
+                              investorAudio.stop();
                               voice.start();
                             }
                       }

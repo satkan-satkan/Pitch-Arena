@@ -16,6 +16,7 @@ export default function InvestorDialogue({
   pick,
   voiceEnabled,
   onToggleVoice,
+  recordedVoice = false,
 }) {
   const text = question.text;
   const hasCutout =
@@ -129,10 +130,15 @@ export default function InvestorDialogue({
         </p>
         <footer>
           <span>
-            {t(
-              "Учебная симуляция · реплики придуманы для игры",
-              "Practice simulation · dialogue written for the game",
-            )}
+            {recordedVoice
+              ? t(
+                  "Учебная симуляция · синтезированный голос Армана, с его согласия",
+                  "Practice simulation · Arman’s synthesized voice, used with consent",
+                )
+              : t(
+                  "Учебная симуляция · реплики придуманы для игры",
+                  "Practice simulation · dialogue written for the game",
+                )}
           </span>
           {visible < text.length ? (
             <button type="button" onClick={() => setVisible(text.length)}>

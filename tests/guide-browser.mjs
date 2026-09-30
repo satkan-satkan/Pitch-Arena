@@ -78,7 +78,7 @@ try {
     (await page.getByLabel("Своя длительность в секундах").inputValue()) ===
       "60" &&
       !(await page
-        .getByLabel("Озвучивать вопросы нейтральным голосом")
+        .getByLabel("Озвучивать вопросы инвесторов")
         .isChecked()),
   );
   await button("Войти на арену").click();

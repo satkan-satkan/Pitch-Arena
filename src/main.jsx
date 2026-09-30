@@ -1480,8 +1480,8 @@ function App() {
               </div>
               <p className="simulation-note">
                 {t(
-                  "Имена и портреты — с официальных страниц. Реплики вымышлены; проект не связан с этими людьми и организациями. Голоса — нейтральные синтетические.",
-                  "Names and portraits come from official pages. Dialogue is fictional; we are not affiliated with these people or organizations. Voices are neutral and synthetic.",
+                  "Имена и портреты — с официальных страниц. Реплики вымышлены; проект не связан с этими людьми и организациями. Подготовленные реплики Армана озвучены его синтезированным голосом с согласия; остальные — нейтральным голосом.",
+                  "Names and portraits come from official pages. Dialogue is fictional; we are not affiliated with these people or organizations. Prepared Arman lines use his synthesized voice with consent; other lines use a neutral voice.",
                 )}
               </p>
             </>
@@ -2324,8 +2324,8 @@ function Setup({
             />
             <span>
               {t(
-                "Озвучивать вопросы нейтральным голосом",
-                "Read questions with a neutral voice",
+                "Озвучивать вопросы инвесторов",
+                "Read investor questions aloud",
               )}
             </span>
           </label>
