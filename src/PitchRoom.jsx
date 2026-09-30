@@ -349,7 +349,13 @@ export default function PitchRoom({
     setQuestions(createQuestions(text, arena, ask, t));
     move("ANALYZE");
   };
+  const toggleInvestorVoice = () => {
+    window.speechSynthesis?.cancel();
+    setSpeechError("");
+    setVoiceEnabled((enabled) => !enabled);
+  };
   const speak = (text) => {
+    if (!voiceEnabled) return;
     setSpeechError("");
     if (!window.speechSynthesis) {
       setSpeechError(
@@ -607,7 +613,8 @@ export default function PitchRoom({
               answered={Boolean(answerFeedback)}
               t={t}
               pick={pick}
-              onSpeak={() => speak(questions[step].text)}
+              voiceEnabled={voiceEnabled}
+              onToggleVoice={toggleInvestorVoice}
             />
           ) : (
             <>
@@ -1183,14 +1190,20 @@ export default function PitchRoom({
               </div>
               <div className="question-voice-setting">
                 <button
-                  onClick={() => setVoiceEnabled(!voiceEnabled)}
+                  onClick={toggleInvestorVoice}
                   aria-pressed={voiceEnabled}
                 >
                   {voiceEnabled ? <Volume2 size={12} /> : <VolumeX size={12} />}{" "}
-                  {t("Озвучивание", "Read aloud")} ·{" "}
+                  {t("Звук инвестора", "Investor audio")} ·{" "}
                   {voiceEnabled ? t("вкл", "on") : t("выкл", "off")}
                 </button>
-                <span>{t("Нейтральный голос", "Neutral voice")}</span>
+                <button
+                  type="button"
+                  disabled={!voiceEnabled}
+                  onClick={() => speak(questions[step].text)}
+                >
+                  {t("Повторить вопрос", "Replay question")}
+                </button>
               </div>
               {speechError && <p className="mic-error">{speechError}</p>}
               {answerFeedback ? (

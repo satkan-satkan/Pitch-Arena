@@ -32,6 +32,23 @@ try {
   });
   const [name, value] = cookie.split("=");
   await context.addCookies([{ name, value, url: f.origin }]);
+  await context.addInitScript(() => {
+    window.__investorAudio = { spoken: [], cancelled: 0, speaking: false };
+    Object.defineProperty(window, "speechSynthesis", {
+      configurable: true,
+      value: {
+        getVoices: () => [],
+        speak: (utterance) => {
+          window.__investorAudio.spoken.push(utterance.text);
+          window.__investorAudio.speaking = true;
+        },
+        cancel: () => {
+          window.__investorAudio.cancelled++;
+          window.__investorAudio.speaking = false;
+        },
+      },
+    });
+  });
   const page = await context.newPage();
   page.on("pageerror", (e) => errors.push(e.message));
   const b = (name) => page.getByRole("button", { name, exact: true });
@@ -77,8 +94,37 @@ try {
   console.log(
     "PASS Novel only appears after pitch and analysis, uses Arman portrait and exact contextual question",
   );
+  assert.equal(
+    await page.evaluate(() => window.__investorAudio.spoken.length),
+    0,
+  );
+  await b("Включить звук инвестора").click();
+  await page.waitForFunction(() => window.__investorAudio.spoken.length === 1);
+  await page.waitForFunction(
+    async () =>
+      (await (await fetch("/api/bootstrap")).json()).draft.state
+        .voiceEnabled === true,
+  );
+  await b("Заглушить инвестора").click();
+  assert.equal(
+    await page.evaluate(() => window.__investorAudio.speaking),
+    false,
+  );
+  assert.equal(await b("Повторить вопрос").isDisabled(), true);
+  await page.waitForFunction(
+    async () =>
+      (await (await fetch("/api/bootstrap")).json()).draft.state
+        .voiceEnabled === false,
+  );
+  assert.equal(
+    await page.locator(".novel-accessible-question").innerText(),
+    snap.state.questions[0].text,
+  );
+  console.log(
+    "PASS Unmute speaks, mute immediately cancels speech and saves while leaving question readable",
+  );
   mkdirSync("artifacts", { recursive: true });
-  await page.screenshot({ path: "artifacts/v22-novel-desktop.png" });
+  await page.screenshot({ path: "artifacts/v24-novel-desktop.png" });
   await page.setViewportSize({ width: 1366, height: 768 });
   await page.locator(".pitch-room").evaluate((el) => {
     el.scrollTop = 0;
@@ -95,7 +141,7 @@ try {
     inputBox.y + inputBox.height < 768,
     "Answer field fits laptop viewport",
   );
-  await page.screenshot({ path: "artifacts/v22-novel-laptop.png" });
+  await page.screenshot({ path: "artifacts/v24-novel-laptop.png" });
   console.log(
     "PASS Compact novel, full question and answer fit a 1366x768 laptop",
   );
@@ -109,7 +155,7 @@ try {
   assert.ok(await page.locator("#pitch-answer").isVisible());
   await page
     .locator(".investor-novel")
-    .screenshot({ path: "artifacts/v22-novel-mobile.png" });
+    .screenshot({ path: "artifacts/v24-novel-mobile.png" });
   console.log(
     "PASS Mobile has no horizontal overflow and answer remains reachable",
   );
@@ -123,6 +169,12 @@ try {
   await page.locator(".investor-novel").waitFor();
   assert.equal(await page.locator(".novel-unrevealed").textContent(), "");
   console.log("PASS Resumed QA and reduced-motion show full question");
+  assert.equal(await b("Включить звук инвестора").isVisible(), true);
+  assert.equal(
+    await page.evaluate(() => window.__investorAudio.spoken.length),
+    0,
+  );
+
   for (let i = 0; i < 7; i++) {
     await page.locator("#pitch-answer").fill(answer);
     await b("Разобрать ответ").click();
@@ -142,6 +194,13 @@ try {
   assert.equal(
     done.history[0].answers.length,
     done.history[0].questions.length,
+  );
+  assert.equal(
+    await page.evaluate(() => window.__investorAudio.spoken.length),
+    0,
+  );
+  console.log(
+    "PASS Muted preference survives reload and prevents all following questions from speaking",
   );
   assert.deepEqual(errors, []);
   console.log(

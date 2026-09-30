@@ -147,14 +147,17 @@
   color: #aeb6be;
 }
 .novel-audio {
-  display: grid;
-  place-items: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  padding: 8px 12px;
+  font-size: 11px;
   background: #242b31;
   color: #ead5b3;
   border: 1px solid #666053;
-  width: 42px;
-  height: 42px;
-  border-radius: 50%;
+  min-height: 40px;
+  border-radius: 8px;
   flex-shrink: 0;
 }
 .novel-question {
@@ -315,4 +318,14 @@
   mask-size: contain;
   mask-repeat: no-repeat;
   mask-position: center bottom;
+}
+
+.novel-audio[aria-pressed="true"] {
+  color: #c8c9c9;
+  background: #20272b;
+}
+@media (max-width: 600px) {
+  .novel-speaker {
+    flex-wrap: wrap;
+  }
 }

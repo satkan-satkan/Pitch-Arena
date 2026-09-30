@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Volume2, ChevronRight } from "lucide-react";
+import { Volume2, VolumeX, ChevronRight } from "lucide-react";
 import { photo } from "../game-data";
 import "./investor-dialogue.css";
 
@@ -14,7 +14,8 @@ export default function InvestorDialogue({
   answered,
   t,
   pick,
-  onSpeak,
+  voiceEnabled,
+  onToggleVoice,
 }) {
   const text = question.text;
   const hasCutout =
@@ -103,10 +104,20 @@ export default function InvestorDialogue({
           <button
             type="button"
             className="novel-audio"
-            onClick={onSpeak}
-            aria-label={t("Озвучить вопрос", "Read question aloud")}
+            onClick={onToggleVoice}
+            aria-pressed={!voiceEnabled}
+            aria-label={
+              voiceEnabled
+                ? t("Заглушить инвестора", "Mute investor")
+                : t("Включить звук инвестора", "Unmute investor")
+            }
           >
-            <Volume2 size={20} />
+            {voiceEnabled ? <Volume2 size={18} /> : <VolumeX size={18} />}
+            <span>
+              {voiceEnabled
+                ? t("Заглушить", "Mute")
+                : t("Включить звук", "Unmute")}
+            </span>
           </button>
         </div>
         <p className="novel-question" aria-live="polite" aria-atomic="true">
