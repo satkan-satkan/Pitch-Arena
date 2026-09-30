@@ -15,6 +15,7 @@ export default function InvestorDialogue({
   t,
   pick,
   onSpeak,
+  compact = false,
 }) {
   const text = question.text;
   const hasCutout =
@@ -44,7 +45,7 @@ export default function InvestorDialogue({
   }, [text]);
   return (
     <section
-      className="investor-novel"
+      className={`investor-novel ${compact ? "novel-compact" : ""}`}
       aria-label={t("Диалог с инвестором", "Investor dialogue")}
     >
       <div className="novel-backdrop" aria-hidden="true" />
