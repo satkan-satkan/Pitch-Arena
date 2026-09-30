@@ -6673,3 +6673,22 @@ main {
     flex-wrap: wrap;
   }
 }
+
+.setup-draft-recovery {
+  margin: 16px 0;
+  padding: 18px;
+  border: 1px solid #8e744b;
+  border-radius: 12px;
+  background: #24211b;
+  color: #eee9df;
+}
+.setup-draft-recovery > p {
+  color: #c9c2b6;
+  line-height: 1.6;
+  margin: 8px 0 14px;
+}
+.setup-draft-recovery > div {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}

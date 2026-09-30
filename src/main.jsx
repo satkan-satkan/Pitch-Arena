@@ -503,6 +503,11 @@ function App() {
       }
       setSelected(null);
       setRetry(null);
+    } catch (error) {
+      if (workspace.account && error.message === "DRAFT_EXISTS") {
+        await workspace.refresh().catch(() => {});
+      }
+      throw error;
     } finally {
       setLaunchBusy(false);
     }
@@ -548,6 +553,8 @@ function App() {
           resuming: true,
         });
       }
+      setSelected(null);
+      setRetry(null);
     } catch (error) {
       setToast(errorText(error, t));
     } finally {
@@ -555,6 +562,7 @@ function App() {
     }
   };
   const discardDraft = async () => {
+    setLaunchBusy(true);
     try {
       if (workspace.account) {
         const snap = await api(`/sessions/${savedDraft.id}`);
@@ -565,6 +573,8 @@ function App() {
       guide.dispatch({ type: "discarded", id: savedDraft.id });
     } catch (error) {
       setToast(errorText(error, t));
+    } finally {
+      setLaunchBusy(false);
     }
   };
   const leaveSession = async () => {
@@ -1612,6 +1622,9 @@ function App() {
           projects={workspace.projects}
           activeProjectId={retry?.projectId || workspace.activeProjectId}
           aiReady={workspace.aiReady}
+          savedDraft={savedDraft}
+          onResume={resumeDraft}
+          onDiscard={discardDraft}
           onClose={() => {
             setSelected(null);
             setRetry(null);
@@ -2043,6 +2056,9 @@ function Setup({
   activeProjectId,
   aiReady,
   launchBusy,
+  savedDraft,
+  onResume,
+  onDiscard,
   tutorial = false,
   guideEnabled = true,
 }) {
@@ -2059,6 +2075,7 @@ function Setup({
   const [files, setFiles] = useState([]);
   const [error, setError] = useState("");
   const [dragging, setDragging] = useState(false);
+  const [confirmDiscard, setConfirmDiscard] = useState(false);
   const input = useRef();
   const addFiles = (list) => {
     setError("");
@@ -2402,7 +2419,76 @@ function Setup({
             ))}
           </div>
         )}
-        {error && (
+        {savedDraft && (
+          <section
+            className="setup-draft-recovery"
+            aria-label={t("Незавершённый питч", "Unfinished pitch")}
+          >
+            <strong>
+              {t(
+                "У тебя есть незавершённый питч",
+                "You have an unfinished pitch",
+              )}
+            </strong>
+            <p>
+              {confirmDiscard
+                ? t(
+                    "Удалить прежнюю тренировку и её сохранённый текст? Файлы, выбранные в этом окне, останутся.",
+                    "Delete the previous practice and its saved text? Files selected in this window will stay.",
+                  )
+                : t(
+                    "Это не ошибка презентации. Продолжи прежнюю тренировку или удали её, чтобы начать новую.",
+                    "Your deck is fine. Resume the previous practice or discard it to start a new one.",
+                  )}
+            </p>
+            <div>
+              {confirmDiscard ? (
+                <>
+                  <button
+                    type="button"
+                    className="button white"
+                    disabled={launchBusy}
+                    onClick={() => setConfirmDiscard(false)}
+                  >
+                    {t("Отмена", "Cancel")}
+                  </button>
+                  <button
+                    type="button"
+                    className="button dark"
+                    disabled={launchBusy}
+                    onClick={async () => {
+                      await onDiscard();
+                      setConfirmDiscard(false);
+                      setError("");
+                    }}
+                  >
+                    {t("Удалить прежний питч", "Discard previous pitch")}
+                  </button>
+                </>
+              ) : (
+                <>
+                  <button
+                    type="button"
+                    className="button dark"
+                    disabled={launchBusy}
+                    onClick={onResume}
+                  >
+                    {t("Продолжить прежний питч", "Resume previous pitch")}
+                  </button>
+                  <button
+                    type="button"
+                    className="button white"
+                    disabled={launchBusy}
+                    onClick={() => setConfirmDiscard(true)}
+                  >
+                    {t("Начать новый вместо него", "Replace with a new pitch")}
+                  </button>
+                </>
+              )}
+            </div>
+          </section>
+        )}
+        {error && !savedDraft && (
           <p className="error-message" role="alert">
             {error}
           </p>
@@ -2428,7 +2514,7 @@ function Setup({
         <button
           className="button dark full"
           type="submit"
-          disabled={launchBusy}
+          disabled={launchBusy || Boolean(savedDraft)}
         >
           {launchBusy
             ? t("Сохраняем…", "Saving…")
