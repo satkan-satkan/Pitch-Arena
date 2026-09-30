@@ -7,6 +7,7 @@
   min-width: 0;
 }
 .investor-novel {
+  --novel-dialogue-gap: 20px;
   position: relative;
   isolation: isolate;
   overflow: hidden;
@@ -90,6 +91,8 @@
 }
 .novel-character {
   position: relative;
+  top: calc(var(--novel-dialogue-gap) + 8px);
+  z-index: 1;
   grid-column: 2;
   grid-row: 2;
   justify-self: center;
@@ -118,7 +121,7 @@
   position: relative;
   z-index: 3;
   grid-column: 1 / -1;
-  margin: 20px 14px 14px;
+  margin: var(--novel-dialogue-gap) 14px 14px;
   padding: 16px 18px 12px;
   border: 1px solid #867456;
   border-radius: 12px;
@@ -257,7 +260,7 @@
     height: 135px;
   }
   .novel-dialogue {
-    margin: 20px 10px 10px;
+    margin: var(--novel-dialogue-gap) 10px 10px;
     padding: 17px 16px 12px;
   }
   .novel-question {

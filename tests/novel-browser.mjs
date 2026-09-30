@@ -123,8 +123,18 @@ try {
   console.log(
     "PASS Unmute speaks, mute immediately cancels speech and saves while leaving question readable",
   );
+  const checkPortraitAnchor = async () => {
+    const portrait = await page.locator(".novel-character").boundingBox();
+    const dialogue = await page.locator(".novel-dialogue").boundingBox();
+    const overlap = portrait.y + portrait.height - dialogue.y;
+    assert.ok(
+      overlap >= 7 && overlap <= 9,
+      "Portrait bottom stays tucked behind dialogue, without a floating gap",
+    );
+  };
+  await checkPortraitAnchor();
   mkdirSync("artifacts", { recursive: true });
-  await page.screenshot({ path: "artifacts/v24-novel-desktop.png" });
+  await page.screenshot({ path: "artifacts/v25-novel-desktop.png" });
   await page.setViewportSize({ width: 1366, height: 768 });
   await page.locator(".pitch-room").evaluate((el) => {
     el.scrollTop = 0;
@@ -141,7 +151,8 @@ try {
     inputBox.y + inputBox.height < 768,
     "Answer field fits laptop viewport",
   );
-  await page.screenshot({ path: "artifacts/v24-novel-laptop.png" });
+  await checkPortraitAnchor();
+  await page.screenshot({ path: "artifacts/v25-novel-laptop.png" });
   console.log(
     "PASS Compact novel, full question and answer fit a 1366x768 laptop",
   );
@@ -151,11 +162,15 @@ try {
       .locator(".pitch-room")
       .evaluate((e) => e.scrollWidth <= e.clientWidth),
   );
+  await checkPortraitAnchor();
+  console.log(
+    "PASS Portrait stays anchored above the dialogue across desktop, laptop and mobile",
+  );
   await page.locator("#pitch-answer").scrollIntoViewIfNeeded();
   assert.ok(await page.locator("#pitch-answer").isVisible());
   await page
     .locator(".investor-novel")
-    .screenshot({ path: "artifacts/v24-novel-mobile.png" });
+    .screenshot({ path: "artifacts/v25-novel-mobile.png" });
   console.log(
     "PASS Mobile has no horizontal overflow and answer remains reachable",
   );
