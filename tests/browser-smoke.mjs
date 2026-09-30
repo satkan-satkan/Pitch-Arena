@@ -41,7 +41,7 @@ async function reviewPitch(text) {
   await page.locator(".phase-review").waitFor();
   check(
     "No questions before transcript confirmation",
-    (await page.locator(".question-bubble").count()) === 0,
+    (await page.locator(".novel-question").count()) === 0,
   );
   await page
     .getByRole("button", { name: "Разобрать мой питч", exact: true })
@@ -128,7 +128,7 @@ try {
     .click();
   check(
     "No question on the ready screen",
-    (await page.locator(".question-bubble").count()) === 0,
+    (await page.locator(".novel-question").count()) === 0,
   );
   await page
     .getByRole("button", { name: "Начать текстом", exact: true })
@@ -342,7 +342,7 @@ try {
     .click();
   check(
     "English demand question does not treat negated metrics as traction",
-    (await page.locator(".question-bubble").textContent()).includes(
+    (await page.locator(".novel-question").textContent()).includes(
       "validate demand",
     ),
   );

@@ -40,6 +40,7 @@ import useVoice from "./hooks/useVoice";
 import useBodyScrollLock from "./hooks/useBodyScrollLock";
 import { errorText } from "./services/api";
 import MentorFeedback from "./components/MentorFeedback";
+import InvestorDialogue from "./components/InvestorDialogue";
 import { GuideMessage } from "./guide/Guide";
 
 const formatTime = (seconds) =>
@@ -593,245 +594,272 @@ export default function PitchRoom({
       </div>
       <div className="room-content">
         <section className="room-stage">
-          <div className="stage-top">
-            <div>
-              <span className="eyebrow">
-                {stagePhase
-                  ? t("СЦЕНА ТВОЯ", "THE STAGE IS YOURS")
-                  : t("ПИТЧ ЗАВЕРШЁН", "PITCH COMPLETE")}
-              </span>
-              <h2>{startup}</h2>
-            </div>
-            {stagePhase ? (
-              <div className={`countdown ${remaining <= 15 ? "urgent" : ""}`}>
-                <Clock3 size={19} />
-                <strong data-testid="pitch-countdown">
-                  {formatTime(remaining)}
-                </strong>
-                <span>
-                  {phase === "ready"
-                    ? t("на твою историю", "to tell your story")
-                    : t("осталось", "remaining")}
-                </span>
-              </div>
-            ) : (
-              <span className="funding-ask">
-                ${ask.toLocaleString()}
-                <small>{t("инвестиционный запрос", "funding ask")}</small>
-              </span>
-            )}
-          </div>
-          <div className="presentation">
-            <CameraPreview t={t} />
-            {urls.length ? (
-              urls[slide].type === "application/pdf" ? (
-                <iframe
-                  title={t("Презентация", "Pitch deck")}
-                  src={urls[slide].url}
-                />
-              ) : (
-                <img
-                  src={urls[slide].url}
-                  alt={`${t("Слайд", "Slide")} ${slide + 1}`}
-                />
-              )
-            ) : (
-              <div className="demo-slide">
-                <div className="demo-slide-label">
-                  {String(slide + 1).padStart(2, "0")} / 05{" "}
-                  <span>YOUR NEXT BIG THING</span>
-                </div>
-                <div className="slide-spark">✳</div>
-                <h1>
-                  {
-                    [
-                      startup,
-                      t(
-                        "Проблема.\nИ твоё решение.",
-                        "The problem.\nYour solution.",
-                      ),
-                      t("Рынок ждёт.", "The market is waiting."),
-                      t(
-                        "От идеи\nк первым клиентам.",
-                        "From an idea\nto your first customers.",
-                      ),
-                      t(
-                        "Создадим будущее.\nВместе.",
-                        "Let’s build the future.\nTogether.",
-                      ),
-                    ][slide]
-                  }
-                </h1>
-                <p>
-                  {
-                    [
-                      t(
-                        "Две минуты могут стать началом большой истории.",
-                        "A few minutes can be the start of a great story.",
-                      ),
-                      t(
-                        "Кому ты помогаешь и что меняешь?",
-                        "Who do you help, and what do you change?",
-                      ),
-                      t(
-                        "Кто твой клиент? Почему сейчас?",
-                        "Who is your customer? Why now?",
-                      ),
-                      t(
-                        "Расскажи о бизнес-модели и росте.",
-                        "Tell us about your business model and growth.",
-                      ),
-                      t(
-                        `Раунд: $${ask.toLocaleString()} · Твой следующий большой шаг`,
-                        `Raising $${ask.toLocaleString()} · Your next big step`,
-                      ),
-                    ][slide]
-                  }
-                </p>
-                <div className="demo-slide-bottom">
-                  {startup}
-                  <ArrowUpRight size={25} />
-                </div>
-              </div>
-            )}
-            {phase === "pitch" && (
-              <div className="stage-time-track">
-                <span style={{ width: `${(remaining / limit) * 100}%` }} />
-              </div>
-            )}
-          </div>
-          <div className="slide-controls">
-            <span>
-              <FileText size={14} />
-              {urls.length
-                ? urls[slide].name
-                : t("Тренировочная презентация", "Practice deck")}
-            </span>
-            {urls[slide]?.type === "application/pdf" ? (
-              <small>
-                {t(
-                  "Страницы листаются внутри PDF",
-                  "Scroll inside the PDF to change pages",
-                )}
-              </small>
-            ) : (
-              <div>
-                <button
-                  className="icon-button"
-                  disabled={slide === 0}
-                  onClick={() => setSlide((s) => s - 1)}
-                  aria-label={t("Предыдущий слайд", "Previous slide")}
-                >
-                  <ChevronLeft size={18} />
-                </button>
-                <span>
-                  {slide + 1} / {urls.length || 5}
-                </span>
-                <button
-                  className="icon-button"
-                  disabled={slide === (urls.length || 5) - 1}
-                  onClick={() => setSlide((s) => s + 1)}
-                  aria-label={t("Следующий слайд", "Next slide")}
-                >
-                  <ChevronRight size={18} />
-                </button>
-              </div>
-            )}
-          </div>
-          <div className="panel-label">
-            <Headphones size={15} />
-            {phase === "pitch"
-              ? t(
-                  "Вся панель слушает. Тебя не перебивают.",
-                  "The panel is listening. No interruptions.",
-                )
-              : t("По ту сторону стола", "Across the table")}
-            <span>
-              {arena.personaIds
-                ? t(
-                    "Реальные прототипы · симуляция",
-                    "Real-world references · simulation",
-                  )
-                : t("Игровые персонажи", "Fictional characters")}
-            </span>
-          </div>
-          <div className={`stage-panel count-${panel.length}`}>
-            {panel.map((person, i) => {
-              const interest =
-                phase === "qa"
-                  ? Math.min(
-                      92,
-                      25 +
-                        answers.reduce(
-                          (sum, a, index) =>
-                            sum + evaluateAnswer(a, questions[index]).points,
-                          0,
-                        ) +
-                        (analysis?.topics.filter((x) => x.found).length || 0) *
-                          2,
-                    )
-                  : null;
-              return (
-                <div
-                  key={i}
-                  className={`stage-investor ${phase === "qa" && speakerIndex % panel.length === i ? "speaking" : ""}`}
-                >
-                  <div className="investor-seat">
-                    <Portrait person={person} pick={pick} />
-                    {phase === "pitch" && (
-                      <span className="listening-indicator">
-                        <i />
-                        <i />
-                        <i />
-                      </span>
-                    )}
-                    {phase === "qa" && speakerIndex % panel.length === i && (
-                      <span className="speaker-mark">
-                        <Volume2 size={13} />
-                      </span>
-                    )}
-                  </div>
-                  <strong>{pick(person.name)}</strong>
-                  <span>
-                    {phase === "qa"
-                      ? speakerIndex % panel.length === i
-                        ? t("Задаёт вопрос", "Asking a question")
-                        : t("Слушает ответ", "Listening")
-                      : phase === "ready"
-                        ? t("Готов слушать", "Ready to listen")
-                        : phase === "pitch"
-                          ? t("Внимательно слушает", "Listening closely")
-                          : t("Знакомится с питчем", "Reviewing your pitch")}
+          {phase === "qa" ? (
+            <InvestorDialogue
+              key={`${step}-${current.id || pick(current.name)}`}
+              person={current}
+              panel={panel}
+              question={questions[step]}
+              step={step}
+              total={questions.length}
+              arena={arena}
+              startup={startup}
+              answered={Boolean(answerFeedback)}
+              t={t}
+              pick={pick}
+              onSpeak={() => speak(questions[step].text)}
+            />
+          ) : (
+            <>
+              <div className="stage-top">
+                <div>
+                  <span className="eyebrow">
+                    {stagePhase
+                      ? t("СЦЕНА ТВОЯ", "THE STAGE IS YOURS")
+                      : t("ПИТЧ ЗАВЕРШЁН", "PITCH COMPLETE")}
                   </span>
-                  {interest !== null && (
-                    <div className="game-interest">
-                      <div>
-                        <span>{t("Интерес", "Interest")}</span>
-                        <strong>{interest}%</strong>
-                      </div>
-                      <span>
-                        <i style={{ width: `${interest}%` }} />
-                      </span>
-                    </div>
-                  )}
+                  <h2>{startup}</h2>
                 </div>
-              );
-            })}
-          </div>
-          <p className="room-disclaimer">
-            {arena.personaIds
-              ? t(
-                  "Учебная симуляция. Реплики придуманы, синтетический голос не имитирует реального человека.",
-                  "Educational simulation. Dialogue is fictional; the synthetic voice does not imitate a real person.",
-                )
-              : t(
-                  "Учебная симуляция с вымышленной панелью. Интерес — игровой показатель.",
-                  "An educational simulation with a fictional panel. Interest is a game indicator.",
+                {stagePhase ? (
+                  <div
+                    className={`countdown ${remaining <= 15 ? "urgent" : ""}`}
+                  >
+                    <Clock3 size={19} />
+                    <strong data-testid="pitch-countdown">
+                      {formatTime(remaining)}
+                    </strong>
+                    <span>
+                      {phase === "ready"
+                        ? t("на твою историю", "to tell your story")
+                        : t("осталось", "remaining")}
+                    </span>
+                  </div>
+                ) : (
+                  <span className="funding-ask">
+                    ${ask.toLocaleString()}
+                    <small>{t("инвестиционный запрос", "funding ask")}</small>
+                  </span>
                 )}
-          </p>
+              </div>
+              <div className="presentation">
+                <CameraPreview t={t} />
+                {urls.length ? (
+                  urls[slide].type === "application/pdf" ? (
+                    <iframe
+                      title={t("Презентация", "Pitch deck")}
+                      src={urls[slide].url}
+                    />
+                  ) : (
+                    <img
+                      src={urls[slide].url}
+                      alt={`${t("Слайд", "Slide")} ${slide + 1}`}
+                    />
+                  )
+                ) : (
+                  <div className="demo-slide">
+                    <div className="demo-slide-label">
+                      {String(slide + 1).padStart(2, "0")} / 05{" "}
+                      <span>YOUR NEXT BIG THING</span>
+                    </div>
+                    <div className="slide-spark">✳</div>
+                    <h1>
+                      {
+                        [
+                          startup,
+                          t(
+                            "Проблема.\nИ твоё решение.",
+                            "The problem.\nYour solution.",
+                          ),
+                          t("Рынок ждёт.", "The market is waiting."),
+                          t(
+                            "От идеи\nк первым клиентам.",
+                            "From an idea\nto your first customers.",
+                          ),
+                          t(
+                            "Создадим будущее.\nВместе.",
+                            "Let’s build the future.\nTogether.",
+                          ),
+                        ][slide]
+                      }
+                    </h1>
+                    <p>
+                      {
+                        [
+                          t(
+                            "Две минуты могут стать началом большой истории.",
+                            "A few minutes can be the start of a great story.",
+                          ),
+                          t(
+                            "Кому ты помогаешь и что меняешь?",
+                            "Who do you help, and what do you change?",
+                          ),
+                          t(
+                            "Кто твой клиент? Почему сейчас?",
+                            "Who is your customer? Why now?",
+                          ),
+                          t(
+                            "Расскажи о бизнес-модели и росте.",
+                            "Tell us about your business model and growth.",
+                          ),
+                          t(
+                            `Раунд: $${ask.toLocaleString()} · Твой следующий большой шаг`,
+                            `Raising $${ask.toLocaleString()} · Your next big step`,
+                          ),
+                        ][slide]
+                      }
+                    </p>
+                    <div className="demo-slide-bottom">
+                      {startup}
+                      <ArrowUpRight size={25} />
+                    </div>
+                  </div>
+                )}
+                {phase === "pitch" && (
+                  <div className="stage-time-track">
+                    <span style={{ width: `${(remaining / limit) * 100}%` }} />
+                  </div>
+                )}
+              </div>
+              <div className="slide-controls">
+                <span>
+                  <FileText size={14} />
+                  {urls.length
+                    ? urls[slide].name
+                    : t("Тренировочная презентация", "Practice deck")}
+                </span>
+                {urls[slide]?.type === "application/pdf" ? (
+                  <small>
+                    {t(
+                      "Страницы листаются внутри PDF",
+                      "Scroll inside the PDF to change pages",
+                    )}
+                  </small>
+                ) : (
+                  <div>
+                    <button
+                      className="icon-button"
+                      disabled={slide === 0}
+                      onClick={() => setSlide((s) => s - 1)}
+                      aria-label={t("Предыдущий слайд", "Previous slide")}
+                    >
+                      <ChevronLeft size={18} />
+                    </button>
+                    <span>
+                      {slide + 1} / {urls.length || 5}
+                    </span>
+                    <button
+                      className="icon-button"
+                      disabled={slide === (urls.length || 5) - 1}
+                      onClick={() => setSlide((s) => s + 1)}
+                      aria-label={t("Следующий слайд", "Next slide")}
+                    >
+                      <ChevronRight size={18} />
+                    </button>
+                  </div>
+                )}
+              </div>
+              <div className="panel-label">
+                <Headphones size={15} />
+                {phase === "pitch"
+                  ? t(
+                      "Вся панель слушает. Тебя не перебивают.",
+                      "The panel is listening. No interruptions.",
+                    )
+                  : t("По ту сторону стола", "Across the table")}
+                <span>
+                  {arena.personaIds
+                    ? t(
+                        "Реальные прототипы · симуляция",
+                        "Real-world references · simulation",
+                      )
+                    : t("Игровые персонажи", "Fictional characters")}
+                </span>
+              </div>
+              <div className={`stage-panel count-${panel.length}`}>
+                {panel.map((person, i) => {
+                  const interest =
+                    phase === "qa"
+                      ? Math.min(
+                          92,
+                          25 +
+                            answers.reduce(
+                              (sum, a, index) =>
+                                sum +
+                                evaluateAnswer(a, questions[index]).points,
+                              0,
+                            ) +
+                            (analysis?.topics.filter((x) => x.found).length ||
+                              0) *
+                              2,
+                        )
+                      : null;
+                  return (
+                    <div
+                      key={i}
+                      className={`stage-investor ${phase === "qa" && speakerIndex % panel.length === i ? "speaking" : ""}`}
+                    >
+                      <div className="investor-seat">
+                        <Portrait person={person} pick={pick} />
+                        {phase === "pitch" && (
+                          <span className="listening-indicator">
+                            <i />
+                            <i />
+                            <i />
+                          </span>
+                        )}
+                        {phase === "qa" &&
+                          speakerIndex % panel.length === i && (
+                            <span className="speaker-mark">
+                              <Volume2 size={13} />
+                            </span>
+                          )}
+                      </div>
+                      <strong>{pick(person.name)}</strong>
+                      <span>
+                        {phase === "qa"
+                          ? speakerIndex % panel.length === i
+                            ? t("Задаёт вопрос", "Asking a question")
+                            : t("Слушает ответ", "Listening")
+                          : phase === "ready"
+                            ? t("Готов слушать", "Ready to listen")
+                            : phase === "pitch"
+                              ? t("Внимательно слушает", "Listening closely")
+                              : t(
+                                  "Знакомится с питчем",
+                                  "Reviewing your pitch",
+                                )}
+                      </span>
+                      {interest !== null && (
+                        <div className="game-interest">
+                          <div>
+                            <span>{t("Интерес", "Interest")}</span>
+                            <strong>{interest}%</strong>
+                          </div>
+                          <span>
+                            <i style={{ width: `${interest}%` }} />
+                          </span>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+              <p className="room-disclaimer">
+                {arena.personaIds
+                  ? t(
+                      "Учебная симуляция. Реплики придуманы, синтетический голос не имитирует реального человека.",
+                      "Educational simulation. Dialogue is fictional; the synthetic voice does not imitate a real person.",
+                    )
+                  : t(
+                      "Учебная симуляция с вымышленной панелью. Интерес — игровой показатель.",
+                      "An educational simulation with a fictional panel. Interest is a game indicator.",
+                    )}
+              </p>
+            </>
+          )}
         </section>
         <aside className="room-conversation game-conversation">
-          {guideEnabled && (
+          {guideEnabled && phase !== "qa" && (
             <GuideMessage
               t={t}
               phase={phase}
@@ -1153,26 +1181,6 @@ export default function PitchRoom({
                   <span key={i} className={i <= step ? "done" : ""} />
                 ))}
               </div>
-              <div className="question-author">
-                <Portrait person={current} pick={pick} />
-                <div>
-                  <strong>{pick(current.name)}</strong>
-                  <span>{t("Симуляция собеседника", "Simulated persona")}</span>
-                </div>
-                <button
-                  className="icon-button"
-                  onClick={() => speak(questions[step].text)}
-                  aria-label={t("Озвучить вопрос", "Read question aloud")}
-                >
-                  <Volume2 size={18} />
-                </button>
-              </div>
-              {questions[step].followUp && (
-                <span className="practice-eyebrow">
-                  {t("УТОЧНЕНИЕ ПО ТВОЕМУ ОТВЕТУ", "FOLLOW-UP TO YOUR ANSWER")}
-                </span>
-              )}
-              <div className="question-bubble">{questions[step].text}</div>
               <div className="question-voice-setting">
                 <button
                   onClick={() => setVoiceEnabled(!voiceEnabled)}
