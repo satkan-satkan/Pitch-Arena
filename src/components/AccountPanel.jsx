@@ -12,6 +12,8 @@ export default function AccountPanel({
   onClose,
   onRefresh,
   onProject,
+  onProfile,
+  onWorkspace,
   registerFirst = false,
 }) {
   const [register, setRegister] = useState(registerFirst),
@@ -45,7 +47,7 @@ export default function AccountPanel({
       </div>
       <h2>
         {account
-          ? t("Мои проекты", "My projects")
+          ? t("Мой аккаунт", "My account")
           : forgot
             ? t("Восстановить доступ", "Recover your account")
             : register
@@ -55,7 +57,26 @@ export default function AccountPanel({
       {account ? (
         <>
           <p className="modal-subtitle">{account.email}</p>
+          <div className="community-actions">
+            {onProfile && (
+              <button className="button white" onClick={onProfile}>
+                {t("Редактировать профиль", "Edit profile")}
+              </button>
+            )}
+            {onWorkspace && (
+              <button className="button white" onClick={onWorkspace}>
+                {t("Стартапы и команды", "Startups & teams")}
+              </button>
+            )}
+          </div>
           <EmailVerification {...{ account, mailReady, t, onRefresh }} />
+          <h3>{t("Проекты тренировок", "Practice projects")}</h3>
+          <p className="modal-subtitle">
+            {t(
+              "Приватные проекты для питчей и истории. Карточки для каталога и команда находятся в разделе «Стартапы и команды».",
+              "Private projects for pitches and history. Manage directory listings and your team in Startups & teams.",
+            )}
+          </p>
           <div className="account-projects">
             {projects.map((p) => (
               <button

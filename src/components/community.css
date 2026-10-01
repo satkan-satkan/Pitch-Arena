@@ -410,3 +410,32 @@
     padding: 22px;
   }
 }
+
+.team-creation-help {
+  color: #bcbab2;
+  line-height: 1.7;
+  font-size: 14px;
+}
+.team-optional-fields summary {
+  cursor: pointer;
+  color: #d2b277;
+  padding: 8px 0;
+}
+.workspace-load-error {
+  padding: 16px 20px;
+  margin: 20px 0;
+  border: 1px solid #67433c;
+  border-radius: 12px;
+  background: #271c19;
+}
+.workspace-load-error .error-message {
+  margin: 0 0 12px;
+  color: #efb7a9;
+}
+.team-selection-shell .avatar-image {
+  width: 100%;
+  height: 100%;
+}
+.team-invite small {
+  line-height: 1.6;
+}

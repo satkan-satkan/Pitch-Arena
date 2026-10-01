@@ -36,7 +36,7 @@ async function login(p, email) {
     .getByRole("dialog")
     .getByRole("button", { name: "Войти", exact: true })
     .click();
-  await p.getByRole("heading", { name: "Мои проекты", exact: true }).waitFor();
+  await p.getByRole("heading", { name: "Мой аккаунт", exact: true }).waitFor();
   await button("Close", p).click();
 }
 try {
@@ -69,7 +69,7 @@ try {
   await field("Пароль · от 12 символов").fill("community test password 123");
   await button("Зарегистрироваться").click();
   await page
-    .getByRole("heading", { name: "Мои проекты", exact: true })
+    .getByRole("heading", { name: "Мой аккаунт", exact: true })
     .waitFor();
   await button("Close").click();
   check(
@@ -83,8 +83,14 @@ try {
   await button("Создать команду").click();
   await field("Название команды").fill("Orbit Founders");
   await field("О команде").fill("Мы создаём инструменты для основателей");
+  await page
+    .getByText("Ссылки команды · необязательно", { exact: true })
+    .click();
   await field("Telegram").fill("https://t.me/example");
-  await button("Сохранить команду").click();
+  await page
+    .getByRole("dialog")
+    .getByRole("button", { name: "Создать команду", exact: true })
+    .click();
   await page.getByRole("dialog").waitFor({ state: "hidden" });
   check(
     "Created team is selected in the profile selector",
@@ -97,7 +103,10 @@ try {
   );
   await button("Создать команду").click();
   await field("Название команды").fill("Side Project");
-  await button("Сохранить команду").click();
+  await page
+    .getByRole("dialog")
+    .getByRole("button", { name: "Создать команду", exact: true })
+    .click();
   await page.getByRole("dialog").waitFor({ state: "hidden" });
   check(
     "New team opens its own room",
@@ -306,7 +315,7 @@ try {
     "Landing supports English",
     await visitor
       .getByRole("heading", {
-        name: /First, the garage\.\s*Then, the round\./,
+        name: /Pitch your startup\.\s*Face investor questions\./,
       })
       .isVisible(),
   );

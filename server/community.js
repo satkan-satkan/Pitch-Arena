@@ -403,10 +403,35 @@ export async function handleCommunity({ req, url, user, store, body }) {
       return { id };
     }
     const listing = path.match(
-      /^\/api\/workspace\/startups\/([^/]+)(?:\/(submit|withdraw))?$/,
+      /^\/api\/workspace\/startups\/([^/]+)(?:\/(submit|withdraw|team))?$/,
     );
     if (listing) {
       const r = await accessible(store, listing[1], user, true);
+      if (listing[2] === "team" && req.method === "POST") {
+        const e = z
+          .object({ revision: z.number().int().positive(), teamId: z.uuid() })
+          .strict()
+          .parse(input);
+        if (r.team_id || r.owner_id !== user.id)
+          fail(403, "PERSONAL_LISTING_REQUIRED");
+        if ((await memberRole(store, e.teamId, user)) !== "owner")
+          fail(403, "TEAM_OWNER_REQUIRED");
+        if (e.revision !== r.revision) fail(409, "STALE_LISTING");
+        await store.run(
+          "UPDATE startups SET team_id=? WHERE id=?",
+          e.teamId,
+          r.id,
+        );
+        await store.run(
+          "UPDATE startup_listings SET revision=revision+1,updated_at=? WHERE startup_id=?",
+          now(),
+          r.id,
+        );
+        await audit(store, user.id, "startup.team", "startup", r.id, {
+          teamId: e.teamId,
+        });
+        return { ok: true };
+      }
       if (!listing[2] && req.method === "PUT") {
         const e = z
           .object({

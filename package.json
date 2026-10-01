@@ -33,7 +33,9 @@
     "test:images": "node --env-file-if-exists=.env --test tests/images.integration.mjs",
     "test:images:browser": "node --env-file-if-exists=.env tests/images-browser.mjs",
     "test:account-email": "node --env-file-if-exists=.env --test tests/account-email.integration.mjs",
-    "test:account-email:browser": "node --env-file-if-exists=.env tests/account-email-browser.mjs"
+    "test:account-email:browser": "node --env-file-if-exists=.env tests/account-email-browser.mjs",
+    "test:profile-teams": "node --env-file-if-exists=.env --test tests/profile-teams.integration.mjs",
+    "test:profile-teams:browser": "node --env-file-if-exists=.env tests/profile-teams-browser.mjs"
   },
   "dependencies": {
     "clsx": "^2.1.1",

@@ -15,6 +15,8 @@ export const profileSchema = z.object({
   startup: z.string().trim().min(1).max(60),
   industry: z.string().max(60),
   bio: z.string().max(1000),
+  role: z.string().trim().max(80).default(""),
+  location: z.string().trim().max(80).default(""),
 });
 export const projectSchema = z.object({
   name: z.string().trim().min(1).max(60),

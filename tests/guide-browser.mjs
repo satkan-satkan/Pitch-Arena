@@ -171,7 +171,7 @@ try {
     .fill("guide browser password 123");
   await button("Зарегистрироваться").click();
   await page
-    .getByRole("heading", { name: "Мои проекты", exact: true })
+    .getByRole("heading", { name: "Мой аккаунт", exact: true })
     .waitFor();
   await button("Close").click();
   await button("Гид Искра").click();

@@ -67,13 +67,14 @@ import PitchRoom from "./PitchRoom";
 import Results from "./components/Results";
 import BackgroundMusic from "./components/BackgroundMusic";
 import AccountPanel from "./components/AccountPanel";
+import FounderProfile from "./components/FounderProfile";
 import AccountSecurity from "./components/AccountSecurity";
 import AuthLinkPage from "./components/AuthLinkPage";
 import AdminPanel from "./components/AdminPanel";
 import useGuide from "./guide/useGuide";
 import { GuideIntro, GuideMessage } from "./guide/Guide";
 import StartupBoard from "./components/StartupBoard";
-import ImagePicker, { Avatar } from "./components/ImagePicker";
+import { Avatar } from "./components/ImagePicker";
 import { regions } from "./world-catalog";
 import Landing from "./components/Landing";
 import { PublicDirectory, FounderWorkspace } from "./components/Community";
@@ -627,6 +628,16 @@ function App() {
       mailReady={workspace.mailReady}
       projects={workspace.projects}
       localHistory={guestHistory}
+      onProfile={() => {
+        setAccountOpen(false);
+        navigate("/play");
+        go("profile");
+      }}
+      onWorkspace={() => {
+        setAccountOpen(false);
+        navigate("/play");
+        go("community");
+      }}
       {...{ t, Modal, registerFirst }}
       onClose={() => setAccountOpen(false)}
       onRefresh={async () => {
@@ -919,6 +930,8 @@ function App() {
             <FounderWorkspace
               key={workspace.account?.id || "guest"}
               account={workspace.account}
+              mailReady={workspace.mailReady}
+              onProfile={() => go("profile")}
               {...{ t, Modal }}
               onSignIn={() => openAuth(true)}
               onPublic={() => navigate("/startups")}
@@ -1588,10 +1601,12 @@ function App() {
                   "Tell us a little about yourself and what you’re building.",
                 )}
               />
-              <ProfileForm
+              <FounderProfile
                 key={workspace.account?.id || "guest"}
-                cloud={!!workspace.account}
-                level={Math.floor(totalXP(history) / 500) + 1}
+                account={workspace.account}
+                history={history}
+                onWorkspace={() => go("community")}
+                onHistory={() => go("history")}
                 {...{ profile, setProfile, t }}
                 onSave={() => setToast(t("Профиль сохранён", "Profile saved"))}
               />
@@ -1926,121 +1941,6 @@ function Modal({ children, onClose, label, wide = false }) {
         {children}
       </section>
     </div>
-  );
-}
-function ProfileForm({ profile, setProfile, t, onSave, level, cloud }) {
-  const [draft, setDraft] = useState(profile);
-  const [imageBusy, setImageBusy] = useState(false);
-  const [saving, setSaving] = useState(false);
-  return (
-    <form
-      className="profile-form"
-      onSubmit={async (e) => {
-        e.preventDefault();
-        setSaving(true);
-        if (await setProfile(draft)) onSave();
-        setSaving(false);
-      }}
-    >
-      <div className="profile-form-top">
-        <div className="user-avatar large">
-          <Avatar src={draft.avatar} name={draft.name} />
-        </div>
-        <div>
-          <h2>{draft.name}</h2>
-          <span>
-            {t(`Основатель · Уровень ${level}`, `Founder · Level ${level}`)}
-          </span>
-        </div>
-        <span className="profile-local">
-          <ShieldCheck size={14} />
-          {cloud
-            ? t("Профиль аккаунта", "Account profile")
-            : t("Гостевой профиль", "Guest profile")}
-        </span>
-      </div>
-      <ImagePicker
-        value={draft.avatar}
-        onChange={(avatar) => setDraft((d) => ({ ...d, avatar }))}
-        onBusy={setImageBusy}
-        label={t("Аватар профиля", "Profile avatar")}
-        name={draft.name}
-        t={t}
-        round
-      />
-      <div className="form-grid">
-        <label>
-          {t("Твоё имя", "Your name")}
-          <input
-            required
-            maxLength={40}
-            value={draft.name}
-            onChange={(e) => setDraft({ ...draft, name: e.target.value })}
-          />
-        </label>
-        <label>
-          {t("Название стартапа", "Startup name")}
-          <input
-            required
-            maxLength={60}
-            value={draft.startup}
-            onChange={(e) => setDraft({ ...draft, startup: e.target.value })}
-          />
-        </label>
-      </div>
-      <label>
-        {t("Индустрия", "Industry")}
-        <select
-          value={draft.industry}
-          onChange={(e) => setDraft({ ...draft, industry: e.target.value })}
-        >
-          {[
-            "SaaS & AI",
-            "FinTech",
-            "HealthTech",
-            "ClimateTech",
-            "Consumer",
-            "DeepTech",
-            "E-commerce",
-          ].map((v) => (
-            <option key={v}>{v}</option>
-          ))}
-        </select>
-      </label>
-      <label>
-        {t("Об идее в двух словах", "Your idea in a few words")}
-        <textarea
-          rows={4}
-          maxLength={500}
-          placeholder={t(
-            "Какую проблему ты решаешь?",
-            "What problem are you solving?",
-          )}
-          value={draft.bio}
-          onChange={(e) => setDraft({ ...draft, bio: e.target.value })}
-        />
-      </label>
-      <div className="form-footer">
-        <span>
-          {t(
-            cloud
-              ? "Данные сохраняются в аккаунте"
-              : "Данные сохраняются в этом браузере",
-            cloud
-              ? "Your data is saved in your account"
-              : "Your data is saved in this browser",
-          )}
-        </span>
-        <button
-          className="button dark"
-          type="submit"
-          disabled={saving || imageBusy}
-        >
-          {t("Сохранить профиль", "Save profile")}
-          <Check size={17} />
-        </button>
-      </div>
-    </form>
   );
 }
 function Setup({

@@ -61,7 +61,7 @@ try {
   await field("Пароль · от 12 символов").fill(password);
   await button("Зарегистрироваться").click();
   await page
-    .getByRole("heading", { name: "Мои проекты", exact: true })
+    .getByRole("heading", { name: "Мой аккаунт", exact: true })
     .waitFor();
   await f.drainMail();
   check(
@@ -74,7 +74,9 @@ try {
     .filter({ hasText: "Стартапы и команды" })
     .click();
   await page
-    .getByText("Приглашения ждут подтверждения почты", { exact: true })
+    .getByText("Для входящих приглашений нужна подтверждённая почта", {
+      exact: true,
+    })
     .waitFor();
   check(
     "Unverified founders can still create their startup",

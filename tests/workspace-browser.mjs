@@ -64,7 +64,7 @@ async function signIn(p) {
     .getByRole("dialog")
     .getByRole("button", { name: "Войти", exact: true })
     .click();
-  await p.getByRole("heading", { name: "Мои проекты", exact: true }).waitFor();
+  await p.getByRole("heading", { name: "Мой аккаунт", exact: true }).waitFor();
 }
 try {
   await page.addInitScript(() => {
@@ -143,7 +143,7 @@ try {
     .getByRole("button", { name: "Зарегистрироваться", exact: true })
     .click();
   await page
-    .getByRole("heading", { name: "Мои проекты", exact: true })
+    .getByRole("heading", { name: "Мой аккаунт", exact: true })
     .waitFor();
   check("Account registration updates UI", (await boot()).user.email === email);
   check(

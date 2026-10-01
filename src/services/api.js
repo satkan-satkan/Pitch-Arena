@@ -73,6 +73,10 @@ export function errorText(error, t) {
       "Нет прав на изменение этой карточки.",
       "You cannot edit this listing.",
     ],
+    PERSONAL_LISTING_REQUIRED: [
+      "Добавить в команду можно только собственную личную карточку.",
+      "Only your own personal listing can be added to a team.",
+    ],
     TEAM_OWNER_REQUIRED: [
       "Управлять участниками может только владелец команды.",
       "Only the team owner can manage members.",
@@ -118,8 +122,8 @@ export function errorText(error, t) {
       "This arena is temporarily unavailable. Choose another.",
     ],
     SERVER_OFFLINE: [
-      "Сервер недоступен. Проверь соединение и повтори. Текст остаётся на этом устройстве.",
-      "Server unavailable. Check your connection and retry. Text remains on this device.",
+      "Не удалось связаться с сервером. Проверь соединение и повтори попытку.",
+      "Could not reach the server. Check your connection and try again.",
     ],
     LOGIN_REQUIRED: ["Нужно войти в аккаунт.", "Please sign in."],
     INVALID_CREDENTIALS: [
@@ -131,8 +135,8 @@ export function errorText(error, t) {
       "This email is already registered.",
     ],
     INVALID_INPUT: [
-      "Проверь введённые данные. Пароль — от 12 символов.",
-      "Check your input. Passwords need at least 12 characters.",
+      "Проверь обязательные поля и формат введённых данных.",
+      "Check the required fields and the format of your input.",
     ],
     STALE_SESSION: [
       "Версия на сервере изменилась. Загрузка серверной версии заменит текст и этап в этой комнате.",

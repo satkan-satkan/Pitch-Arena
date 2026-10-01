@@ -97,7 +97,7 @@ try {
     .getByRole("button", { name: "Войти", exact: true })
     .click();
   await page
-    .getByRole("heading", { name: "Мои проекты", exact: true })
+    .getByRole("heading", { name: "Мой аккаунт", exact: true })
     .waitFor();
   await page.getByRole("button", { name: "Close", exact: true }).click();
   await page.locator(".nav-item").filter({ hasText: "Админка" }).click();

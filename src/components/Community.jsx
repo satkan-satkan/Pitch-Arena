@@ -358,10 +358,18 @@ export function PublicDirectory({
     </section>
   );
 }
-function StartupEditor({ item, teams, t, Modal, onClose, onSave }) {
+function StartupEditor({
+  item,
+  teams,
+  initialTeamId = "",
+  t,
+  Modal,
+  onClose,
+  onSave,
+}) {
   const [imageBusy, setImageBusy] = useState({});
   const [data, setData] = useState(item?.data || emptyListing),
-    [teamId, setTeamId] = useState(item?.teamId || ""),
+    [teamId, setTeamId] = useState(item?.teamId || initialTeamId),
     [busy, setBusy] = useState(false),
     [error, setError] = useState("");
   const field = (key, value) => setData((d) => ({ ...d, [key]: value }));
@@ -369,7 +377,7 @@ function StartupEditor({ item, teams, t, Modal, onClose, onSave }) {
     <Modal
       wide
       label={t("Карточка стартапа", "Startup listing")}
-      onClose={onClose}
+      onClose={() => !busy && onClose()}
     >
       <span className="eyebrow">
         {t("РАССКАЖИ О СВОЁМ ПРОДУКТЕ", "TELL YOUR PRODUCT STORY")}
@@ -401,7 +409,7 @@ function StartupEditor({ item, teams, t, Modal, onClose, onSave }) {
                   : { teamId: teamId || null, data },
               },
             );
-            await onSave();
+            await onSave(teamId);
             onClose();
           } catch (e) {
             setError(errorText(e, t));
@@ -653,17 +661,24 @@ function TeamEditor({ team, t, Modal, onSave, onClose }) {
     [busy, setBusy] = useState(false),
     [error, setError] = useState("");
   return (
-    <Modal wide label={t("Команда", "Team")} onClose={onClose}>
+    <Modal wide label={t("Команда", "Team")} onClose={() => !busy && onClose()}>
       <h2>
         {team
           ? t("Настройки команды", "Team settings")
           : t("Собери свою команду", "Build your team")}
       </h2>
+      <p className="team-creation-help">
+        {t(
+          "Команда — общая рабочая комната. Сначала задай название, затем пригласи участников и добавь карточку стартапа. Ты станешь владельцем. Личные питчи и слайды останутся приватными.",
+          "A team is a shared workspace. Name it first, then invite members and add a startup listing. You become the owner. Personal pitches and slides stay private.",
+        )}
+      </p>
       <form
         className="community-form"
         onSubmit={async (e) => {
           e.preventDefault();
           setBusy(true);
+          setError("");
           try {
             const saved = await api(
               team ? `/workspace/teams/${team.id}` : "/workspace/teams",
@@ -700,18 +715,27 @@ function TeamEditor({ team, t, Modal, onSave, onClose }) {
             onChange={(e) => setData({ ...data, description: e.target.value })}
           />
         </label>
-        <LinkFields
-          value={data.links}
-          onChange={(links) => setData({ ...data, links })}
-          t={t}
-        />
+        <details className="team-optional-fields">
+          <summary>
+            {t("Ссылки команды · необязательно", "Team links · optional")}
+          </summary>
+          <LinkFields
+            value={data.links}
+            onChange={(links) => setData({ ...data, links })}
+            t={t}
+          />
+        </details>
         {error && (
           <p role="alert" className="error-message">
             {error}
           </p>
         )}
         <button className="button dark" disabled={busy}>
-          {t("Сохранить команду", "Save team")}
+          {busy
+            ? t("Сохраняем…", "Saving…")
+            : team
+              ? t("Сохранить команду", "Save team")
+              : t("Создать команду", "Create team")}
         </button>
       </form>
     </Modal>
@@ -725,15 +749,37 @@ const roleName = (role, t) =>
       member: ["Участник", "Member"],
     }[role],
   );
-export function FounderWorkspace({ account, t, Modal, onSignIn, onPublic }) {
+function lastTeam(accountId) {
+  if (!accountId) return "";
+  try {
+    return localStorage.getItem(`pa-team:${accountId}`) || "";
+  } catch {
+    return "";
+  }
+}
+export function FounderWorkspace({
+  account,
+  mailReady = false,
+  t,
+  Modal,
+  onSignIn,
+  onPublic,
+  onProfile = onSignIn,
+}) {
   const [data, setData] = useState(null),
     [error, setError] = useState(""),
     [busy, setBusy] = useState(false),
     [editing, setEditing] = useState(null),
     [teamEdit, setTeamEdit] = useState(null),
     [notice, setNotice] = useState(""),
-    [selectedTeamId, setSelectedTeamId] = useState(null),
+    [selectedTeamId, setSelectedTeamId] = useState(() => lastTeam(account?.id)),
     [selectedInvite, setSelectedInvite] = useState(null);
+  const [sharing, setSharing] = useState(null);
+  const selectedTeam = data?.teams.find((team) => team.id === selectedTeamId);
+  const visibleItems =
+    data?.items.filter((item) =>
+      selectedTeam ? item.teamId === selectedTeam.id : !item.teamId,
+    ) || [];
   const refresh = async () => {
     const [s, teams, invites] = await Promise.all([
       api("/workspace/startups"),
@@ -741,10 +787,14 @@ export function FounderWorkspace({ account, t, Modal, onSignIn, onPublic }) {
       api("/workspace/invitations"),
     ]);
     setData({ items: s.items, teams: teams.teams, invites: invites.items });
+    setError("");
+    setSelectedTeamId((id) =>
+      teams.teams.some((team) => team.id === id) ? id : "",
+    );
   };
   useEffect(() => {
     setData(null);
-    setSelectedTeamId(null);
+    setSelectedTeamId(lastTeam(account?.id));
     setSelectedInvite(null);
     setError("");
     if (!account) return;
@@ -754,23 +804,33 @@ export function FounderWorkspace({ account, t, Modal, onSignIn, onPublic }) {
       api("/workspace/teams"),
       api("/workspace/invitations"),
     ])
-      .then(
-        ([s, t, i]) =>
-          active &&
-          setData({ items: s.items, teams: t.teams, invites: i.items }),
-      )
+      .then(([s, teams, i]) => {
+        if (!active) return;
+        setData({ items: s.items, teams: teams.teams, invites: i.items });
+        setSelectedTeamId((id) =>
+          teams.teams.some((team) => team.id === id) ? id : "",
+        );
+      })
       .catch((e) => active && setError(errorText(e, t)));
     return () => {
       active = false;
     };
   }, [account?.id, account?.emailVerified]);
+  useEffect(() => {
+    if (!account || !data || (selectedTeamId && !selectedTeam)) return;
+    try {
+      localStorage.setItem(`pa-team:${account.id}`, selectedTeamId);
+    } catch {
+      /* Selection still works without browser storage. */
+    }
+  }, [account?.id, data, selectedTeamId]);
   const act = async (path, method = "POST", data = {}) => {
     setBusy(true);
     setError("");
     setNotice("");
     try {
       await api(path, { method, data });
-      await refresh();
+      await reloadAfterMutation();
       setNotice(t("Готово. Изменения сохранены.", "Done. Changes saved."));
       return true;
     } catch (e) {
@@ -778,6 +838,18 @@ export function FounderWorkspace({ account, t, Modal, onSignIn, onPublic }) {
       return false;
     } finally {
       setBusy(false);
+    }
+  };
+  const reloadAfterMutation = async () => {
+    try {
+      await refresh();
+    } catch {
+      setError(
+        t(
+          "Действие сохранено, но список не обновился. Нажми «Обновить данные»; повторно создавать ничего не нужно.",
+          "Your action was saved, but the list did not refresh. Click Refresh data; do not create it again.",
+        ),
+      );
     }
   };
   return (
@@ -803,29 +875,52 @@ export function FounderWorkspace({ account, t, Modal, onSignIn, onPublic }) {
           </button>
         </div>
       </GarageScene>
-      {account && !account.emailVerified && (
+      {account && data && !account.emailVerified && (
         <div className="email-verification">
           <strong>
             {t(
-              "Приглашения ждут подтверждения почты",
-              "Verify your email to see invitations",
+              "Для входящих приглашений нужна подтверждённая почта",
+              "Incoming invitations require a verified email",
             )}
           </strong>
           <p>
-            {t(
-              "Подтверди адрес в окне аккаунта, чтобы просматривать и принимать приглашения. Свои стартапы можно редактировать уже сейчас.",
-              "Confirm your address in your account panel to view and accept invitations. You can edit your own startups now.",
-            )}
+            {mailReady
+              ? t(
+                  "Подтверди адрес в окне аккаунта, чтобы просматривать и принимать приглашения. Свои стартапы можно редактировать уже сейчас.",
+                  "Confirm your address in your account panel to view and accept invitations. You can edit your own startups now.",
+                )
+              : t(
+                  "Сервис писем пока не подключён, поэтому подтвердить адрес сейчас нельзя. Создание команды и своих карточек доступно; входящие приглашения откроются после подключения почты и подтверждения адреса.",
+                  "Email delivery is not connected, so you cannot verify your address yet. You can create teams and your own listings; incoming invitations unlock after email is connected and your address is verified.",
+                )}
           </p>
-          <button className="button white" onClick={onSignIn}>
-            {t("Открыть аккаунт", "Open account")}
+          <button className="button white" onClick={onProfile}>
+            {t("Открыть профиль", "Open profile")}
           </button>
         </div>
       )}
       {error && (
-        <p className="error-message" role="alert">
-          {error}
-        </p>
+        <div className="workspace-load-error" role="alert">
+          <p className="error-message">{error}</p>
+          {data && (
+            <button
+              className="button white"
+              disabled={busy}
+              onClick={async () => {
+                setBusy(true);
+                try {
+                  await refresh();
+                } catch (e) {
+                  setError(errorText(e, t));
+                } finally {
+                  setBusy(false);
+                }
+              }}
+            >
+              {t("Обновить данные", "Refresh data")}
+            </button>
+          )}
+        </div>
       )}
       {notice && (
         <p className="admin-notice" role="status">
@@ -864,7 +959,17 @@ export function FounderWorkspace({ account, t, Modal, onSignIn, onPublic }) {
           {error && (
             <button
               className="button white"
-              onClick={() => refresh().catch((e) => setError(errorText(e, t)))}
+              disabled={busy}
+              onClick={async () => {
+                setBusy(true);
+                try {
+                  await refresh();
+                } catch (e) {
+                  setError(errorText(e, t));
+                } finally {
+                  setBusy(false);
+                }
+              }}
             >
               {t("Повторить", "Retry")}
             </button>
@@ -880,8 +985,22 @@ export function FounderWorkspace({ account, t, Modal, onSignIn, onPublic }) {
               title={t("С кем строим?", "Who are we building with?")}
               className="min-h-0 bg-transparent py-10"
               disabled={busy}
-              selectedId={`team:${selectedTeamId || data.teams[0]?.id}`}
+              selectedId={
+                selectedTeamId ? `team:${selectedTeamId}` : "personal"
+              }
               profiles={[
+                {
+                  id: "personal",
+                  label: t("Лично", "Solo"),
+                  icon: (
+                    <ProfileIcon className="team-avatar">
+                      <Avatar
+                        src={account.profile?.avatar}
+                        name={account.profile?.name || ""}
+                      />
+                    </ProfileIcon>
+                  ),
+                },
                 ...data.teams.map((team, index) => ({
                   id: `team:${team.id}`,
                   label: team.data.name,
@@ -916,21 +1035,27 @@ export function FounderWorkspace({ account, t, Modal, onSignIn, onPublic }) {
                 },
               ]}
               selectionLabel={(profile) =>
-                profile.id === "add"
-                  ? t("Создать команду", "Create team")
-                  : profile.id.startsWith("invite:")
-                    ? t(
-                        `Открыть приглашение: ${profile.label}`,
-                        `Open invitation: ${profile.label}`,
-                      )
-                    : t(
-                        `Выбрать команду: ${profile.label}`,
-                        `Select team: ${profile.label}`,
-                      )
+                profile.id === "personal"
+                  ? t(
+                      "Выбрать личное пространство",
+                      "Select personal workspace",
+                    )
+                  : profile.id === "add"
+                    ? t("Создать команду", "Create team")
+                    : profile.id.startsWith("invite:")
+                      ? t(
+                          `Открыть приглашение: ${profile.label}`,
+                          `Open invitation: ${profile.label}`,
+                        )
+                      : t(
+                          `Выбрать команду: ${profile.label}`,
+                          `Select team: ${profile.label}`,
+                        )
               }
               onProfileSelect={(id) => {
                 setError("");
-                if (id === "add") setTeamEdit({});
+                if (id === "personal") setSelectedTeamId("");
+                else if (id === "add") setTeamEdit({});
                 else if (id.startsWith("invite:"))
                   setSelectedInvite(
                     data.invites.find((i) => i.id === id.slice(7)),
@@ -940,8 +1065,8 @@ export function FounderWorkspace({ account, t, Modal, onSignIn, onPublic }) {
             />
             <p className="team-selection-note">
               {t(
-                "Выбери команду или собери свою. Приглашение нужно принять отдельно.",
-                "Choose a team or build your own. Invitations need your acceptance.",
+                "«Лично» — твои карточки. Команда — общие карточки и участники. Приглашение принимается отдельно.",
+                "Solo shows your personal listings. A team has shared listings and members. Accept invitations separately.",
               )}
             </p>
             {data.invites.length > 0 && (
@@ -1020,13 +1145,32 @@ export function FounderWorkspace({ account, t, Modal, onSignIn, onPublic }) {
             </Modal>
           )}
           <div className="community-section-title">
-            <h2>{t("Мои карточки", "My listings")}</h2>
-            <button className="button dark" onClick={() => setEditing({})}>
+            <h2>
+              {selectedTeam
+                ? t(
+                    `Стартапы · ${selectedTeam.data.name}`,
+                    `Startups · ${selectedTeam.data.name}`,
+                  )
+                : t("Мои карточки", "My listings")}
+            </h2>
+            <button
+              className="button dark"
+              disabled={selectedTeam?.role === "member"}
+              onClick={() => setEditing({})}
+            >
               <Plus size={15} />
               {t("Новый стартап", "New startup")}
             </button>
           </div>
-          {!data.items.length ? (
+          {selectedTeam?.role === "member" && (
+            <p className="team-selection-note">
+              {t(
+                "У тебя доступ для просмотра. Создавать и менять общие карточки могут владелец и редакторы команды.",
+                "You have read-only access. The team owner and editors can create and update shared listings.",
+              )}
+            </p>
+          )}
+          {!visibleItems.length ? (
             <div className="community-empty compact">
               <p>
                 {t(
@@ -1037,7 +1181,7 @@ export function FounderWorkspace({ account, t, Modal, onSignIn, onPublic }) {
             </div>
           ) : (
             <div className="startup-grid">
-              {data.items.map((s) => (
+              {visibleItems.map((s) => (
                 <article className="startup-card" key={s.id}>
                   <div className="community-tags">
                     <span>{t(...statuses[s.status])}</span>
@@ -1064,6 +1208,23 @@ export function FounderWorkspace({ account, t, Modal, onSignIn, onPublic }) {
                     </p>
                   )}
                   <div className="community-actions">
+                    {!s.teamId &&
+                      s.canEdit &&
+                      data.teams.some((team) => team.role === "owner") && (
+                        <button
+                          className="button white"
+                          onClick={() =>
+                            setSharing({
+                              item: s,
+                              teamId: data.teams.find(
+                                (team) => team.role === "owner",
+                              ).id,
+                            })
+                          }
+                        >
+                          {t("Добавить в команду", "Add to team")}
+                        </button>
+                      )}
                     {s.canEdit && (
                       <>
                         <button
@@ -1126,26 +1287,19 @@ export function FounderWorkspace({ account, t, Modal, onSignIn, onPublic }) {
               {t("УЧАСТНИКИ И ДОСТУП", "PEOPLE & ACCESS")}
             </span>
           </div>
-          {!data.teams.length && (
+          {!selectedTeam && (
             <div className="community-empty compact">
               <p>
                 {t(
-                  "Собери людей, с которыми создаёшь продукт.",
-                  "Bring together the people you are building with.",
+                  "Можно работать одному. Создай команду выше, когда захочешь открыть другим доступ к карточкам стартапов.",
+                  "Working solo is fine. Create a team above when you want to share startup listings with others.",
                 )}
               </p>
             </div>
           )}
           <div className="team-grid">
             {data.teams
-              .filter(
-                (team) =>
-                  team.id ===
-                  (selectedTeamId &&
-                  data.teams.some((v) => v.id === selectedTeamId)
-                    ? selectedTeamId
-                    : data.teams[0]?.id),
-              )
+              .filter((team) => team.id === selectedTeamId)
               .map((team) => (
                 <article className="team-card" key={team.id}>
                   <div className="community-section-title">
@@ -1233,8 +1387,8 @@ export function FounderWorkspace({ account, t, Modal, onSignIn, onPublic }) {
                         </button>
                         <small>
                           {t(
-                            "Приглашение появится в аккаунте с этим email. Письмо не отправляется.",
-                            "The invitation appears in the account with this email. No email is sent.",
+                            "Приглашение появится в аккаунте с этим email после подтверждения адреса. Письмо-приглашение не отправляется: поделись адресом сайта с участником самостоятельно. Совместный питч в реальном времени пока недоступен.",
+                            "The invitation appears in the account with this email once its address is verified. No invitation email is sent: share the website with your teammate yourself. Live joint pitching is not available yet.",
                           )}
                         </small>
                       </form>
@@ -1266,17 +1420,83 @@ export function FounderWorkspace({ account, t, Modal, onSignIn, onPublic }) {
               item={editing.id ? editing : null}
               teams={data.teams}
               {...{ t, Modal }}
-              onSave={refresh}
+              initialTeamId={selectedTeamId}
+              onSave={async (teamId) => {
+                setEditing(null);
+                setSelectedTeamId(teamId || "");
+                await reloadAfterMutation();
+              }}
               onClose={() => setEditing(null)}
             />
+          )}
+          {sharing && (
+            <Modal
+              label={t("Добавить стартап в команду", "Add startup to team")}
+              onClose={() => !busy && setSharing(null)}
+            >
+              <h2>{sharing.item.data.name}</h2>
+              <p>
+                {t(
+                  "Карточка станет общей: редакторы выбранной команды смогут её менять и отправлять на публикацию, участники — просматривать. Личные тренировки и слайды не передаются. Автоматической публикации не будет.",
+                  "The listing becomes shared: team editors can edit and submit it for publication, and members can view it. Personal practices and slides are not shared. This does not publish the listing.",
+                )}
+              </p>
+              <form
+                className="community-form"
+                onSubmit={async (e) => {
+                  e.preventDefault();
+                  if (
+                    await act(
+                      `/workspace/startups/${sharing.item.id}/team`,
+                      "POST",
+                      {
+                        teamId: sharing.teamId,
+                        revision: sharing.item.revision,
+                      },
+                    )
+                  ) {
+                    setSelectedTeamId(sharing.teamId);
+                    setSharing(null);
+                  }
+                }}
+              >
+                <label>
+                  {t("Команда для стартапа", "Startup team")}
+                  <select
+                    aria-label={t("Команда для стартапа", "Startup team")}
+                    value={sharing.teamId}
+                    onChange={(e) =>
+                      setSharing({ ...sharing, teamId: e.target.value })
+                    }
+                  >
+                    {data.teams
+                      .filter((team) => team.role === "owner")
+                      .map((team) => (
+                        <option key={team.id} value={team.id}>
+                          {team.data.name}
+                        </option>
+                      ))}
+                  </select>
+                </label>
+                {error && (
+                  <p role="alert" className="error-message">
+                    {error}
+                  </p>
+                )}
+                <button className="button dark" disabled={busy}>
+                  {t("Дать команде доступ", "Share with team")}
+                </button>
+              </form>
+            </Modal>
           )}
           {teamEdit && (
             <TeamEditor
               team={teamEdit.id ? teamEdit : null}
               {...{ t, Modal }}
               onSave={async (id) => {
-                await refresh();
+                setTeamEdit(null);
                 if (id) setSelectedTeamId(id);
+                await reloadAfterMutation();
               }}
               onClose={() => setTeamEdit(null)}
             />

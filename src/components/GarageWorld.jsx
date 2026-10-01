@@ -17,7 +17,18 @@ export function GarageScene({ scene, children, className = "" }) {
       className={`garage-environment ${className}`}
       data-garage-scene={scene}
     >
-      <img src={garageScenes[scene]} alt="" loading="lazy" decoding="async" />
+      <img
+        src={garageScenes[scene]}
+        alt=""
+        loading="lazy"
+        decoding="async"
+        onError={(e) => {
+          e.currentTarget.style.visibility = "hidden";
+        }}
+        onLoad={(e) => {
+          e.currentTarget.style.visibility = "visible";
+        }}
+      />
       <div className="garage-environment-shade" />
       <div className="garage-environment-content">{children}</div>
     </div>
